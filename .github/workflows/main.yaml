@@ -12,7 +12,7 @@ jobs:
   java_build:
     strategy:
       matrix:
-        java_version: [8, 11, 17, 21]
+        java_version: [ 8, 11, 17, 21 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +27,6 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-  # For checking some compliance things (require a recent JDK due to plugins so in a separate step)
   compliance:
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +37,5 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-        # Check we only rely on permissive licenses in the main parts of the library:
       - name: License Compliance
         run: mvn -U -P compliance org.honton.chas:license-maven-plugin:compliance
