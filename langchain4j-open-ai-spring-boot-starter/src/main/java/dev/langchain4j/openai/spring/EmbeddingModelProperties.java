@@ -13,6 +13,7 @@ class EmbeddingModelProperties {
     String apiKey;
     String organizationId;
     String modelName;
+    String user;
     Duration timeout;
     Integer maxRetries;
     Boolean logRequests;

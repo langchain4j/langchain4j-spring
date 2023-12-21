@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -20,6 +21,10 @@ class ChatModelProperties {
     Integer maxTokens;
     Double presencePenalty;
     Double frequencyPenalty;
+    Map<String, Integer> logitBias;
+    String responseFormat;
+    Integer seed;
+    String user;
     Duration timeout;
     Integer maxRetries;
     Boolean logRequests;
