@@ -22,10 +22,14 @@ jobs:
           java-version: ${{ matrix.java_version }}
           distribution: 'temurin'
           cache: 'maven'
+          server-id: ossrh
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_PASSWORD
       - name: Build with JDK ${{ matrix.java_version }}
         run: mvn -U -B deploy
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
 
   compliance:
     runs-on: ubuntu-latest
