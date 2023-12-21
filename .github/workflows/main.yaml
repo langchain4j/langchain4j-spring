@@ -41,5 +41,3 @@ jobs:
         # Check we only rely on permissive licenses in the main parts of the library:
       - name: License Compliance
         run: mvn -U -P compliance org.honton.chas:license-maven-plugin:compliance
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
