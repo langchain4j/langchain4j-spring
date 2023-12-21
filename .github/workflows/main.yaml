@@ -1,0 +1,43 @@
+name: Java CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  java_build:
+    strategy:
+      matrix:
+        java_version: [8, 11, 17, 21]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{ matrix.java_version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java_version }}
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Build with JDK ${{ matrix.java_version }}
+        run: mvn --batch-mode install ${{ matrix.included_modules }}
+
+  # For checking some compliance things (require a recent JDK due to plugins so in a separate step)
+  compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+        # Check we only rely on permissive licenses in the main parts of the library:
+      - name: License Compliance
+        run: mvn -P compliance org.honton.chas:license-maven-plugin:compliance
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
