@@ -24,6 +24,8 @@ jobs:
           cache: 'maven'
       - name: Build with JDK ${{ matrix.java_version }}
         run: mvn -U --batch-mode install ${{ matrix.included_modules }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
   # For checking some compliance things (require a recent JDK due to plugins so in a separate step)
   compliance:
