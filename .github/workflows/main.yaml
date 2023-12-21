@@ -23,7 +23,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Build with JDK ${{ matrix.java_version }}
-        run: mvn -U --batch-mode install ${{ matrix.included_modules }}
+        run: mvn -U -B deploy
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
