@@ -28,7 +28,7 @@ jobs:
       - name: Build with JDK ${{ matrix.java_version }}
         run: mvn -U -B deploy
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
 
