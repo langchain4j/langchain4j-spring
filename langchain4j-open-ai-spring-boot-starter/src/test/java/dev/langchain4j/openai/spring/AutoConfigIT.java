@@ -12,7 +12,6 @@ import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.model.openai.*;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -21,7 +20,6 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = "sk.*")
 class AutoConfigIT {
 
     private static final String API_KEY = System.getenv("OPENAI_API_KEY");
