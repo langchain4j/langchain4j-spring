@@ -156,13 +156,20 @@
         <developerConnection>scm:git:git@github.com:langchain4j/langchain4j-spring.git</developerConnection>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>ossrh-snapshots</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </snapshotRepository>
     </distributionManagement>
 
