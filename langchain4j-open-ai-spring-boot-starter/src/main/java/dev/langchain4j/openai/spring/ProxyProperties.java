@@ -14,7 +14,7 @@ class ProxyProperties {
     String host;
     Integer port;
 
-    static Proxy toProxy(ProxyProperties proxy) {
+    static Proxy convert(ProxyProperties proxy) {
         if (proxy == null) {
             return null;
         }

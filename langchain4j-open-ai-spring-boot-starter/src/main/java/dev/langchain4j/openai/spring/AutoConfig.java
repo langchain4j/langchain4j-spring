@@ -33,7 +33,7 @@ public class AutoConfig {
                 .user(chatModelProperties.getUser())
                 .timeout(chatModelProperties.getTimeout())
                 .maxRetries(chatModelProperties.getMaxRetries())
-                .proxy(ProxyProperties.toProxy(chatModelProperties.getProxy()))
+                .proxy(ProxyProperties.convert(chatModelProperties.getProxy()))
                 .logRequests(chatModelProperties.getLogRequests())
                 .logResponses(chatModelProperties.getLogResponses())
                 .build();
@@ -59,7 +59,7 @@ public class AutoConfig {
                 .seed(chatModelProperties.getSeed())
                 .user(chatModelProperties.getUser())
                 .timeout(chatModelProperties.getTimeout())
-                .proxy(ProxyProperties.toProxy(chatModelProperties.getProxy()))
+                .proxy(ProxyProperties.convert(chatModelProperties.getProxy()))
                 .logRequests(chatModelProperties.getLogRequests())
                 .logResponses(chatModelProperties.getLogResponses())
                 .build();
@@ -77,7 +77,7 @@ public class AutoConfig {
                 .temperature(languageModelProperties.getTemperature())
                 .timeout(languageModelProperties.getTimeout())
                 .maxRetries(languageModelProperties.getMaxRetries())
-                .proxy(ProxyProperties.toProxy(languageModelProperties.getProxy()))
+                .proxy(ProxyProperties.convert(languageModelProperties.getProxy()))
                 .logRequests(languageModelProperties.getLogRequests())
                 .logResponses(languageModelProperties.getLogResponses())
                 .build();
@@ -94,7 +94,7 @@ public class AutoConfig {
                 .modelName(languageModelProperties.getModelName())
                 .temperature(languageModelProperties.getTemperature())
                 .timeout(languageModelProperties.getTimeout())
-                .proxy(ProxyProperties.toProxy(languageModelProperties.getProxy()))
+                .proxy(ProxyProperties.convert(languageModelProperties.getProxy()))
                 .logRequests(languageModelProperties.getLogRequests())
                 .logResponses(languageModelProperties.getLogResponses())
                 .build();
@@ -112,7 +112,7 @@ public class AutoConfig {
                 .user(embeddingModelProperties.getUser())
                 .timeout(embeddingModelProperties.getTimeout())
                 .maxRetries(embeddingModelProperties.getMaxRetries())
-                .proxy(ProxyProperties.toProxy(embeddingModelProperties.getProxy()))
+                .proxy(ProxyProperties.convert(embeddingModelProperties.getProxy()))
                 .logRequests(embeddingModelProperties.getLogRequests())
                 .logResponses(embeddingModelProperties.getLogResponses())
                 .build();
@@ -129,7 +129,7 @@ public class AutoConfig {
                 .modelName(moderationModelProperties.getModelName())
                 .timeout(moderationModelProperties.getTimeout())
                 .maxRetries(moderationModelProperties.getMaxRetries())
-                .proxy(ProxyProperties.toProxy(moderationModelProperties.getProxy()))
+                .proxy(ProxyProperties.convert(moderationModelProperties.getProxy()))
                 .logRequests(moderationModelProperties.getLogRequests())
                 .logResponses(moderationModelProperties.getLogResponses())
                 .build();
@@ -151,7 +151,7 @@ public class AutoConfig {
                 .responseFormat(imageModelProperties.getResponseFormat())
                 .timeout(imageModelProperties.getTimeout())
                 .maxRetries(imageModelProperties.getMaxRetries())
-                .proxy(ProxyProperties.toProxy(imageModelProperties.getProxy()))
+                .proxy(ProxyProperties.convert(imageModelProperties.getProxy()))
                 .logRequests(imageModelProperties.getLogRequests())
                 .logResponses(imageModelProperties.getLogResponses())
                 .withPersisting(imageModelProperties.getWithPersisting())
