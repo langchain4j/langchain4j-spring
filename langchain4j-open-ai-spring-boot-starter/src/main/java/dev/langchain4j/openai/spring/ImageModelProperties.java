@@ -2,6 +2,7 @@ package dev.langchain4j.openai.spring;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -21,6 +22,8 @@ class ImageModelProperties {
     String responseFormat;
     Duration timeout;
     Integer maxRetries;
+    @NestedConfigurationProperty
+    ProxyProperties proxy;
     Boolean logRequests;
     Boolean logResponses;
     Boolean withPersisting;
