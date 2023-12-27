@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import java.util.List;
@@ -23,8 +24,9 @@ import static org.assertj.core.data.Percentage.withPercentage;
 
 class ElasticsearchEmbeddingStoreAutoConfigurationIT {
 
-    static ElasticsearchContainer elasticsearch = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:8.9.0")
-            .withEnv("xpack.security.enabled", "false");
+    static ElasticsearchContainer elasticsearch = new ElasticsearchContainer("elasticsearch:8.9.0")
+            .withEnv("xpack.security.enabled", "false")
+            .waitingFor(Wait.defaultWaitStrategy());
 
     EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
 
@@ -42,15 +44,15 @@ class ElasticsearchEmbeddingStoreAutoConfigurationIT {
     }
 
     @Test
-    void should_provide_redis_vector_store() {
+    void should_provide_elasticsearch_vector_store() {
         TextSegment segment = TextSegment.from("hello");
         Embedding embedding = embeddingModel.embed(segment.text()).content();
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.redis.enabled=true",
+                        "langchain4j.elasticsearch.enabled=true",
                         "langchain4j.elasticsearch.serverUrl=" + elasticsearch.getHttpHostAddress(),
-                        "langchain4j.redis.indexName=" + randomUUID(),
-                        "langchain4j.redis.dimension=" + 384
+                        "langchain4j.elasticsearch.indexName=" + randomUUID(),
+                        "langchain4j.elasticsearch.dimension=" + 384
                 )
                 .run(context -> {
                     EmbeddingStore<TextSegment> embeddingStore = context.getBean(ElasticsearchEmbeddingStore.class);

@@ -2,11 +2,11 @@ package dev.langchain4j.store.embedding.elasticsearch.spring;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
-@ConditionalOnProperty(prefix = ElasticsearchProperties.PREFIX)
+@ConfigurationProperties(prefix = ElasticsearchProperties.PREFIX)
 public class ElasticsearchProperties {
 
     static final String PREFIX = "langchain4j.elasticsearch";
