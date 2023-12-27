@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.util.List;
 
@@ -24,7 +25,8 @@ import static org.assertj.core.data.Percentage.withPercentage;
 
 class RedisEmbeddingStoreAutoConfigurationIT {
 
-    static RedisContainer redis = new RedisContainer(DEFAULT_IMAGE_NAME.withTag(DEFAULT_TAG));
+    static RedisContainer redis = new RedisContainer(DEFAULT_IMAGE_NAME.withTag(DEFAULT_TAG))
+            .waitingFor(Wait.defaultWaitStrategy());
 
     EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
 
@@ -32,7 +34,7 @@ class RedisEmbeddingStoreAutoConfigurationIT {
             .withConfiguration(AutoConfigurations.of(RedisEmbeddingStoreAutoConfiguration.class));
 
     @BeforeAll
-    static void beforeAll() throws Exception {
+    static void beforeAll() {
         redis.start();
     }
 
