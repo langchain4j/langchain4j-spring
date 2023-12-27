@@ -7,10 +7,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.util.ArrayList;
 import java.util.List;
 
-@ConfigurationProperties(prefix = RedisProperties.PREFIX)
+@ConfigurationProperties(prefix = RedisEmbeddingStoreProperties.PREFIX)
 @Getter
 @Setter
-public class RedisProperties {
+public class RedisEmbeddingStoreProperties {
 
     static final String PREFIX = "langchain4j.redis";
 
