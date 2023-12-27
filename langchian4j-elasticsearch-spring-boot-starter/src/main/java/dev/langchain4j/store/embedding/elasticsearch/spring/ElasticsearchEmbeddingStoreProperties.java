@@ -6,8 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
-@ConfigurationProperties(prefix = ElasticsearchProperties.PREFIX)
-public class ElasticsearchProperties {
+@ConfigurationProperties(prefix = ElasticsearchEmbeddingStoreProperties.PREFIX)
+public class ElasticsearchEmbeddingStoreProperties {
 
     static final String PREFIX = "langchain4j.elasticsearch";
 
