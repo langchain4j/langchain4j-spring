@@ -14,6 +14,7 @@
     <url>https://github.com/langchain4j/langchain4j-spring</url>
 
     <modules>
+        <module>langchain4j-ollama-spring-boot-starter</module>
         <module>langchain4j-open-ai-spring-boot-starter</module>
     </modules>
 
@@ -55,6 +56,14 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.30</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>1.19.2</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
 
         </dependencies>
