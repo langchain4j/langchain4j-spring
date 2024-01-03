@@ -40,8 +40,7 @@ class AutoConfigIT {
                     assertThat(chatLanguageModel).isInstanceOf(OpenAiChatModel.class);
                     assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
 
-                    OpenAiChatModel openAiChatModel = context.getBean(OpenAiChatModel.class);
-                    assertThat(openAiChatModel.generate("What is the capital of Germany?")).contains("Berlin");
+                    assertThat(context.getBean(OpenAiChatModel.class)).isSameAs(chatLanguageModel);
                 });
     }
 
@@ -75,8 +74,7 @@ class AutoConfigIT {
                     Response<AiMessage> response = future.get(30, SECONDS);
                     assertThat(response.content().text()).contains("Berlin");
 
-                    OpenAiStreamingChatModel openAiStreamingChatModel = context.getBean(OpenAiStreamingChatModel.class);
-                    assertThat(openAiStreamingChatModel).isNotNull();
+                    assertThat(context.getBean(OpenAiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
                 });
     }
 
@@ -93,8 +91,7 @@ class AutoConfigIT {
                     assertThat(languageModel).isInstanceOf(OpenAiLanguageModel.class);
                     assertThat(languageModel.generate("What is the capital of Germany?").content()).contains("Berlin");
 
-                    OpenAiLanguageModel openAiLanguageModel = context.getBean(OpenAiLanguageModel.class);
-                    assertThat(openAiLanguageModel.generate("What is the capital of Germany?").content()).contains("Berlin");
+                    assertThat(context.getBean(OpenAiLanguageModel.class)).isSameAs(languageModel);
                 });
     }
 
@@ -128,8 +125,7 @@ class AutoConfigIT {
                     Response<String> response = future.get(30, SECONDS);
                     assertThat(response.content()).contains("Berlin");
 
-                    OpenAiStreamingLanguageModel openAiStreamingLanguageModel = context.getBean(OpenAiStreamingLanguageModel.class);
-                    assertThat(openAiStreamingLanguageModel).isNotNull();
+                    assertThat(context.getBean(OpenAiStreamingLanguageModel.class)).isSameAs(streamingLanguageModel);
                 });
     }
 
@@ -143,8 +139,7 @@ class AutoConfigIT {
                     assertThat(embeddingModel).isInstanceOf(OpenAiEmbeddingModel.class);
                     assertThat(embeddingModel.embed("hi").content().dimension()).isEqualTo(1536);
 
-                    OpenAiEmbeddingModel openAiEmbeddingModel = context.getBean(OpenAiEmbeddingModel.class);
-                    assertThat(openAiEmbeddingModel.embed("hi").content().dimension()).isEqualTo(1536);
+                    assertThat(context.getBean(OpenAiEmbeddingModel.class)).isSameAs(embeddingModel);
                 });
     }
 
@@ -158,8 +153,7 @@ class AutoConfigIT {
                     assertThat(moderationModel).isInstanceOf(OpenAiModerationModel.class);
                     assertThat(moderationModel.moderate("He wants to kill them.").content().flagged()).isTrue();
 
-                    OpenAiModerationModel openAiModerationModel = context.getBean(OpenAiModerationModel.class);
-                    assertThat(openAiModerationModel.moderate("He wants to kill them.").content().flagged()).isTrue();
+                    assertThat(context.getBean(OpenAiModerationModel.class)).isSameAs(moderationModel);
                 });
     }
 
@@ -177,8 +171,7 @@ class AutoConfigIT {
                     assertThat(imageModel).isInstanceOf(OpenAiImageModel.class);
                     assertThat(imageModel.generate("banana").content().url()).isNotNull();
 
-                    OpenAiImageModel openAiImageModel = context.getBean(OpenAiImageModel.class);
-                    assertThat(openAiImageModel.generate("banana").content().url()).isNotNull();
+                    assertThat(context.getBean(OpenAiImageModel.class)).isSameAs(imageModel);
                 });
     }
 }
