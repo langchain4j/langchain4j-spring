@@ -14,6 +14,7 @@ class EmbeddingModelProperties {
     String apiKey;
     String organizationId;
     String modelName;
+    Integer dimensions;
     String user;
     Duration timeout;
     Integer maxRetries;
