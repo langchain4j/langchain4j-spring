@@ -71,7 +71,7 @@ class AutoConfigIT {
                         public void onError(Throwable error) {
                         }
                     });
-                    Response<AiMessage> response = future.get(30, SECONDS);
+                    Response<AiMessage> response = future.get(60, SECONDS);
                     assertThat(response.content().text()).contains("Berlin");
 
                     assertThat(context.getBean(OpenAiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
@@ -122,7 +122,7 @@ class AutoConfigIT {
                         public void onError(Throwable error) {
                         }
                     });
-                    Response<String> response = future.get(30, SECONDS);
+                    Response<String> response = future.get(60, SECONDS);
                     assertThat(response.content()).contains("Berlin");
 
                     assertThat(context.getBean(OpenAiStreamingLanguageModel.class)).isSameAs(streamingLanguageModel);
