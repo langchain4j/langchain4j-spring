@@ -13,7 +13,6 @@
 
     <artifactId>langchain4j-ollama-spring-boot-starter</artifactId>
     <name>LangChain4j Spring Boot starter for Ollama</name>
-    <packaging>jar</packaging>
 
     <dependencies>
 
