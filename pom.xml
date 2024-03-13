@@ -16,6 +16,7 @@
     <modules>
         <module>langchain4j-ollama-spring-boot-starter</module>
         <module>langchain4j-open-ai-spring-boot-starter</module>
+        <module>langchain4j-reactor</module>
     </modules>
 
     <properties>
@@ -23,6 +24,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.boot.version>2.7.18</spring.boot.version>
+        <project.reactor.version>3.6.3</project.reactor.version>
+        <junit.version>5.10.0</junit.version>
     </properties>
 
     <dependencyManagement>
@@ -64,6 +67,26 @@
                 <version>1.19.2</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>${project.reactor.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-test</artifactId>
+                <version>${project.reactor.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>
