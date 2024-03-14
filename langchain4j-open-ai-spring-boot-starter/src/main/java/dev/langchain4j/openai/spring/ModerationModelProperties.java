@@ -1,4 +1,4 @@
-package dev.langchain4j.anthropic.spring;
+package dev.langchain4j.openai.spring;
 
 import lombok.Getter;
 import lombok.Setter;
