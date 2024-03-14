@@ -1,4 +1,4 @@
-package dev.langchain4j.openai.spring;
+package dev.langchain4j.anthropic.spring;
 
 import dev.langchain4j.model.openai.*;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

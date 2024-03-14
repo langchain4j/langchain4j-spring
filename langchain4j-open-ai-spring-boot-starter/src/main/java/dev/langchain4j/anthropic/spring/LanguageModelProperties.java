@@ -1,4 +1,4 @@
-package dev.langchain4j.openai.spring;
+package dev.langchain4j.anthropic.spring;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,14 +8,13 @@ import java.time.Duration;
 
 @Getter
 @Setter
-class EmbeddingModelProperties {
+class LanguageModelProperties {
 
     String baseUrl;
     String apiKey;
     String organizationId;
     String modelName;
-    Integer dimensions;
-    String user;
+    Double temperature;
     Duration timeout;
     Integer maxRetries;
     @NestedConfigurationProperty

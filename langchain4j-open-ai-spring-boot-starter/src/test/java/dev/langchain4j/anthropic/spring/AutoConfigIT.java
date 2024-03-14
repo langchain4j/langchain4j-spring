@@ -1,4 +1,4 @@
-package dev.langchain4j.openai.spring;
+package dev.langchain4j.anthropic.spring;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;

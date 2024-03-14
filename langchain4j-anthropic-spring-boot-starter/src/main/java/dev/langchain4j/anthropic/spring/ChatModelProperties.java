@@ -1,23 +1,26 @@
-package dev.langchain4j.openai.spring;
+package dev.langchain4j.anthropic.spring;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.time.Duration;
+import java.util.List;
 
 @Getter
 @Setter
-class ModerationModelProperties {
+class ChatModelProperties {
 
     String baseUrl;
     String apiKey;
-    String organizationId;
+    String version;
     String modelName;
+    Double temperature;
+    Double topP;
+    Integer topK;
+    Integer maxTokens;
+    List<String> stopSequences;
     Duration timeout;
     Integer maxRetries;
-    @NestedConfigurationProperty
-    ProxyProperties proxy;
     Boolean logRequests;
     Boolean logResponses;
 }
