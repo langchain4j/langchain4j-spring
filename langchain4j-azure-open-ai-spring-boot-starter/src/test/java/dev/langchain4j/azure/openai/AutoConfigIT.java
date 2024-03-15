@@ -40,7 +40,7 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(AzureOpenAiChatModel.class);
+                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
                     assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
                     assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
 
