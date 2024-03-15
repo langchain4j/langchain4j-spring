@@ -93,7 +93,7 @@ class AutoConfigIT {
                         "langchain4j.azure.open-ai.embedding-model.deployment-name=" + AZURE_EMBEDDING_DEPLOYMENT_NAME)
                 .run(context -> {
 
-                    EmbeddingModel embeddingModel = context.getBean(AzureOpenAiEmbeddingModel.class);
+                    EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
                     assertThat(embeddingModel).isInstanceOf(AzureOpenAiEmbeddingModel.class);
                     assertThat(embeddingModel.embed("hi").content().dimension()).isEqualTo(1536);
 
