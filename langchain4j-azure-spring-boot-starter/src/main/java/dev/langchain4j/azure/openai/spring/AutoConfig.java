@@ -1,8 +1,11 @@
 package dev.langchain4j.azure.openai.spring;
 
-import com.azure.core.util.Configuration;
-import dev.langchain4j.model.azure.*;
 import com.azure.core.http.ProxyOptions;
+import com.azure.core.util.Configuration;
+import dev.langchain4j.model.azure.AzureOpenAiChatModel;
+import dev.langchain4j.model.azure.AzureOpenAiEmbeddingModel;
+import dev.langchain4j.model.azure.AzureOpenAiImageModel;
+import dev.langchain4j.model.azure.AzureOpenAiStreamingChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -86,7 +89,7 @@ public class AutoConfig {
                 .timeout(imageModelProperties.getTimeout())
                 .maxRetries(imageModelProperties.getMaxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
-                .logRequestsAndResponses(imageModelProperties.getLogRequestsAndResponses()!=null&&imageModelProperties.getLogRequestsAndResponses())
+                .logRequestsAndResponses(imageModelProperties.getLogRequestsAndResponses() != null && imageModelProperties.getLogRequestsAndResponses())
                 .build();
     }
 }
