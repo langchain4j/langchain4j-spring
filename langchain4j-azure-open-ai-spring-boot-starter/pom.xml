@@ -40,11 +40,6 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-core</artifactId>
-            <version>1.45.1</version>
-        </dependency>
 
         <!-- needed to generate automatic metadata about available config properties -->
         <dependency>
