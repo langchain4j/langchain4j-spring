@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+dev.langchain4j.azure.openai.spring.AutoConfig,\
+dev.langchain4j.azure.aisearch.spring.AutoConfig
