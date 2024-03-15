@@ -1,14 +1,17 @@
 package dev.langchain4j.azure.openai;
 
+import dev.langchain4j.azure.openai.spring.AutoConfig;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
-import dev.langchain4j.model.azure.*;
+import dev.langchain4j.model.azure.AzureOpenAiChatModel;
+import dev.langchain4j.model.azure.AzureOpenAiEmbeddingModel;
+import dev.langchain4j.model.azure.AzureOpenAiImageModel;
+import dev.langchain4j.model.azure.AzureOpenAiStreamingChatModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
 import dev.langchain4j.model.output.Response;
-import dev.langchain4j.azure.openai.spring.AutoConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
