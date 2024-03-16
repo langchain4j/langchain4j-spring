@@ -1,46 +1,59 @@
-package dev.langchain4j.openai.spring;
+package dev.langchain4j.ollama.spring;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.model.image.ImageModel;
 import dev.langchain4j.model.language.LanguageModel;
 import dev.langchain4j.model.language.StreamingLanguageModel;
-import dev.langchain4j.model.moderation.ModerationModel;
-import dev.langchain4j.model.openai.*;
+import dev.langchain4j.model.ollama.*;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.concurrent.CompletableFuture;
 
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Testcontainers
 class AutoConfigIT {
 
-    private static final String API_KEY = System.getenv("OPENAI_API_KEY");
+    private static final String MODEL_NAME = "phi";
+
+    @Container
+    static GenericContainer<?> ollama = new GenericContainer<>("langchain4j/ollama-" + MODEL_NAME)
+            .withExposedPorts(11434);
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
+
+    private static String baseUrl() {
+        return format("http://%s:%s", ollama.getHost(), ollama.getFirstMappedPort());
+    }
 
     @Test
     void should_provide_chat_model() {
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
-                        "langchain4j.open-ai.chat-model.max-tokens=20"
+                        "langchain4j.ollama.chat-model.base-url=" + baseUrl(),
+                        "langchain4j.ollama.chat-model.model-name=" + MODEL_NAME,
+                        "langchain4j.ollama.chat-model.max-tokens=20",
+                        "langchain4j.ollama.chat-model.temperature=0.0"
                 )
                 .run(context -> {
 
                     ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(OpenAiChatModel.class);
+                    assertThat(chatLanguageModel).isInstanceOf(OllamaChatModel.class);
                     assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
 
-                    assertThat(context.getBean(OpenAiChatModel.class)).isSameAs(chatLanguageModel);
+                    assertThat(context.getBean(OllamaChatModel.class)).isSameAs(chatLanguageModel);
                 });
     }
 
@@ -48,13 +61,15 @@ class AutoConfigIT {
     void should_provide_streaming_chat_model() {
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
-                        "langchain4j.open-ai.streaming-chat-model.max-tokens=20"
+                        "langchain4j.ollama.streaming-chat-model.base-url=" + baseUrl(),
+                        "langchain4j.ollama.streaming-chat-model.model-name=" + MODEL_NAME,
+                        "langchain4j.ollama.streaming-chat-model.max-tokens=20",
+                        "langchain4j.ollama.streaming-chat-model.temperature=0.0"
                 )
                 .run(context -> {
 
                     StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(OpenAiStreamingChatModel.class);
+                    assertThat(streamingChatLanguageModel).isInstanceOf(OllamaStreamingChatModel.class);
                     CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
                     streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
 
@@ -74,7 +89,7 @@ class AutoConfigIT {
                     Response<AiMessage> response = future.get(60, SECONDS);
                     assertThat(response.content().text()).contains("Berlin");
 
-                    assertThat(context.getBean(OpenAiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    assertThat(context.getBean(OllamaStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
                 });
     }
 
@@ -82,16 +97,18 @@ class AutoConfigIT {
     void should_provide_language_model() {
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.open-ai.language-model.api-key=" + API_KEY,
-                        "langchain4j.open-ai.language-model.max-tokens=20"
+                        "langchain4j.ollama.language-model.base-url=" + baseUrl(),
+                        "langchain4j.ollama.language-model.model-name=" + MODEL_NAME,
+                        "langchain4j.ollama.language-model.max-tokens=20",
+                        "langchain4j.ollama.language-model.temperature=0.0"
                 )
                 .run(context -> {
 
                     LanguageModel languageModel = context.getBean(LanguageModel.class);
-                    assertThat(languageModel).isInstanceOf(OpenAiLanguageModel.class);
+                    assertThat(languageModel).isInstanceOf(OllamaLanguageModel.class);
                     assertThat(languageModel.generate("What is the capital of Germany?").content()).contains("Berlin");
 
-                    assertThat(context.getBean(OpenAiLanguageModel.class)).isSameAs(languageModel);
+                    assertThat(context.getBean(OllamaLanguageModel.class)).isSameAs(languageModel);
                 });
     }
 
@@ -99,13 +116,15 @@ class AutoConfigIT {
     void should_provide_streaming_language_model() {
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.open-ai.streaming-language-model.api-key=" + API_KEY,
-                        "langchain4j.open-ai.streaming-language-model.max-tokens=20"
+                        "langchain4j.ollama.streaming-language-model.base-url=" + baseUrl(),
+                        "langchain4j.ollama.streaming-language-model.model-name=" + MODEL_NAME,
+                        "langchain4j.ollama.streaming-language-model.max-tokens=20",
+                        "langchain4j.ollama.streaming-language-model.temperature=0.0"
                 )
                 .run(context -> {
 
                     StreamingLanguageModel streamingLanguageModel = context.getBean(StreamingLanguageModel.class);
-                    assertThat(streamingLanguageModel).isInstanceOf(OpenAiStreamingLanguageModel.class);
+                    assertThat(streamingLanguageModel).isInstanceOf(OllamaStreamingLanguageModel.class);
                     CompletableFuture<Response<String>> future = new CompletableFuture<>();
                     streamingLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<String>() {
 
@@ -125,53 +144,24 @@ class AutoConfigIT {
                     Response<String> response = future.get(60, SECONDS);
                     assertThat(response.content()).contains("Berlin");
 
-                    assertThat(context.getBean(OpenAiStreamingLanguageModel.class)).isSameAs(streamingLanguageModel);
+                    assertThat(context.getBean(OllamaStreamingLanguageModel.class)).isSameAs(streamingLanguageModel);
                 });
     }
 
     @Test
     void should_provide_embedding_model() {
         contextRunner
-                .withPropertyValues("langchain4j.open-ai.embedding-model.api-key=" + API_KEY)
-                .run(context -> {
-
-                    EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
-                    assertThat(embeddingModel).isInstanceOf(OpenAiEmbeddingModel.class);
-                    assertThat(embeddingModel.embed("hi").content().dimension()).isEqualTo(1536);
-
-                    assertThat(context.getBean(OpenAiEmbeddingModel.class)).isSameAs(embeddingModel);
-                });
-    }
-
-    @Test
-    void should_provide_moderation_model() {
-        contextRunner
-                .withPropertyValues("langchain4j.open-ai.moderation-model.api-key=" + API_KEY)
-                .run(context -> {
-
-                    ModerationModel moderationModel = context.getBean(ModerationModel.class);
-                    assertThat(moderationModel).isInstanceOf(OpenAiModerationModel.class);
-                    assertThat(moderationModel.moderate("He wants to kill them.").content().flagged()).isTrue();
-
-                    assertThat(context.getBean(OpenAiModerationModel.class)).isSameAs(moderationModel);
-                });
-    }
-
-    @Test
-    void should_provide_image_model() {
-        contextRunner
                 .withPropertyValues(
-                        "langchain4j.open-ai.image-model.api-key=" + API_KEY,
-                        "langchain4j.open-ai.image-model.model-name=dall-e-2",
-                        "langchain4j.open-ai.image-model.size=256x256"
+                        "langchain4j.ollama.embedding-model.base-url=" + baseUrl(),
+                        "langchain4j.ollama.embedding-model.model-name=" + MODEL_NAME
                 )
                 .run(context -> {
 
-                    ImageModel imageModel = context.getBean(ImageModel.class);
-                    assertThat(imageModel).isInstanceOf(OpenAiImageModel.class);
-                    assertThat(imageModel.generate("banana").content().url()).isNotNull();
+                    EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
+                    assertThat(embeddingModel).isInstanceOf(OllamaEmbeddingModel.class);
+                    assertThat(embeddingModel.embed("hi").content().dimension()).isEqualTo(2560);
 
-                    assertThat(context.getBean(OpenAiImageModel.class)).isSameAs(imageModel);
+                    assertThat(context.getBean(OllamaEmbeddingModel.class)).isSameAs(embeddingModel);
                 });
     }
 }

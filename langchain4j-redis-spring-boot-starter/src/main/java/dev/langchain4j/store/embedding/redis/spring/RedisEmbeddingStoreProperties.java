@@ -20,5 +20,5 @@ public class RedisEmbeddingStoreProperties {
     private String password;
     private String indexName;
     private Integer dimension;
-    private List<String> metadataFieldsName = new ArrayList<>();
+    private List<String> metadataKeys = new ArrayList<>();
 }

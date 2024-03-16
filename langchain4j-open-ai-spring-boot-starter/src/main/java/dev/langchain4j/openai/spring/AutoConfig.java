@@ -109,6 +109,7 @@ public class AutoConfig {
                 .apiKey(embeddingModelProperties.getApiKey())
                 .organizationId(embeddingModelProperties.getOrganizationId())
                 .modelName(embeddingModelProperties.getModelName())
+                .dimensions(embeddingModelProperties.getDimensions())
                 .user(embeddingModelProperties.getUser())
                 .timeout(embeddingModelProperties.getTimeout())
                 .maxRetries(embeddingModelProperties.getMaxRetries())

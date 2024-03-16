@@ -24,7 +24,7 @@ public class RedisEmbeddingStoreAutoConfiguration {
                 .password(properties.getPassword())
                 .indexName(properties.getIndexName())
                 .dimension(properties.getDimension())
-                .metadataFieldsName(properties.getMetadataFieldsName())
+                .metadataFieldsName(properties.getMetadataKeys())
                 .build();
     }
 }

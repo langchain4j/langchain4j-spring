@@ -54,7 +54,7 @@ class RedisEmbeddingStoreAutoConfigurationIT {
                         "langchain4j.redis.port=" + redis.getFirstMappedPort(),
                         "langchain4j.redis.indexName=" + randomUUID(),
                         "langchain4j.redis.dimension=" + 384,
-                        "langchain4j.redis.metadataFieldsName=test-key"
+                        "langchain4j.redis.metadataKeys=test-key"
                 )
                 .run(context -> {
                     EmbeddingStore<TextSegment> embeddingStore = context.getBean(RedisEmbeddingStore.class);
