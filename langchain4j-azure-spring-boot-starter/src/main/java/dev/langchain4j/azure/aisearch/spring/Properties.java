@@ -14,5 +14,5 @@ public class Properties {
     String endpoint;
     String apiKey;
     int dimensions;
-    boolean setupIndex;
+    boolean createOrUpdateIndex;
 }
