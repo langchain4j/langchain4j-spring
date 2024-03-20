@@ -19,7 +19,7 @@ public class AutoConfig {
                 .endpoint(properties.getEndpoint())
                 .apiKey(properties.getApiKey())
                 .dimensions(properties.getDimensions())
-                .setupIndex(properties.isSetupIndex())
+                .createOrUpdateIndex(properties.isCreateOrUpdateIndex())
                 .build();
     }
 }
