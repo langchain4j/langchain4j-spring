@@ -19,7 +19,8 @@
         <module>langchain4j-anthropic-spring-boot-starter</module>
         <module>langchain4j-ollama-spring-boot-starter</module>
         <module>langchain4j-open-ai-spring-boot-starter</module>
-        <module>langchain4j-azure-spring-boot-starter</module>
+        <module>langchain4j-azure-aisearch-spring-boot-starter</module>
+        <module>langchain4j-azure-openai-spring-boot-starter</module>
     </modules>
 
     <properties>
@@ -177,11 +178,12 @@
         </repository>
     </repositories>
 
+
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/showpune/langchain4j</url>
+        </repository>
     </distributionManagement>
 
     <profiles>
