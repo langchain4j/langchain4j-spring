@@ -14,6 +14,9 @@
     <url>https://github.com/langchain4j/langchain4j-spring</url>
 
     <modules>
+        <module>langchain4j-spring-boot-starter</module>
+        <module>langchain4j-easy-rag-spring-boot-starter</module>
+
         <module>langchain4j-ollama-spring-boot-starter</module>
         <module>langchain4j-open-ai-spring-boot-starter</module>
     </modules>
