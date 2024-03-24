@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-@Component
+@Component("publicTools")
 public class PublicTools {
 
     @Tool

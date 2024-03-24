@@ -18,7 +18,7 @@ public class RagAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    EmbeddingStore<TextSegment> embeddingStore() { // TODO bean name
+    EmbeddingStore<TextSegment> embeddingStore() { // TODO bean name, type
         return new InMemoryEmbeddingStore<>();
     }
 
@@ -30,18 +30,19 @@ public class RagAutoConfig {
     @ConditionalOnMissingBean
     ContentRetriever contentRetriever(EmbeddingModel embeddingModel,
                                       EmbeddingStore<TextSegment> embeddingStore,
-                                      RagProperties ragProperties) {  // TODO bean name
+                                      RagProperties ragProperties) {  // TODO bean name, type
 
         EmbeddingStoreContentRetriever.EmbeddingStoreContentRetrieverBuilder builder = EmbeddingStoreContentRetriever.builder()
                 .embeddingStore(embeddingStore)
                 .embeddingModel(embeddingModel);
 
-        // TODO ragProperties can be null?
-        RetrievalProperties retrievalProperties = ragProperties.getRetrieval();
-        if (retrievalProperties != null) {
-            builder
-                    .maxResults(retrievalProperties.maxResults)
-                    .minScore(retrievalProperties.minScore);
+        if (ragProperties != null) {
+            RetrievalProperties retrievalProperties = ragProperties.getRetrieval();
+            if (retrievalProperties != null) {
+                builder
+                        .maxResults(retrievalProperties.maxResults)
+                        .minScore(retrievalProperties.minScore);
+            }
         }
 
         return builder.build();

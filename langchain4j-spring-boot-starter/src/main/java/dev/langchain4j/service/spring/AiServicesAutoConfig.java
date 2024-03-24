@@ -1,5 +1,6 @@
 package dev.langchain4j.service.spring;
 
+import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.exception.IllegalConfigurationException;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
@@ -8,8 +9,8 @@ import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import org.reflections.Reflections;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -18,7 +19,10 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.internal.Utils.isNotNullOrBlank;
@@ -28,96 +32,130 @@ public class AiServicesAutoConfig {
 
     @Bean
     BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor() {
-        return new BeanFactoryPostProcessor() {
+        return beanFactory -> {
 
-            @Override
-            public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+            String[] chatLanguageModels = beanFactory.getBeanNamesForType(ChatLanguageModel.class);
+            String[] streamingChatLanguageModels = beanFactory.getBeanNamesForType(StreamingChatLanguageModel.class);
+            String[] chatMemories = beanFactory.getBeanNamesForType(ChatMemory.class);
+            String[] chatMemoryProviders = beanFactory.getBeanNamesForType(ChatMemoryProvider.class);
+            String[] contentRetrievers = beanFactory.getBeanNamesForType(ContentRetriever.class);
+            String[] retrievalAugmentors = beanFactory.getBeanNamesForType(RetrievalAugmentor.class);
 
-//            Set<Class<?>> allToolBeans = new HashSet<>();
-//
-//            for (String beanName : registry.getBeanDefinitionNames()) {
-//                BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
-//                try {
-//                    Class<?> beanClass = Class.forName(beanDefinition.getBeanClassName());
-//                    for (Method beanMethod : beanClass.getDeclaredMethods()) {
-//                        if (beanMethod.isAnnotationPresent(Tool.class)) {
-//                            allToolBeans.add(beanClass);
-//                        }
-//                    }
-//                } catch (Exception e) {
-//                    // TODO
-//                }
-//            }
-
-                String[] app = beanFactory.getBeanNamesForAnnotation(SpringBootApplication.class);
-                String basePackage = beanFactory.getBeanDefinition(app[0]).getResolvableType().resolve().getPackage().getName();
-
-                String[] chatLanguageModels = beanFactory.getBeanNamesForType(ChatLanguageModel.class);
-                String[] streamingChatLanguageModels = beanFactory.getBeanNamesForType(StreamingChatLanguageModel.class);
-                String[] chatMemories = beanFactory.getBeanNamesForType(ChatMemory.class);
-                String[] chatMemoryProviders = beanFactory.getBeanNamesForType(ChatMemoryProvider.class);
-                String[] contentRetrievers = beanFactory.getBeanNamesForType(ContentRetriever.class);
-                String[] retrievalAugmentors = beanFactory.getBeanNamesForType(RetrievalAugmentor.class);
-
-                Reflections reflections = new Reflections(basePackage);
-                reflections.getTypesAnnotatedWith(AiService.class).forEach(aiService -> {
-
-                    if (beanFactory.getBeanNamesForType(aiService).length > 0) {
-                        // User probably wants to configure AI Service bean manually
-                        // TODO or better fail because he should not annotate it with @AiService then?
-                        return;
-                    }
-
-                    AiService annotation = aiService.getAnnotation(AiService.class);
-
-                    GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
-                    beanDefinition.setBeanClass(AiServiceFactory.class);
-                    beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(aiService);
-                    MutablePropertyValues propertyValues = beanDefinition.getPropertyValues();
-
-                    if (isNotNullOrBlank(annotation.chatModel())) {
-                        propertyValues.add("chatLanguageModel", new RuntimeBeanReference(annotation.chatModel()));
-                    } else {
-                        if (chatLanguageModels.length == 1) {
-                            propertyValues.add("chatLanguageModel", new RuntimeBeanReference(chatLanguageModels[0]));
-                        } else if (chatLanguageModels.length > 1) {
-                            throw conflict(ChatLanguageModel.class, chatLanguageModels);
+            Set<String> beansWithTools = new HashSet<>();
+            for (String beanName : beanFactory.getBeanDefinitionNames()) {
+                try {
+                    Class<?> beanClass = Class.forName(beanFactory.getBeanDefinition(beanName).getBeanClassName());
+                    for (Method beanMethod : beanClass.getDeclaredMethods()) {
+                        if (beanMethod.isAnnotationPresent(Tool.class)) {
+                            beansWithTools.add(beanName);
                         }
                     }
-
-                    // TODO handle conflicts for all other components
-
-                    if (streamingChatLanguageModels.length == 1) {
-                        propertyValues.add("streamingChatLanguageModel", new RuntimeBeanReference(streamingChatLanguageModels[0]));
-                    }
-
-                    if (chatMemories.length == 1) {
-                        propertyValues.add("chatMemory", new RuntimeBeanReference(chatMemories[0]));
-                    }
-
-                    if (chatMemoryProviders.length == 1) {
-                        propertyValues.add("chatMemoryProvider", new RuntimeBeanReference(chatMemoryProviders[0]));
-                    }
-
-                    if (contentRetrievers.length == 1) {
-                        propertyValues.add("contentRetriever", new RuntimeBeanReference(contentRetrievers[0]));
-                    }
-
-                    if (retrievalAugmentors.length == 1) {
-                        propertyValues.add("retrievalAugmentor", new RuntimeBeanReference(retrievalAugmentors[0]));
-                    }
-
-                    for (Class<?> classWithTools : annotation.tools()) {
-                        for (String beanWithTools : beanFactory.getBeanNamesForType(classWithTools)) {
-                            propertyValues.add("beanWithTools", new RuntimeBeanReference(beanWithTools));
-                        }
-                    }
-
-                    BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-                    registry.registerBeanDefinition(lowercaseFirstLetter(aiService.getSimpleName()), beanDefinition);
-                });
+                } catch (Exception e) {
+                    // TODO
+                }
             }
+
+            findAiServices(beanFactory).forEach(aiServiceClass -> {
+
+                if (beanFactory.getBeanNamesForType(aiServiceClass).length > 0) {
+                    // User probably wants to configure AI Service bean manually
+                    // TODO or better fail because user should not annotate it with @AiService then?
+                    return;
+                }
+
+                GenericBeanDefinition aiServiceBeanDefinition = new GenericBeanDefinition();
+                aiServiceBeanDefinition.setBeanClass(AiServiceFactory.class);
+                aiServiceBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(aiServiceClass);
+                MutablePropertyValues propertyValues = aiServiceBeanDefinition.getPropertyValues();
+
+                AiService aiServiceAnnotation = aiServiceClass.getAnnotation(AiService.class);
+
+                addBeanReference(
+                        ChatLanguageModel.class,
+                        aiServiceAnnotation.chatModel(),
+                        chatLanguageModels,
+                        "chatLanguageModel",
+                        propertyValues
+                );
+
+                addBeanReference(
+                        StreamingChatLanguageModel.class,
+                        aiServiceAnnotation.streamingChatModel(),
+                        streamingChatLanguageModels,
+                        "streamingChatLanguageModel",
+                        propertyValues
+                );
+
+                addBeanReference(
+                        ChatMemory.class,
+                        aiServiceAnnotation.chatMemory(),
+                        chatMemories,
+                        "chatMemory",
+                        propertyValues
+                );
+
+                addBeanReference(
+                        ChatMemoryProvider.class,
+                        aiServiceAnnotation.chatMemoryProvider(),
+                        chatMemoryProviders,
+                        "chatMemoryProvider",
+                        propertyValues
+                );
+
+                addBeanReference(
+                        ContentRetriever.class,
+                        aiServiceAnnotation.contentRetriever(),
+                        contentRetrievers,
+                        "contentRetriever",
+                        propertyValues
+                );
+
+                addBeanReference(
+                        RetrievalAugmentor.class,
+                        aiServiceAnnotation.retrievalAugmentor(),
+                        retrievalAugmentors,
+                        "retrievalAugmentor",
+                        propertyValues
+                );
+
+                if (aiServiceAnnotation.tools().length > 0) {
+                    for (String beanWithTools : aiServiceAnnotation.tools()) {
+                        propertyValues.add("beanWithTools", new RuntimeBeanReference(beanWithTools));
+                    }
+                } else {
+                    for (String beanWithTools : beansWithTools) {
+                        propertyValues.add("beanWithTools", new RuntimeBeanReference(beanWithTools));
+                    }
+                }
+
+                BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+                registry.registerBeanDefinition(lowercaseFirstLetter(aiServiceClass.getSimpleName()), aiServiceBeanDefinition);
+            });
         };
+    }
+
+    private static Set<Class<?>> findAiServices(ConfigurableListableBeanFactory beanFactory) {
+        String[] applicationBean = beanFactory.getBeanNamesForAnnotation(SpringBootApplication.class);
+        BeanDefinition applicationBeanDefinition = beanFactory.getBeanDefinition(applicationBean[0]);
+        String basePackage = applicationBeanDefinition.getResolvableType().resolve().getPackage().getName();
+        Reflections reflections = new Reflections(basePackage);
+        return reflections.getTypesAnnotatedWith(AiService.class);
+    }
+
+    private static void addBeanReference(Class<?> beanType,
+                                         String customBeanName,
+                                         String[] beanNames,
+                                         String propertyName,
+                                         MutablePropertyValues propertyValues) {
+        if (isNotNullOrBlank(customBeanName)) {
+            propertyValues.add(propertyName, new RuntimeBeanReference(customBeanName));
+        } else {
+            if (beanNames.length == 1) {
+                propertyValues.add(propertyName, new RuntimeBeanReference(beanNames[0]));
+            } else if (beanNames.length > 1) {
+                throw conflict(beanType, beanNames);
+            }
+        }
     }
 
     private static IllegalConfigurationException conflict(Class<?> beanType, Object[] beanNames) {
