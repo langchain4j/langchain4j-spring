@@ -2,6 +2,7 @@ package dev.langchain4j.openai.spring;
 
 import dev.langchain4j.model.openai.*;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -158,5 +159,11 @@ public class AutoConfig {
                 .withPersisting(imageModelProperties.getWithPersisting())
                 .persistTo(imageModelProperties.getPersistTo())
                 .build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    OpenAiTokenizer openAiTokenizer() {
+        return new OpenAiTokenizer();
     }
 }
