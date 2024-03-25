@@ -143,7 +143,7 @@ public class AiServicesAutoConfig {
                 } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
                     propertyValues.add("tools", toManagedList(tools));
                 } else {
-                    throw illegalArgument("Unknown component selection mode: " + aiServiceAnnotation.wiringMode());
+                    throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
                 }
 
                 BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
