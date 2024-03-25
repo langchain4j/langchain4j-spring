@@ -9,7 +9,6 @@ import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
 import org.springframework.beans.factory.FactoryBean;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
@@ -23,7 +22,7 @@ class AiServiceFactory implements FactoryBean<Object> {
     private ChatMemoryProvider chatMemoryProvider;
     private ContentRetriever contentRetriever;
     private RetrievalAugmentor retrievalAugmentor;
-    private final List<Object> beansWithTools = new ArrayList<>();
+    private List<Object> tools;
 
     public AiServiceFactory(Class<Object> aiServiceClass) {
         this.aiServiceClass = aiServiceClass;
@@ -53,8 +52,8 @@ class AiServiceFactory implements FactoryBean<Object> {
         this.retrievalAugmentor = retrievalAugmentor;
     }
 
-    public void setBeanWithTools(Object beanWithTools) {
-        this.beansWithTools.add(beanWithTools);
+    public void setTools(List<Object> tools) {
+        this.tools = tools;
     }
 
     @Override
@@ -86,8 +85,8 @@ class AiServiceFactory implements FactoryBean<Object> {
             builder = builder.retrievalAugmentor(retrievalAugmentor);
         }
 
-        if (!isNullOrEmpty(beansWithTools)) {
-            builder = builder.tools(beansWithTools);
+        if (!isNullOrEmpty(tools)) {
+            builder = builder.tools(tools);
         }
 
         return builder.build();

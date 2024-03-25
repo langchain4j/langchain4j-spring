@@ -12,12 +12,13 @@ import dev.langchain4j.service.AiServices;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import static dev.langchain4j.service.spring.AiServiceWiringMode.AUTOMATIC;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Any interface annotated with {@code @AiService} will be automatically registered as a bean
- * and configured to use all the following components (beans) available in the context:
+ * An interface annotated with {@code @AiService} will be automatically registered as a bean
+ * and wired with all the following components (beans) available in the context:
  * <pre>
  * - {@link ChatLanguageModel}
  * - {@link StreamingChatLanguageModel}
@@ -27,8 +28,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * - {@link RetrievalAugmentor}
  * - All beans containing methods annotated with {@code @}{@link Tool}
  * </pre>
- * You can also explicitly specify which components this AI Service should use by specifying bean names
- * using the following properties:
+ * You can also explicitly specify which components (beans) should be wired into this AI Service
+ * by setting {@link #wiringMode()} to {@link AiServiceWiringMode#EXPLICIT}
+ * and specifying bean names using the following attributes:
  * <pre>
  * - {@link #chatModel()}
  * - {@link #streamingChatModel()}
@@ -47,37 +49,49 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface AiService {
 
     /**
-     * The name of a {@link ChatLanguageModel} bean that should be used by this AI Service.
+     * Specifies how LangChain4j components (beans) are wired (injected) into this AI Service.
+     */
+    AiServiceWiringMode wiringMode() default AUTOMATIC;
+
+    /**
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the name of a {@link ChatLanguageModel} bean that should be used by this AI Service.
      */
     String chatModel() default "";
 
     /**
-     * The name of a {@link StreamingChatLanguageModel} bean that should be used by this AI Service.
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the name of a {@link StreamingChatLanguageModel} bean that should be used by this AI Service.
      */
     String streamingChatModel() default "";
 
     /**
-     * The name of a {@link ChatMemory} bean that should be used by this AI Service.
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the name of a {@link ChatMemory} bean that should be used by this AI Service.
      */
     String chatMemory() default "";
 
     /**
-     * The name of a {@link ChatMemoryProvider} bean that should be used by this AI Service.
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the name of a {@link ChatMemoryProvider} bean that should be used by this AI Service.
      */
     String chatMemoryProvider() default "";
 
     /**
-     * The name of a {@link ContentRetriever} bean that should be used by this AI Service.
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the name of a {@link ContentRetriever} bean that should be used by this AI Service.
      */
     String contentRetriever() default "";
 
     /**
-     * The name of a {@link RetrievalAugmentor} bean that should be used by this AI Service.
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the name of a {@link RetrievalAugmentor} bean that should be used by this AI Service.
      */
     String retrievalAugmentor() default "";
 
     /**
-     * The names of beans containing methods annotated with {@link Tool} that should be used by this AI Service.
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the names of beans containing methods annotated with {@link Tool} that should be used by this AI Service.
      */
     String[] tools() default {};
 
