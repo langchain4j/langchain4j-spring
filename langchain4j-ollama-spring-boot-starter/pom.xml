@@ -7,13 +7,12 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-spring</artifactId>
-        <version>0.28.0-SNAPSHOT</version>
+        <version>0.29.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>langchain4j-ollama-spring-boot-starter</artifactId>
     <name>LangChain4j Spring Boot starter for Ollama</name>
-    <packaging>jar</packaging>
 
     <dependencies>
 
