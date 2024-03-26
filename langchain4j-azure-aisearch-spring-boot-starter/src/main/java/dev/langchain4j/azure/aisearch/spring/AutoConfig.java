@@ -1,7 +1,7 @@
 package dev.langchain4j.azure.aisearch.spring;
 
+import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.rag.content.retriever.azure.search.AzureAiSearchContentRetriever;
-import dev.langchain4j.store.embedding.azure.search.AzureAiSearchEmbeddingStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,22 +15,16 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".api-key")
-    public AzureAiSearchEmbeddingStore azureAiSearchEmbeddingStore(Properties properties) {
-        return AzureAiSearchEmbeddingStore.builder()
-                .endpoint(properties.getEndpoint())
-                .apiKey(properties.getApiKey())
-                .dimensions(properties.getDimensions())
-//                .createOrUpdateIndex(properties.isCreateOrUpdateIndex())
-                .build();
-    }
-
-    @Bean
-    @ConditionalOnProperty(PREFIX + ".api-key")
-    public AzureAiSearchContentRetriever azureAiSearchContentRetriever(Properties properties) {
+    public AzureAiSearchContentRetriever azureAiSearchContentRetriever(Properties properties, EmbeddingModel embeddingModel) {
         return AzureAiSearchContentRetriever.builder()
                 .endpoint(properties.getEndpoint())
                 .apiKey(properties.getApiKey())
+                .createOrUpdateIndex(properties.isCreateOrUpdateIndex())
+                .embeddingModel(embeddingModel)
                 .dimensions(properties.getDimensions())
+                .maxResults(properties.getMaxResults())
+                .minScore(properties.getMinScore())
+                .queryType(properties.getQueryType())
                 .build();
     }
 }
