@@ -11,14 +11,14 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>langchain4j-ollama-spring-boot-starter</artifactId>
-    <name>LangChain4j Spring Boot starter for Ollama</name>
+    <artifactId>langchain4j-anthropic-spring-boot-starter</artifactId>
+    <name>LangChain4j Spring Boot starter for Anthropic</name>
 
     <dependencies>
 
         <dependency>
             <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-ollama</artifactId>
+            <artifactId>langchain4j-anthropic</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -50,18 +50,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
 

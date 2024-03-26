@@ -11,14 +11,14 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>langchain4j-ollama-spring-boot-starter</artifactId>
-    <name>LangChain4j Spring Boot starter for Ollama</name>
+    <artifactId>langchain4j-easy-rag-spring-boot-starter</artifactId>
+    <name>Spring Boot starter for Easy RAG</name>
 
     <dependencies>
 
         <dependency>
             <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-ollama</artifactId>
+            <artifactId>langchain4j-easy-rag</artifactId>
             <version>${project.version}</version>
         </dependency>
 
