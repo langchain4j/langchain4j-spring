@@ -51,7 +51,6 @@ class AutoConfigIT {
                         "langchain4j.azure.ai-search.dimensions=" + "0",
                         "langchain4j.azure.ai-search.create-or-update-index=" + "false",
                         "langchain4j.azure.ai-search.max-results=" + AZURE_AISEARCH_MAX_RESULTS,
-                        "langchain4j.azure.ai-search.min-score=" + AZURE_AISEARCH_MIN_SCORE,
                         "langchain4j.azure.ai-search.query-type=" + "FULL_TEXT"
                 ).withBean(EmbeddingModel.class, AllMiniLmL6V2EmbeddingModel::new)
                 .run(context -> {
