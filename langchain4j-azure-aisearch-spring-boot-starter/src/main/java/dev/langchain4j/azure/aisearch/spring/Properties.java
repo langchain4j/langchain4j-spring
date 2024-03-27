@@ -17,6 +17,6 @@ public class Properties {
     int dimensions;
     boolean createOrUpdateIndex;
     int maxResults = 1;
-    double minScore = 0.6;
+    double minScore;
     AzureAiSearchQueryType queryType;
 }

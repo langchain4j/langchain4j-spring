@@ -11,6 +11,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
+import dev.langchain4j.model.openai.OpenAiTokenizer;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -39,7 +40,8 @@ class AutoConfigIT {
                         "langchain4j.azure.open-ai.chat-model.api-key=" + AZURE_OPENAI_KEY,
                         "langchain4j.azure.open-ai.chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
                         "langchain4j.azure.open-ai.chat-model.deployment-name=" + AZURE_OPENAI_DEPLOYMENT_NAME,
-                        "langchain4j.azure.open-ai.chat-model.max-tokens=20"
+                        "langchain4j.azure.open-ai.chat-model.max-tokens=20",
+                        "langchain4j.azure.open-ai.streaming-chat-model.timeout=60"
                 )
                 .run(context -> {
 
@@ -58,7 +60,8 @@ class AutoConfigIT {
                         "langchain4j.azure.open-ai.streaming-chat-model.api-key=" + AZURE_OPENAI_KEY,
                         "langchain4j.azure.open-ai.streaming-chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
                         "langchain4j.azure.open-ai.streaming-chat-model.deployment-name=" + AZURE_OPENAI_DEPLOYMENT_NAME,
-                        "langchain4j.azure.open-ai.streaming-chat-model.max-tokens=20"
+                        "langchain4j.azure.open-ai.streaming-chat-model.max-tokens=20",
+                        "langchain4j.azure.open-ai.streaming-chat-model.timeout=60"
                 )
                 .run(context -> {
 
@@ -94,6 +97,7 @@ class AutoConfigIT {
                 .withPropertyValues("langchain4j.azure.open-ai.embedding-model.api-key=" + AZURE_OPENAI_KEY,
                         "langchain4j.azure.open-ai.embedding-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
                         "langchain4j.azure.open-ai.embedding-model.deployment-name=" + AZURE_EMBEDDING_DEPLOYMENT_NAME)
+                .withBean(OpenAiTokenizer.class, () -> new OpenAiTokenizer("gpt-3.5-turbo"))
                 .run(context -> {
 
                     EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
