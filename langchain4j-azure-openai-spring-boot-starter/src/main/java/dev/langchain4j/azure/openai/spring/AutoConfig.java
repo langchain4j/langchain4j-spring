@@ -9,6 +9,7 @@ import dev.langchain4j.model.azure.AzureOpenAiImageModel;
 import dev.langchain4j.model.azure.AzureOpenAiStreamingChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,9 +23,21 @@ import static dev.langchain4j.azure.openai.spring.Properties.PREFIX;
 @EnableConfigurationProperties(Properties.class)
 public class AutoConfig {
 
+
     @Bean
-    @ConditionalOnProperty(PREFIX + ".chat-model.deployment-name")
+    @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
     @ConfigurationProperties
+    AzureOpenAiChatModel openAiChatModelByAPIKey(Properties properties) {
+        return openAiChatModel(properties);
+    }
+
+    @Bean
+    @ConditionalOnProperty(PREFIX + ".chat-model.non-azure-api-key")
+    @ConditionalOnMissingBean(AzureOpenAiChatModel.class)
+    AzureOpenAiChatModel openAiChatModelByNonAzureApiKey(Properties properties) {
+        return openAiChatModel(properties);
+    }
+
     AzureOpenAiChatModel openAiChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         AzureOpenAiChatModel.Builder builder = AzureOpenAiChatModel.builder()
@@ -47,7 +60,19 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(PREFIX + ".streaming-chat-model.deployment-name")
+    @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
+    AzureOpenAiStreamingChatModel openAiStreamingChatModelByApiKey(Properties properties) {
+        return openAiStreamingChatModel(properties);
+    }
+
+    @Bean
+    @ConditionalOnProperty(PREFIX + ".streaming-chat-model.non-azure-api-key")
+    @ConditionalOnMissingBean(AzureOpenAiStreamingChatModel.class)
+    AzureOpenAiStreamingChatModel openAiStreamingChatModelByNonAzureApiKey(Properties properties) {
+        return openAiStreamingChatModel(properties);
+    }
+
+
     AzureOpenAiStreamingChatModel openAiStreamingChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         AzureOpenAiStreamingChatModel.Builder builder= AzureOpenAiStreamingChatModel.builder()
@@ -70,8 +95,20 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty({PREFIX + ".embedding-model.deployment-name"})
+    @ConditionalOnProperty({PREFIX + ".embedding-model.api-key"})
     @ConditionalOnBean(Tokenizer.class)
+    AzureOpenAiEmbeddingModel openAiEmbeddingModelByApiKey(Properties properties, Tokenizer tokenizer){
+        return openAiEmbeddingModel(properties, tokenizer);
+    }
+
+    @Bean
+    @ConditionalOnProperty({PREFIX + ".embedding-model.non-azure-api-key"})
+    @ConditionalOnBean(Tokenizer.class)
+    @ConditionalOnMissingBean(AzureOpenAiEmbeddingModel.class)
+    AzureOpenAiEmbeddingModel openAiEmbeddingModelByNonAzureApiKey(Properties properties, Tokenizer tokenizer){
+        return openAiEmbeddingModel(properties, tokenizer);
+    }
+
     AzureOpenAiEmbeddingModel openAiEmbeddingModel(Properties properties, Tokenizer tokenizer) {
         EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         AzureOpenAiEmbeddingModel.Builder builder= AzureOpenAiEmbeddingModel.builder()
@@ -90,7 +127,18 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(PREFIX + ".image-model.deployment-name")
+    @ConditionalOnProperty(PREFIX + ".image-model.api-key")
+    AzureOpenAiImageModel openAiImageModelByApiKey(Properties properties){
+        return openAiImageModel(properties);
+    }
+
+    @Bean
+    @ConditionalOnProperty(PREFIX + ".image-model.non-azure-api-key")
+    @ConditionalOnMissingBean(AzureOpenAiImageModel.class)
+    AzureOpenAiImageModel openAiImageModelByNonAzureApiKey(Properties properties){
+        return openAiImageModel(properties);
+    }
+
     AzureOpenAiImageModel openAiImageModel(Properties properties) {
         ImageModelProperties imageModelProperties = properties.getImageModel();
         AzureOpenAiImageModel.Builder builder= AzureOpenAiImageModel.builder()
