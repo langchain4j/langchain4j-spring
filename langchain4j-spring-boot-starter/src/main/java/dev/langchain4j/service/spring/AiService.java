@@ -8,6 +8,7 @@ import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
+import org.springframework.stereotype.Service;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -44,6 +45,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * @see AiServices
  */
+@Service
 @Target(TYPE)
 @Retention(RUNTIME)
 public @interface AiService {
