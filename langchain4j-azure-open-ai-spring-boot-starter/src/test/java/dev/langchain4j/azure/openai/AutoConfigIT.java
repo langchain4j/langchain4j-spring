@@ -2,7 +2,9 @@ package dev.langchain4j.azure.openai;
 
 import dev.langchain4j.azure.openai.spring.AutoConfig;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.model.ExampleTestTokenizer;
 import dev.langchain4j.model.StreamingResponseHandler;
+import dev.langchain4j.model.Tokenizer;
 import dev.langchain4j.model.azure.AzureOpenAiChatModel;
 import dev.langchain4j.model.azure.AzureOpenAiEmbeddingModel;
 import dev.langchain4j.model.azure.AzureOpenAiImageModel;
@@ -11,7 +13,6 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
-import dev.langchain4j.model.openai.OpenAiTokenizer;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -116,7 +117,7 @@ class AutoConfigIT {
                 .withPropertyValues("langchain4j.azure.open-ai.embedding-model.api-key=" + AZURE_OPENAI_KEY,
                         "langchain4j.azure.open-ai.embedding-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
                         "langchain4j.azure.open-ai.embedding-model.deployment-name=" + AZURE_EMBEDDING_DEPLOYMENT_NAME)
-                .withBean(OpenAiTokenizer.class, () -> new OpenAiTokenizer("gpt-3.5-turbo"))
+                .withBean(Tokenizer.class, ExampleTestTokenizer::new)
                 .run(context -> {
 
                     EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
