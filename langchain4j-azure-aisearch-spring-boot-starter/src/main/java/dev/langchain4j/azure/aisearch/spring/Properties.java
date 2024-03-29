@@ -16,7 +16,7 @@ public class Properties {
     String apiKey;
     int dimensions;
     boolean createOrUpdateIndex;
-    int maxResults = 1;
+    int maxResults = 3;
     double minScore;
     AzureAiSearchQueryType queryType;
 }
