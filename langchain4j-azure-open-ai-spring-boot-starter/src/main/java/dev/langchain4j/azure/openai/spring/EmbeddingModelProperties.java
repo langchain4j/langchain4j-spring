@@ -12,6 +12,7 @@ class EmbeddingModelProperties {
     String nonAzureApiKey;
     String deploymentName;
     Integer dimensions;
+    Integer timeout;
     Integer maxRetries;
     Boolean logRequestsAndResponses;
 }

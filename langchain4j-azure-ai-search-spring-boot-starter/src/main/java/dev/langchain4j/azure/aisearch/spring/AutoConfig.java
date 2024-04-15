@@ -16,18 +16,18 @@ import static dev.langchain4j.azure.aisearch.spring.Properties.PREFIX;
 @EnableConfigurationProperties(Properties.class)
 public class AutoConfig {
     @Bean
-    @ConditionalOnProperty(PREFIX + ".content-retriver.api-key")
+    @ConditionalOnProperty(PREFIX + ".content-retriever.api-key")
     public AzureAiSearchContentRetriever azureAiSearchContentRetriever(Properties properties, @Nullable EmbeddingModel embeddingModel, @Nullable SearchIndex index) {
-        Properties.NestedProperties nestedProperties = properties.getContentRetriver();
+        Properties.NestedProperties nestedProperties = properties.getContentRetriever();
         return AzureAiSearchContentRetriever.builder()
                 .endpoint(nestedProperties.getEndpoint())
                 .apiKey(nestedProperties.getApiKey())
-                .createOrUpdateIndex(nestedProperties.isCreateOrUpdateIndex())
+                .createOrUpdateIndex(nestedProperties.getCreateOrUpdateIndex())
                 .embeddingModel(embeddingModel)
-                .dimensions(nestedProperties.getDimensions())
+                .dimensions(nestedProperties.getDimensions() == null ? 0 : nestedProperties.getDimensions())
                 .index(index)
                 .maxResults(nestedProperties.getMaxResults())
-                .minScore(nestedProperties.getMinScore())
+                .minScore(nestedProperties.getMinScore() == null ? 0.0 : nestedProperties.getMinScore())
                 .queryType(nestedProperties.getQueryType())
                 .build();
     }
@@ -39,7 +39,7 @@ public class AutoConfig {
         return AzureAiSearchEmbeddingStore.builder()
                 .endpoint(nestedProperties.getEndpoint())
                 .apiKey(nestedProperties.getApiKey())
-                .createOrUpdateIndex(nestedProperties.isCreateOrUpdateIndex())
+                .createOrUpdateIndex(nestedProperties.getCreateOrUpdateIndex())
                 .dimensions(nestedProperties.getDimensions())
                 .index(index)
                 .build();

@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-dev.langchain4j.azure.openai.spring.AutoConfig
+spring.dev.langchain4j.azure.openai.spring.AutoConfig

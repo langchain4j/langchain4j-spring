@@ -8,16 +8,12 @@ import dev.langchain4j.model.azure.AzureOpenAiEmbeddingModel;
 import dev.langchain4j.model.azure.AzureOpenAiImageModel;
 import dev.langchain4j.model.azure.AzureOpenAiStreamingChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.lang.Nullable;
 
 import java.time.Duration;
-
-import static dev.langchain4j.azure.openai.spring.Properties.PREFIX;
 
 @AutoConfiguration
 @EnableConfigurationProperties(Properties.class)
@@ -25,15 +21,13 @@ public class AutoConfig {
 
 
     @Bean
-    @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
-    @ConfigurationProperties
+    @ConditionalOnProperty(Properties.PREFIX + ".chat-model.api-key")
     AzureOpenAiChatModel openAiChatModelByAPIKey(Properties properties) {
         return openAiChatModel(properties);
     }
 
     @Bean
-    @ConditionalOnProperty(PREFIX + ".chat-model.non-azure-api-key")
-    @ConditionalOnMissingBean(AzureOpenAiChatModel.class)
+    @ConditionalOnProperty(Properties.PREFIX + ".chat-model.non-azure-api-key")
     AzureOpenAiChatModel openAiChatModelByNonAzureApiKey(Properties properties) {
         return openAiChatModel(properties);
     }
@@ -49,7 +43,7 @@ public class AutoConfig {
                 .maxTokens(chatModelProperties.getMaxTokens())
                 .presencePenalty(chatModelProperties.getPresencePenalty())
                 .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
-                .timeout(Duration.ofSeconds(chatModelProperties.getTimeout()))
+                .timeout(Duration.ofSeconds(chatModelProperties.getTimeout() == null ? 0 : chatModelProperties.getTimeout()))
                 .maxRetries(chatModelProperties.getMaxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses());
@@ -60,14 +54,13 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
+    @ConditionalOnProperty(Properties.PREFIX + ".streaming-chat-model.api-key")
     AzureOpenAiStreamingChatModel openAiStreamingChatModelByApiKey(Properties properties) {
         return openAiStreamingChatModel(properties);
     }
 
     @Bean
-    @ConditionalOnProperty(PREFIX + ".streaming-chat-model.non-azure-api-key")
-    @ConditionalOnMissingBean(AzureOpenAiStreamingChatModel.class)
+    @ConditionalOnProperty(Properties.PREFIX + ".streaming-chat-model.non-azure-api-key")
     AzureOpenAiStreamingChatModel openAiStreamingChatModelByNonAzureApiKey(Properties properties) {
         return openAiStreamingChatModel(properties);
     }
@@ -85,7 +78,7 @@ public class AutoConfig {
                 .maxTokens(chatModelProperties.getMaxTokens())
                 .presencePenalty(chatModelProperties.getPresencePenalty())
                 .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
-                .timeout(Duration.ofSeconds(chatModelProperties.getTimeout()))
+                .timeout(Duration.ofSeconds(chatModelProperties.getTimeout() == null ? 0 : chatModelProperties.getTimeout()))
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses());
         if (chatModelProperties.getNonAzureApiKey() != null) {
@@ -95,17 +88,14 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty({PREFIX + ".embedding-model.api-key"})
-    @ConditionalOnBean(Tokenizer.class)
-    AzureOpenAiEmbeddingModel openAiEmbeddingModelByApiKey(Properties properties, Tokenizer tokenizer){
+    @ConditionalOnProperty({Properties.PREFIX + ".embedding-model.api-key"})
+    AzureOpenAiEmbeddingModel openAiEmbeddingModelByApiKey(Properties properties, @Nullable Tokenizer tokenizer) {
         return openAiEmbeddingModel(properties, tokenizer);
     }
 
     @Bean
-    @ConditionalOnProperty({PREFIX + ".embedding-model.non-azure-api-key"})
-    @ConditionalOnBean(Tokenizer.class)
-    @ConditionalOnMissingBean(AzureOpenAiEmbeddingModel.class)
-    AzureOpenAiEmbeddingModel openAiEmbeddingModelByNonAzureApiKey(Properties properties, Tokenizer tokenizer){
+    @ConditionalOnProperty({Properties.PREFIX + ".embedding-model.non-azure-api-key"})
+    AzureOpenAiEmbeddingModel openAiEmbeddingModelByNonAzureApiKey(Properties properties, @Nullable Tokenizer tokenizer) {
         return openAiEmbeddingModel(properties, tokenizer);
     }
 
@@ -117,6 +107,7 @@ public class AutoConfig {
                 .deploymentName(embeddingModelProperties.getDeploymentName())
                 .maxRetries(embeddingModelProperties.getMaxRetries())
                 .tokenizer(tokenizer)
+                .timeout(Duration.ofSeconds(embeddingModelProperties.getTimeout() == null ? 0 : embeddingModelProperties.getTimeout()))
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(embeddingModelProperties.getLogRequestsAndResponses() != null && embeddingModelProperties.getLogRequestsAndResponses());
 
@@ -127,14 +118,13 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(PREFIX + ".image-model.api-key")
+    @ConditionalOnProperty(Properties.PREFIX + ".image-model.api-key")
     AzureOpenAiImageModel openAiImageModelByApiKey(Properties properties){
         return openAiImageModel(properties);
     }
 
     @Bean
-    @ConditionalOnProperty(PREFIX + ".image-model.non-azure-api-key")
-    @ConditionalOnMissingBean(AzureOpenAiImageModel.class)
+    @ConditionalOnProperty(Properties.PREFIX + ".image-model.non-azure-api-key")
     AzureOpenAiImageModel openAiImageModelByNonAzureApiKey(Properties properties){
         return openAiImageModel(properties);
     }

@@ -1,10 +1,7 @@
-package dev.langchain4j.azure.openai;
+package dev.langchain4j.azure.openai.spring;
 
-import dev.langchain4j.azure.openai.spring.AutoConfig;
 import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.ExampleTestTokenizer;
 import dev.langchain4j.model.StreamingResponseHandler;
-import dev.langchain4j.model.Tokenizer;
 import dev.langchain4j.model.azure.AzureOpenAiChatModel;
 import dev.langchain4j.model.azure.AzureOpenAiEmbeddingModel;
 import dev.langchain4j.model.azure.AzureOpenAiImageModel;
@@ -15,6 +12,8 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -27,7 +26,6 @@ class AutoConfigIT {
 
     private static final String AZURE_OPENAI_KEY = System.getenv("AZURE_OPENAI_KEY");
     private static final String AZURE_OPENAI_ENDPOINT = System.getenv("AZURE_OPENAI_ENDPOINT");
-    private static final String AZURE_OPENAI_DEPLOYMENT_NAME = System.getenv("AZURE_OPENAI_DEPLOYMENT_NAME");
     private static final String AZURE_DALLE3_DEPLOYMENT_NAME = System.getenv("AZURE_DALLE3_DEPLOYMENT_NAME");
     private static final String AZURE_EMBEDDING_DEPLOYMENT_NAME = System.getenv("AZURE_EMBEDDING_DEPLOYMENT_NAME");
 
@@ -36,13 +34,17 @@ class AutoConfigIT {
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
 
-    @Test
-    void should_provide_chat_model() {
+    @ParameterizedTest(name = "Deployment name: {0}")
+    @CsvSource({
+            "gpt-35-turbo",
+            "gpt-4"
+    })
+    void should_provide_chat_model(String deploymentName) {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.azure.open-ai.chat-model.api-key=" + AZURE_OPENAI_KEY,
                         "langchain4j.azure.open-ai.chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
-                        "langchain4j.azure.open-ai.chat-model.deployment-name=" + AZURE_OPENAI_DEPLOYMENT_NAME,
+                        "langchain4j.azure.open-ai.chat-model.deployment-name=" + deploymentName,
                         "langchain4j.azure.open-ai.chat-model.max-tokens=20"
                 )
                 .run(context -> {
@@ -50,16 +52,19 @@ class AutoConfigIT {
                     ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
                     assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
                     assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
-
                     assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
                 });
     }
 
-    @Test
-    void should_provide_chat_model_no_azure() {
+    @ParameterizedTest(name = "Deployment name: {0}")
+    @CsvSource({
+            "gpt-3.5-turbo"
+    })
+    void should_provide_chat_model_no_azure(String deploymentName) {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.azure.open-ai.chat-model.non-azure-api-key=" + NO_AZURE_OPENAI_KEY,
+                        "langchain4j.azure.open-ai.chat-model.deployment-name=" + deploymentName,
                         "langchain4j.azure.open-ai.chat-model.max-tokens=20",
                         "langchain4j.azure.open-ai.chat-model.timeout=60"
                 )
@@ -73,13 +78,17 @@ class AutoConfigIT {
                 });
     }
 
-    @Test
-    void should_provide_streaming_chat_model() {
+    @ParameterizedTest(name = "Deployment name: {0}")
+    @CsvSource({
+            "gpt-35-turbo",
+            "gpt-4"
+    })
+    void should_provide_streaming_chat_model(String deploymentName) {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.azure.open-ai.streaming-chat-model.api-key=" + AZURE_OPENAI_KEY,
                         "langchain4j.azure.open-ai.streaming-chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
-                        "langchain4j.azure.open-ai.streaming-chat-model.deployment-name=" + AZURE_OPENAI_DEPLOYMENT_NAME,
+                        "langchain4j.azure.open-ai.streaming-chat-model.deployment-name=" + deploymentName,
                         "langchain4j.azure.open-ai.streaming-chat-model.max-tokens=20",
                         "langchain4j.azure.open-ai.streaming-chat-model.timeout=60"
                 )
@@ -117,7 +126,6 @@ class AutoConfigIT {
                 .withPropertyValues("langchain4j.azure.open-ai.embedding-model.api-key=" + AZURE_OPENAI_KEY,
                         "langchain4j.azure.open-ai.embedding-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
                         "langchain4j.azure.open-ai.embedding-model.deployment-name=" + AZURE_EMBEDDING_DEPLOYMENT_NAME)
-                .withBean(Tokenizer.class, ExampleTestTokenizer::new)
                 .run(context -> {
 
                     EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);

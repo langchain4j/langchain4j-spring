@@ -22,7 +22,7 @@ class ChatModelProperties {
     String responseFormat;
     Integer seed;
     List<String> stop;
-    int timeout;
+    Integer timeout;
     Integer maxRetries;
     Boolean logRequestsAndResponses;
 }

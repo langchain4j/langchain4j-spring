@@ -14,7 +14,7 @@ public class Properties {
     static final String PREFIX = "langchain4j.azure.ai-search";
 
     @NestedConfigurationProperty
-    NestedProperties contentRetriver;
+    NestedProperties contentRetriever;
 
     @NestedConfigurationProperty
     NestedProperties embeddingStore;
@@ -24,10 +24,11 @@ public class Properties {
     public static class NestedProperties {
         String endpoint;
         String apiKey;
-        int dimensions;
-        boolean createOrUpdateIndex;
-        int maxResults = 3;
-        double minScore;
+        Integer dimensions;
+        Boolean createOrUpdateIndex;
+        String indexName;
+        Integer maxResults = 3;
+        Double minScore;
         AzureAiSearchQueryType queryType;
     }
 }
