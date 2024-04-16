@@ -77,12 +77,10 @@ class AiServiceFactory implements FactoryBean<Object> {
             builder.chatMemoryProvider(chatMemoryProvider);
         }
 
-        if (contentRetriever != null) {
-            builder = builder.contentRetriever(contentRetriever);
-        }
-
         if (retrievalAugmentor != null) {
             builder = builder.retrievalAugmentor(retrievalAugmentor);
+        } else if (contentRetriever != null) {
+            builder = builder.contentRetriever(contentRetriever);
         }
 
         if (!isNullOrEmpty(tools)) {
