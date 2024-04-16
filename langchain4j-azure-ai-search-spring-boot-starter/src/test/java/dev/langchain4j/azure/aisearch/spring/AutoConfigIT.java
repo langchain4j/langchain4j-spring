@@ -88,6 +88,8 @@ class AutoConfigIT {
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
+                        Properties.PREFIX + ".content-retriever.max-results=" + "3",
+                        Properties.PREFIX + ".content-retriever.min-score=" + "0.6",
                         Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.VECTOR
                 ).withBean(SearchIndex.class, () -> index)
                 .withBean(EmbeddingModel.class, () -> embeddingModel)
@@ -145,6 +147,8 @@ class AutoConfigIT {
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
+                        Properties.PREFIX + ".content-retriever.max-results=" + "3",
+                        Properties.PREFIX + ".content-retriever.min-score=" + "0.4",
                         Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.HYBRID_WITH_RERANKING
                 ).withBean(SearchIndex.class, () -> index)
                 .withBean(EmbeddingModel.class, () -> embeddingModel)
