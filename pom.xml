@@ -19,6 +19,7 @@
         <module>langchain4j-anthropic-spring-boot-starter</module>
         <module>langchain4j-ollama-spring-boot-starter</module>
         <module>langchain4j-open-ai-spring-boot-starter</module>
+        <module>langchain4j-qianfan-spring-boot-starter</module>
     </modules>
 
     <properties>
