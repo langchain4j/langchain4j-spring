@@ -5,10 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-import java.time.LocalDateTime;
-
 import static dev.langchain4j.service.spring.mode.ApiKeys.OPENAI_API_KEY;
-import static dev.langchain4j.service.spring.mode.automatic.withTools.PublicTools.CURRENT_TEMPERATURE;
+import static dev.langchain4j.service.spring.mode.automatic.withTools.PackagePrivateTools.CURRENT_TIME;
+import static dev.langchain4j.service.spring.mode.automatic.withTools.PublicTools.CURRENT_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AiServicesAutoConfigIT {
@@ -21,7 +20,6 @@ class AiServicesAutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.chat-model.max-tokens=20",
                         "langchain4j.open-ai.chat-model.temperature=0.0",
                         "langchain4j.open-ai.chat-model.log-requests=true",
                         "langchain4j.open-ai.chat-model.log-responses=true"
@@ -33,10 +31,10 @@ class AiServicesAutoConfigIT {
                     AiServiceWithTools aiService = context.getBean(AiServiceWithTools.class);
 
                     // when
-                    String answer = aiService.chat("What is the current temperature?");
+                    String answer = aiService.chat("What is the current date?");
 
-                    // then should use PublicTools.getCurrentTemperature()
-                    assertThat(answer).contains(String.valueOf(CURRENT_TEMPERATURE));
+                    // then should use PublicTools.getCurrentDate()
+                    assertThat(answer).contains(String.valueOf(CURRENT_DATE.getDayOfMonth()));
                 });
     }
 
@@ -45,8 +43,9 @@ class AiServicesAutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.chat-model.max-tokens=20",
-                        "langchain4j.open-ai.chat-model.temperature=0.0"
+                        "langchain4j.open-ai.chat-model.temperature=0.0",
+                        "langchain4j.open-ai.chat-model.log-requests=true",
+                        "langchain4j.open-ai.chat-model.log-responses=true"
                 )
                 .withUserConfiguration(AiServiceWithToolsApplication.class)
                 .run(context -> {
@@ -55,10 +54,10 @@ class AiServicesAutoConfigIT {
                     AiServiceWithTools aiService = context.getBean(AiServiceWithTools.class);
 
                     // when
-                    String answer = aiService.chat("What is the current minute?");
+                    String answer = aiService.chat("What is the current time?");
 
-                    // then should use PackagePrivateTools.getCurrentMinute()
-                    assertThat(answer).contains(String.valueOf(LocalDateTime.now().getMinute()));
+                    // then should use PackagePrivateTools.getCurrentTime()
+                    assertThat(answer).contains(String.valueOf(CURRENT_TIME.getMinute()));
                 });
     }
 
