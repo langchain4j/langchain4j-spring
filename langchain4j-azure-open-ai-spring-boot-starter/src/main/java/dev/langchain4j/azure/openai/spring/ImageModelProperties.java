@@ -16,7 +16,7 @@ class ImageModelProperties {
     String style;
     String responseFormat;
     String user;
-    int timeout;
+    Integer timeout;
     Integer maxRetries;
     Boolean logRequestsAndResponses;
 }

@@ -139,7 +139,7 @@ public class AutoConfig {
                 .style(imageModelProperties.getStyle())
                 .user(imageModelProperties.getUser())
                 .responseFormat(imageModelProperties.getResponseFormat())
-                .timeout(Duration.ofSeconds(imageModelProperties.getTimeout()))
+                .timeout(imageModelProperties.getTimeout() == null ? null : Duration.ofSeconds(imageModelProperties.getTimeout()))
                 .maxRetries(imageModelProperties.getMaxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(imageModelProperties.getLogRequestsAndResponses() != null && imageModelProperties.getLogRequestsAndResponses());
