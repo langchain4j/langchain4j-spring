@@ -19,7 +19,6 @@ import java.time.Duration;
 @EnableConfigurationProperties(Properties.class)
 public class AutoConfig {
 
-
     @Bean
     @ConditionalOnProperty(Properties.PREFIX + ".chat-model.api-key")
     AzureOpenAiChatModel openAiChatModelByAPIKey(Properties properties) {
@@ -68,7 +67,7 @@ public class AutoConfig {
 
     AzureOpenAiStreamingChatModel openAiStreamingChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
-        AzureOpenAiStreamingChatModel.Builder builder= AzureOpenAiStreamingChatModel.builder()
+        AzureOpenAiStreamingChatModel.Builder builder = AzureOpenAiStreamingChatModel.builder()
                 .endpoint(chatModelProperties.getEndpoint())
                 .apiKey(chatModelProperties.getApiKey())
                 .deploymentName(chatModelProperties.getDeploymentName())
@@ -101,7 +100,7 @@ public class AutoConfig {
 
     AzureOpenAiEmbeddingModel openAiEmbeddingModel(Properties properties, Tokenizer tokenizer) {
         EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
-        AzureOpenAiEmbeddingModel.Builder builder= AzureOpenAiEmbeddingModel.builder()
+        AzureOpenAiEmbeddingModel.Builder builder = AzureOpenAiEmbeddingModel.builder()
                 .endpoint(embeddingModelProperties.getEndpoint())
                 .apiKey(embeddingModelProperties.getApiKey())
                 .deploymentName(embeddingModelProperties.getDeploymentName())
@@ -119,19 +118,19 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(Properties.PREFIX + ".image-model.api-key")
-    AzureOpenAiImageModel openAiImageModelByApiKey(Properties properties){
+    AzureOpenAiImageModel openAiImageModelByApiKey(Properties properties) {
         return openAiImageModel(properties);
     }
 
     @Bean
     @ConditionalOnProperty(Properties.PREFIX + ".image-model.non-azure-api-key")
-    AzureOpenAiImageModel openAiImageModelByNonAzureApiKey(Properties properties){
+    AzureOpenAiImageModel openAiImageModelByNonAzureApiKey(Properties properties) {
         return openAiImageModel(properties);
     }
 
     AzureOpenAiImageModel openAiImageModel(Properties properties) {
         ImageModelProperties imageModelProperties = properties.getImageModel();
-        AzureOpenAiImageModel.Builder builder= AzureOpenAiImageModel.builder()
+        AzureOpenAiImageModel.Builder builder = AzureOpenAiImageModel.builder()
                 .endpoint(imageModelProperties.getEndpoint())
                 .apiKey(imageModelProperties.getApiKey())
                 .deploymentName(imageModelProperties.getDeploymentName())

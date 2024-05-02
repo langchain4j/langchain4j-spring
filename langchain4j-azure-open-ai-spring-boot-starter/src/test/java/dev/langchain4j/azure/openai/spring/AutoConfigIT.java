@@ -26,12 +26,9 @@ class AutoConfigIT {
 
     private static final String AZURE_OPENAI_KEY = System.getenv("AZURE_OPENAI_KEY");
     private static final String AZURE_OPENAI_ENDPOINT = System.getenv("AZURE_OPENAI_ENDPOINT");
-    private static final String AZURE_DALLE3_DEPLOYMENT_NAME = System.getenv("AZURE_DALLE3_DEPLOYMENT_NAME");
-    private static final String AZURE_EMBEDDING_DEPLOYMENT_NAME = System.getenv("AZURE_EMBEDDING_DEPLOYMENT_NAME");
+    private static final String NO_AZURE_OPENAI_KEY = System.getenv("OPENAI_API_KEY");
 
-    private static final String NO_AZURE_OPENAI_KEY = System.getenv("NO_AZURE_OPENAI_KEY");
-
-    ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
 
     @ParameterizedTest(name = "Deployment name: {0}")
@@ -42,10 +39,10 @@ class AutoConfigIT {
     void should_provide_chat_model(String deploymentName) {
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.azure.open-ai.chat-model.api-key=" + AZURE_OPENAI_KEY,
-                        "langchain4j.azure.open-ai.chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
-                        "langchain4j.azure.open-ai.chat-model.deployment-name=" + deploymentName,
-                        "langchain4j.azure.open-ai.chat-model.max-tokens=20"
+                        "langchain4j.azure-open-ai.chat-model.api-key=" + AZURE_OPENAI_KEY,
+                        "langchain4j.azure-open-ai.chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
+                        "langchain4j.azure-open-ai.chat-model.deployment-name=" + deploymentName,
+                        "langchain4j.azure-open-ai.chat-model.max-tokens=20"
                 )
                 .run(context -> {
 
@@ -63,10 +60,10 @@ class AutoConfigIT {
     void should_provide_chat_model_no_azure(String deploymentName) {
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.azure.open-ai.chat-model.non-azure-api-key=" + NO_AZURE_OPENAI_KEY,
-                        "langchain4j.azure.open-ai.chat-model.deployment-name=" + deploymentName,
-                        "langchain4j.azure.open-ai.chat-model.max-tokens=20",
-                        "langchain4j.azure.open-ai.chat-model.timeout=60"
+                        "langchain4j.azure-open-ai.chat-model.non-azure-api-key=" + NO_AZURE_OPENAI_KEY,
+                        "langchain4j.azure-open-ai.chat-model.deployment-name=" + deploymentName,
+                        "langchain4j.azure-open-ai.chat-model.max-tokens=20",
+                        "langchain4j.azure-open-ai.chat-model.timeout=60"
                 )
                 .run(context -> {
 
@@ -86,11 +83,11 @@ class AutoConfigIT {
     void should_provide_streaming_chat_model(String deploymentName) {
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.azure.open-ai.streaming-chat-model.api-key=" + AZURE_OPENAI_KEY,
-                        "langchain4j.azure.open-ai.streaming-chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
-                        "langchain4j.azure.open-ai.streaming-chat-model.deployment-name=" + deploymentName,
-                        "langchain4j.azure.open-ai.streaming-chat-model.max-tokens=20",
-                        "langchain4j.azure.open-ai.streaming-chat-model.timeout=60"
+                        "langchain4j.azure-open-ai.streaming-chat-model.api-key=" + AZURE_OPENAI_KEY,
+                        "langchain4j.azure-open-ai.streaming-chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
+                        "langchain4j.azure-open-ai.streaming-chat-model.deployment-name=" + deploymentName,
+                        "langchain4j.azure-open-ai.streaming-chat-model.max-tokens=20",
+                        "langchain4j.azure-open-ai.streaming-chat-model.timeout=60"
                 )
                 .run(context -> {
 
@@ -119,13 +116,12 @@ class AutoConfigIT {
                 });
     }
 
-
     @Test
     void should_provide_embedding_model() {
         contextRunner
-                .withPropertyValues("langchain4j.azure.open-ai.embedding-model.api-key=" + AZURE_OPENAI_KEY,
-                        "langchain4j.azure.open-ai.embedding-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
-                        "langchain4j.azure.open-ai.embedding-model.deployment-name=" + AZURE_EMBEDDING_DEPLOYMENT_NAME)
+                .withPropertyValues("langchain4j.azure-open-ai.embedding-model.api-key=" + AZURE_OPENAI_KEY,
+                        "langchain4j.azure-open-ai.embedding-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
+                        "langchain4j.azure-open-ai.embedding-model.deployment-name=" + "text-embedding-ada-002")
                 .run(context -> {
 
                     EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
@@ -140,9 +136,9 @@ class AutoConfigIT {
     void should_provide_image_model() {
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.azure.open-ai.image-model.api-key=" + AZURE_OPENAI_KEY,
-                        "langchain4j.azure.open-ai.image-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
-                        "langchain4j.azure.open-ai.image-model.deployment-name=" + AZURE_DALLE3_DEPLOYMENT_NAME
+                        "langchain4j.azure-open-ai.image-model.api-key=" + AZURE_OPENAI_KEY,
+                        "langchain4j.azure-open-ai.image-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
+                        "langchain4j.azure-open-ai.image-model.deployment-name=" + "dall-e-3"
                 )
                 .run(context -> {
 

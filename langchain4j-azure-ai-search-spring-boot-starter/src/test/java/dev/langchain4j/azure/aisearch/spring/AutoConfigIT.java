@@ -30,22 +30,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AutoConfigIT {
 
-    private static final String AZURE_SEARCH_KEY = System.getenv("AZURE_SEARCH_KEY");
-    private static final String AZURE_SEARCH_ENDPOINT = System.getenv("AZURE_SEARCH_ENDPOINT");
-    ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AutoConfig.class));
-
     private static final Logger log = LoggerFactory.getLogger(AutoConfigIT.class);
 
+    private static final String AZURE_SEARCH_KEY = System.getenv("AZURE_SEARCH_KEY");
+    private static final String AZURE_SEARCH_ENDPOINT = System.getenv("AZURE_SEARCH_ENDPOINT");
+
     private final EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
-    private final int dimensions = embeddingModel.embed("test").content().vector().length;
+    private final int dimensions = embeddingModel.embed("test").content().dimension();
 
     private final SearchIndexClient searchIndexClient = new SearchIndexClientBuilder()
             .endpoint(System.getenv("AZURE_SEARCH_ENDPOINT"))
             .credential(new AzureKeyCredential(System.getenv("AZURE_SEARCH_KEY")))
             .buildClient();
+    private final SearchIndex index = new SearchIndex(INDEX_NAME);
 
-    private SearchIndex index = new SearchIndex(INDEX_NAME);
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(AutoConfig.class));
 
     @Test
     void should_provide_ai_search_retriever() {
@@ -164,15 +164,6 @@ class AutoConfigIT {
                 });
     }
 
-    protected void awaitUntilPersisted() {
-        try {
-            Thread.sleep(1_000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
     @Test
     void should_provide_ai_search_embedding_store() {
 
@@ -186,10 +177,9 @@ class AutoConfigIT {
                         Properties.PREFIX + ".embedding-store.create-or-update-index=" + "true"
                 ).withBean(EmbeddingModel.class, () -> embeddingModel)
                 .run(context -> {
-                    EmbeddingStore embeddingStore = context.getBean(EmbeddingStore.class);
+                    EmbeddingStore<TextSegment> embeddingStore = context.getBean(EmbeddingStore.class);
                     assertThat(embeddingStore).isInstanceOf(AzureAiSearchEmbeddingStore.class);
                     assertThat(context.getBean(AzureAiSearchEmbeddingStore.class)).isSameAs(embeddingStore);
-
 
                     String content1 = "banana";
                     String content2 = "computer";
@@ -212,4 +202,11 @@ class AutoConfigIT {
                 });
     }
 
+    protected void awaitUntilPersisted() {
+        try {
+            Thread.sleep(1_000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

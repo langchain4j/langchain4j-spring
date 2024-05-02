@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 @ConfigurationProperties(prefix = Properties.PREFIX)
 public class Properties {
 
-    static final String PREFIX = "langchain4j.azure.open-ai";
+    static final String PREFIX = "langchain4j.azure-open-ai";
 
     @NestedConfigurationProperty
     ChatModelProperties chatModel;
