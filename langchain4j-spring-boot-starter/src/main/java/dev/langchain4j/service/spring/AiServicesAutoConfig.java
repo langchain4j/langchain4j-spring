@@ -52,7 +52,6 @@ public class AiServicesAutoConfig {
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
                 try {
                     Class<?> beanClass = Class.forName(beanFactory.getBeanDefinition(beanName).getBeanClassName());
-                    System.out.println();
                     for (Method beanMethod : beanClass.getDeclaredMethods()) {
                         if (beanMethod.isAnnotationPresent(Tool.class)) {
                             tools.add(beanName);
