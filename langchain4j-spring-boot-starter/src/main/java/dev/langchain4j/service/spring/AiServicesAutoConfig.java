@@ -9,6 +9,7 @@ import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import org.reflections.Reflections;
+import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -156,7 +157,7 @@ public class AiServicesAutoConfig {
         String[] applicationBean = beanFactory.getBeanNamesForAnnotation(SpringBootApplication.class);
         BeanDefinition applicationBeanDefinition = beanFactory.getBeanDefinition(applicationBean[0]);
         String basePackage = applicationBeanDefinition.getResolvableType().resolve().getPackage().getName();
-        Reflections reflections = new Reflections(basePackage);
+        Reflections reflections = new Reflections((new ConfigurationBuilder()).forPackage(basePackage));
         return reflections.getTypesAnnotatedWith(AiService.class);
     }
 
