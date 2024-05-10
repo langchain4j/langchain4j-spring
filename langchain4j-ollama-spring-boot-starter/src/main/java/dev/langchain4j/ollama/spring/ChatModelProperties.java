@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -22,4 +23,5 @@ class ChatModelProperties {
     String format;
     Duration timeout;
     Integer maxRetries;
+    Map<String, String> customHeaders;
 }
