@@ -14,8 +14,8 @@ public class RedisEmbeddingStoreProperties {
 
     static final String PREFIX = "langchain4j.redis";
 
-    private String host;
-    private Integer port;
+    private String host = "localhost";
+    private Integer port = 6379;
     private String user;
     private String password;
     private String indexName;

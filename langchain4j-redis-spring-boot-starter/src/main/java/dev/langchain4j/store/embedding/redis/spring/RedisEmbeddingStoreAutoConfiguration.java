@@ -11,7 +11,7 @@ import static dev.langchain4j.store.embedding.redis.spring.RedisEmbeddingStorePr
 
 @AutoConfiguration
 @EnableConfigurationProperties(RedisEmbeddingStoreProperties.class)
-@ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class RedisEmbeddingStoreAutoConfiguration {
 
     @Bean
@@ -24,7 +24,7 @@ public class RedisEmbeddingStoreAutoConfiguration {
                 .password(properties.getPassword())
                 .indexName(properties.getIndexName())
                 .dimension(properties.getDimension())
-                .metadataFieldsName(properties.getMetadataKeys())
+                .metadataKeys(properties.getMetadataKeys())
                 .build();
     }
 }
