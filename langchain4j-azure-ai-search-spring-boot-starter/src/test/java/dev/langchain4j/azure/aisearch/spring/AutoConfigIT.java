@@ -24,7 +24,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import java.util.List;
 
-import static dev.langchain4j.store.embedding.azure.search.AbstractAzureAiSearchEmbeddingStore.INDEX_NAME;
+import static dev.langchain4j.store.embedding.azure.search.AbstractAzureAiSearchEmbeddingStore.DEFAULT_INDEX_NAME;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +42,7 @@ class AutoConfigIT {
             .endpoint(System.getenv("AZURE_SEARCH_ENDPOINT"))
             .credential(new AzureKeyCredential(System.getenv("AZURE_SEARCH_KEY")))
             .buildClient();
-    private final SearchIndex index = new SearchIndex(INDEX_NAME);
+    private final SearchIndex index = new SearchIndex(DEFAULT_INDEX_NAME);
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
@@ -50,7 +50,7 @@ class AutoConfigIT {
     @Test
     void should_provide_ai_search_retriever() {
 
-        searchIndexClient.deleteIndex(INDEX_NAME);
+        searchIndexClient.deleteIndex(DEFAULT_INDEX_NAME);
 
         contextRunner
                 .withPropertyValues(
@@ -167,7 +167,7 @@ class AutoConfigIT {
     @Test
     void should_provide_ai_search_embedding_store() {
 
-        searchIndexClient.deleteIndex(INDEX_NAME);
+        searchIndexClient.deleteIndex(DEFAULT_INDEX_NAME);
 
         contextRunner
                 .withPropertyValues(
