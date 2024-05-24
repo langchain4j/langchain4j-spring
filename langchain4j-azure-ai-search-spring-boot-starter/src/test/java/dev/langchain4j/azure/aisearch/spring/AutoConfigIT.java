@@ -17,6 +17,7 @@ import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.azure.search.AzureAiSearchEmbeddingStore;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -141,6 +142,16 @@ class AutoConfigIT {
                     assertThat(relevant3.get(0).textSegment().text()).isEqualTo("The house is open");
                     log.info("#1 relevant item: {}", relevant3.get(0).textSegment().text());
                 });
+    }
+
+    @Test
+    @EnabledIfEnvironmentVariable(named = "AZURE_SEARCH_RERANKER_AVAILABLE", matches = "true")
+    void should_provide_ai_search_retriever_with_reranking() {
+
+        searchIndexClient.deleteIndex(DEFAULT_INDEX_NAME);
+
+        String content = "house";
+        Query query = Query.from(content);
 
         contextRunner
                 .withPropertyValues(
