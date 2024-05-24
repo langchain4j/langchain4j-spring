@@ -205,6 +205,7 @@ class AutoConfigIT {
                         Embedding embedding = embeddingModel.embed(content).content();
                         embeddingStore.add(embedding, textSegment);
                     }
+                    Thread.sleep(2000);
                     Embedding relevantEmbedding = embeddingModel.embed("fruit").content();
                     List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(relevantEmbedding, 3);
                     assertThat(relevant).hasSize(3);
