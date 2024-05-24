@@ -26,7 +26,7 @@ jobs:
           server-username: OSSRH_USERNAME
           server-password: OSSRH_PASSWORD
       - name: Build with JDK ${{ matrix.java_version }}
-        run: mvn -U -B deploy
+        run: mvn -U -B -DskipOllamaITs deploy
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
