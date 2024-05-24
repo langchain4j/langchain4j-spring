@@ -1,1 +1,1 @@
-spring.dev.langchain4j.azure.openai.spring.AutoConfig
+dev.langchain4j.azure.openai.spring.AutoConfig
