@@ -200,12 +200,16 @@ class AutoConfigIT {
                     String content6 = "chess";
                     List<String> contents = asList(content1, content2, content3, content4, content5, content6);
 
+                    Thread.sleep(3000);
+
                     for (String content : contents) {
                         TextSegment textSegment = TextSegment.from(content);
                         Embedding embedding = embeddingModel.embed(content).content();
                         embeddingStore.add(embedding, textSegment);
                     }
-                    Thread.sleep(2000);
+
+                    Thread.sleep(3000);
+
                     Embedding relevantEmbedding = embeddingModel.embed("fruit").content();
                     List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(relevantEmbedding, 3);
                     assertThat(relevant).hasSize(3);
