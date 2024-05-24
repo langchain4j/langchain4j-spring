@@ -11,7 +11,7 @@ class PackagePrivateTools {
     static final LocalTime CURRENT_TIME = LocalTime.of(17, 49);
 
     @Tool
-    LocalTime getCurrentTime() {
-        return CURRENT_TIME;
+    String getCurrentTime() {
+        return CURRENT_TIME.toString();
     }
 }
