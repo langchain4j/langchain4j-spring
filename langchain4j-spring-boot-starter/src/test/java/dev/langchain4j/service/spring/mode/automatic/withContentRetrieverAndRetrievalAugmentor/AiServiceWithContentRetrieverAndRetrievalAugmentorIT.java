@@ -1,4 +1,4 @@
-package dev.langchain4j.service.spring.mode.automatic.withContentRetrieverAndRetrievalAugmentor.withRetrievalAugmentor;
+package dev.langchain4j.service.spring.mode.automatic.withContentRetrieverAndRetrievalAugmentor;
 
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import org.junit.jupiter.api.Test;
