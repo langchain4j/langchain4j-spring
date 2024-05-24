@@ -16,6 +16,7 @@ import dev.langchain4j.rag.query.Query;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.azure.search.AzureAiSearchEmbeddingStore;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.slf4j.Logger;
@@ -48,10 +49,20 @@ class AutoConfigIT {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
 
+    @AfterEach
+    void afterEach() {
+        searchIndexClient.deleteIndex(DEFAULT_INDEX_NAME);
+        try {
+            Thread.sleep(10_000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Test
     void should_provide_ai_search_retriever() {
 
-        searchIndexClient.deleteIndex(DEFAULT_INDEX_NAME);
+        // TODO extract in separate tests
 
         contextRunner
                 .withPropertyValues(
@@ -148,8 +159,6 @@ class AutoConfigIT {
     @EnabledIfEnvironmentVariable(named = "AZURE_SEARCH_RERANKER_AVAILABLE", matches = "true")
     void should_provide_ai_search_retriever_with_reranking() {
 
-        searchIndexClient.deleteIndex(DEFAULT_INDEX_NAME);
-
         String content = "house";
         Query query = Query.from(content);
 
@@ -178,8 +187,6 @@ class AutoConfigIT {
     @Test
     void should_provide_ai_search_embedding_store() {
 
-        searchIndexClient.deleteIndex(DEFAULT_INDEX_NAME);
-
         contextRunner
                 .withPropertyValues(
                         Properties.PREFIX + ".embedding-store.api-key=" + AZURE_SEARCH_KEY,
@@ -200,15 +207,11 @@ class AutoConfigIT {
                     String content6 = "chess";
                     List<String> contents = asList(content1, content2, content3, content4, content5, content6);
 
-                    Thread.sleep(3000);
-
                     for (String content : contents) {
                         TextSegment textSegment = TextSegment.from(content);
                         Embedding embedding = embeddingModel.embed(content).content();
                         embeddingStore.add(embedding, textSegment);
                     }
-
-                    Thread.sleep(3000);
 
                     Embedding relevantEmbedding = embeddingModel.embed("fruit").content();
                     List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(relevantEmbedding, 3);
