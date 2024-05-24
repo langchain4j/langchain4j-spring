@@ -29,7 +29,7 @@ class AutoConfigIT {
         Thread.sleep(10_000); // to avoid hitting rate limits
     }
 
-    @RetryingTest(2)
+    @RetryingTest(maxAttempts = 3, suspendForMs = 10_000)
     void should_provide_chat_model() {
         contextRunner
                 .withPropertyValues(
@@ -46,7 +46,7 @@ class AutoConfigIT {
                 });
     }
 
-    @RetryingTest(2)
+    @RetryingTest(maxAttempts = 3, suspendForMs = 10_000)
     void should_provide_streaming_chat_model() {
         contextRunner
                 .withPropertyValues(
