@@ -8,7 +8,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.AfterEach;
-import org.junitpioneer.jupiter.RetryingTest;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -29,7 +29,7 @@ class AutoConfigIT {
         Thread.sleep(10_000); // to avoid hitting rate limits
     }
 
-    @RetryingTest(maxAttempts = 3, suspendForMs = 10_000)
+    @Test
     void should_provide_chat_model() {
         contextRunner
                 .withPropertyValues(
@@ -46,7 +46,7 @@ class AutoConfigIT {
                 });
     }
 
-    @RetryingTest(maxAttempts = 3, suspendForMs = 10_000)
+    @Test
     void should_provide_streaming_chat_model() {
         contextRunner
                 .withPropertyValues(
