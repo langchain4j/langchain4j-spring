@@ -7,7 +7,9 @@ import dev.langchain4j.model.azure.AzureOpenAiChatModel;
 import dev.langchain4j.model.azure.AzureOpenAiEmbeddingModel;
 import dev.langchain4j.model.azure.AzureOpenAiImageModel;
 import dev.langchain4j.model.azure.AzureOpenAiStreamingChatModel;
+import dev.langchain4j.model.azure.AzureOpenAiTokenizer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -147,5 +149,12 @@ public class AutoConfig {
             builder.nonAzureApiKey(imageModelProperties.getNonAzureApiKey());
         }
         return builder.build();
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean
+    AzureOpenAiTokenizer openAiTokenizer() {
+        return new AzureOpenAiTokenizer();
     }
 }
