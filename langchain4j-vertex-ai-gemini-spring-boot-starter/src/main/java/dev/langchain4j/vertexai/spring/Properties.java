@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 @ConfigurationProperties(prefix = Properties.PREFIX)
 public class Properties {
 
-    static final String PREFIX = "langchain4j.vertexai-gemini";
+    static final String PREFIX = "langchain4j.vertex-ai-gemini";
 
     @NestedConfigurationProperty
     ChatModelProperties chatModel;

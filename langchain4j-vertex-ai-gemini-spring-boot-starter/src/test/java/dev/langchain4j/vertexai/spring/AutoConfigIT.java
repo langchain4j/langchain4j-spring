@@ -17,12 +17,13 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@EnabledIfEnvironmentVariable(named = "VERTEXAI_PROJECT_ID", matches = ".+")
+@EnabledIfEnvironmentVariable(named = "GCP_PROJECT_ID", matches = ".+")
+@EnabledIfEnvironmentVariable(named = "GCP_LOCATION", matches = ".+")
 class AutoConfigIT {
 
-    private static final String PROJECT_ID = System.getenv("VERTEXAI_PROJECT_ID");
+    private static final String PROJECT_ID = System.getenv("GCP_PROJECT_ID");
+    private static final String LOCATION = System.getenv("GCP_LOCATION");
     private static final String MODEL = "gemini-1.5-flash";
-    private static final String LOCATION = "us-east4";
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
@@ -32,10 +33,10 @@ class AutoConfigIT {
         // given
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.vertexai-gemini.chat-model.enabled=true",
-                        "langchain4j.vertexai-gemini.chat-model.project=" + PROJECT_ID,
-                        "langchain4j.vertexai-gemini.chat-model.modelName=" + MODEL,
-                        "langchain4j.vertexai-gemini.chat-model.location=" + LOCATION
+                        "langchain4j.vertex-ai-gemini.chat-model.enabled=true",
+                        "langchain4j.vertex-ai-gemini.chat-model.project=" + PROJECT_ID,
+                        "langchain4j.vertex-ai-gemini.chat-model.modelName=" + MODEL,
+                        "langchain4j.vertex-ai-gemini.chat-model.location=" + LOCATION
                 )
                 .run(context -> {
                     ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
@@ -55,10 +56,10 @@ class AutoConfigIT {
         // given
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.vertexai-gemini.streaming-chat-model.enabled=true",
-                        "langchain4j.vertexai-gemini.streaming-chat-model.project=" + PROJECT_ID,
-                        "langchain4j.vertexai-gemini.streaming-chat-model.modelName=gemini-1.5-flash",
-                        "langchain4j.vertexai-gemini.streaming-chat-model.location=" + LOCATION
+                        "langchain4j.vertex-ai-gemini.streaming-chat-model.enabled=true",
+                        "langchain4j.vertex-ai-gemini.streaming-chat-model.project=" + PROJECT_ID,
+                        "langchain4j.vertex-ai-gemini.streaming-chat-model.modelName=" + MODEL,
+                        "langchain4j.vertex-ai-gemini.streaming-chat-model.location=" + LOCATION
                 )
                 .run(context -> {
 
