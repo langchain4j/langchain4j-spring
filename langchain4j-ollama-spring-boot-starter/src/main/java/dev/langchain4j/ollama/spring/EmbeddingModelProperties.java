@@ -15,4 +15,6 @@ class EmbeddingModelProperties {
     Duration timeout;
     Integer maxRetries;
     Map<String, String> customHeaders;
+    Boolean logRequests;
+    Boolean logResponses;
 }

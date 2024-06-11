@@ -30,6 +30,8 @@ public class AutoConfig {
                 .timeout(chatModelProperties.getTimeout())
                 .maxRetries(chatModelProperties.getMaxRetries())
                 .customHeaders(chatModelProperties.getCustomHeaders())
+                .logRequests(chatModelProperties.getLogRequests())
+                .logResponses(chatModelProperties.getLogResponses())
                 .build();
     }
 
@@ -50,6 +52,8 @@ public class AutoConfig {
                 .format(chatModelProperties.getFormat())
                 .timeout(chatModelProperties.getTimeout())
                 .customHeaders(chatModelProperties.getCustomHeaders())
+                .logRequests(chatModelProperties.getLogRequests())
+                .logResponses(chatModelProperties.getLogResponses())
                 .build();
     }
 
@@ -71,6 +75,8 @@ public class AutoConfig {
                 .timeout(languageModelProperties.getTimeout())
                 .maxRetries(languageModelProperties.getMaxRetries())
                 .customHeaders(languageModelProperties.getCustomHeaders())
+                .logRequests(languageModelProperties.getLogRequests())
+                .logResponses(languageModelProperties.getLogResponses())
                 .build();
     }
 
@@ -91,6 +97,8 @@ public class AutoConfig {
                 .format(languageModelProperties.getFormat())
                 .timeout(languageModelProperties.getTimeout())
                 .customHeaders(languageModelProperties.getCustomHeaders())
+                .logRequests(languageModelProperties.getLogRequests())
+                .logResponses(languageModelProperties.getLogResponses())
                 .build();
     }
 
@@ -104,6 +112,8 @@ public class AutoConfig {
                 .timeout(embeddingModelProperties.getTimeout())
                 .maxRetries(embeddingModelProperties.getMaxRetries())
                 .customHeaders(embeddingModelProperties.getCustomHeaders())
+                .logRequests(embeddingModelProperties.getLogRequests())
+                .logResponses(embeddingModelProperties.getLogResponses())
                 .build();
     }
 }
