@@ -12,10 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 8
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'temurin'
           cache: maven
           server-id: ossrh
@@ -25,7 +25,7 @@ jobs:
           gpg-passphrase: GPG_PASSPHRASE
 
       - name: release
-        run: mvn -B -U --fail-at-end -Psign clean deploy
+        run: mvn -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

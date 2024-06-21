@@ -19,7 +19,6 @@ import java.util.List;
 
 import static com.redis.testcontainers.RedisStackContainer.DEFAULT_IMAGE_NAME;
 import static com.redis.testcontainers.RedisStackContainer.DEFAULT_TAG;
-import static dev.langchain4j.internal.Utils.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Percentage.withPercentage;
 
@@ -27,8 +26,6 @@ class RedisEmbeddingStoreAutoConfigurationIT {
 
     static RedisContainer redis = new RedisContainer(DEFAULT_IMAGE_NAME.withTag(DEFAULT_TAG))
             .waitingFor(Wait.defaultWaitStrategy());
-
-    EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(RedisEmbeddingStoreAutoConfiguration.class));
@@ -46,17 +43,16 @@ class RedisEmbeddingStoreAutoConfigurationIT {
     @Test
     void should_provide_redis_vector_store() {
         TextSegment segment = TextSegment.from("hello");
-        Embedding embedding = embeddingModel.embed(segment.text()).content();
+
         contextRunner
+                .withBean(AllMiniLmL6V2QuantizedEmbeddingModel.class)
                 .withPropertyValues(
-                        "langchain4j.redis.enabled=true",
                         "langchain4j.redis.host=" + redis.getHost(),
-                        "langchain4j.redis.port=" + redis.getFirstMappedPort(),
-                        "langchain4j.redis.indexName=" + randomUUID(),
-                        "langchain4j.redis.dimension=" + 384,
-                        "langchain4j.redis.metadataKeys=test-key"
+                        "langchain4j.redis.port=" + redis.getFirstMappedPort()
                 )
                 .run(context -> {
+                    EmbeddingModel embeddingModel = context.getBean(AllMiniLmL6V2QuantizedEmbeddingModel.class);
+                    Embedding embedding = embeddingModel.embed(segment.text()).content();
                     EmbeddingStore<TextSegment> embeddingStore = context.getBean(RedisEmbeddingStore.class);
                     assertThat(embeddingStore).isInstanceOf(RedisEmbeddingStore.class);
 

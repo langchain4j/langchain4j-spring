@@ -7,12 +7,16 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-spring</artifactId>
-        <version>0.31.0-SNAPSHOT</version>
+        <version>0.32.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>langchain4j-ollama-spring-boot-starter</artifactId>
     <name>LangChain4j Spring Boot starter for Ollama</name>
+
+    <properties>
+        <skipOllamaITs>false</skipOllamaITs>
+    </properties>
 
     <dependencies>
 
@@ -66,6 +70,18 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skipOllamaITs}</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <licenses>
         <license>

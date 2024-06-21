@@ -11,7 +11,7 @@ public class PublicTools {
     public static final LocalDate CURRENT_DATE = LocalDate.of(2024, 4, 29);
 
     @Tool
-    public LocalDate getCurrentDate() {
-        return CURRENT_DATE;
+    public String getCurrentDate() {
+        return CURRENT_DATE.toString();
     }
 }

@@ -6,6 +6,7 @@ import com.azure.search.documents.indexes.SearchIndexClientBuilder;
 import com.azure.search.documents.indexes.models.SearchIndex;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.Utils;
 import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.rag.content.Content;
@@ -16,7 +17,9 @@ import dev.langchain4j.rag.query.Query;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.azure.search.AzureAiSearchEmbeddingStore;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -24,7 +27,6 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import java.util.List;
 
-import static dev.langchain4j.store.embedding.azure.search.AbstractAzureAiSearchEmbeddingStore.INDEX_NAME;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,15 +44,20 @@ class AutoConfigIT {
             .endpoint(System.getenv("AZURE_SEARCH_ENDPOINT"))
             .credential(new AzureKeyCredential(System.getenv("AZURE_SEARCH_KEY")))
             .buildClient();
-    private final SearchIndex index = new SearchIndex(INDEX_NAME);
+
+    private final String indexName = Utils.randomUUID();
+    private final SearchIndex index = new SearchIndex(indexName);
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
 
+    @AfterEach
+    void afterEach() {
+        searchIndexClient.deleteIndex(indexName);
+    }
+
     @Test
     void should_provide_ai_search_retriever() {
-
-        searchIndexClient.deleteIndex(INDEX_NAME);
 
         contextRunner
                 .withPropertyValues(
@@ -141,6 +148,42 @@ class AutoConfigIT {
                     assertThat(relevant3.get(0).textSegment().text()).isEqualTo("The house is open");
                     log.info("#1 relevant item: {}", relevant3.get(0).textSegment().text());
                 });
+    }
+
+    @Test
+    @EnabledIfEnvironmentVariable(named = "AZURE_SEARCH_RERANKER_AVAILABLE", matches = "true")
+    void should_provide_ai_search_retriever_with_reranking() {
+
+        contextRunner
+                .withPropertyValues(
+                        Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
+                        Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        Properties.PREFIX + ".content-retriever.dimensions=" + dimensions,
+                        Properties.PREFIX + ".content-retriever.create-or-update-index=" + "true",
+                        Properties.PREFIX + ".content-retriever.query-type=" + "VECTOR"
+                ).withBean(EmbeddingModel.class, () -> embeddingModel)
+                .run(context -> {
+                    ContentRetriever contentRetriever = context.getBean(ContentRetriever.class);
+                    assertThat(contentRetriever).isInstanceOf(AzureAiSearchContentRetriever.class);
+                    AzureAiSearchContentRetriever azureAiSearchContentRetriever = (AzureAiSearchContentRetriever) contentRetriever;
+
+                    String content1 = "This book is about politics";
+                    String content2 = "Cats sleeps a lot.";
+                    String content3 = "Sandwiches taste good.";
+                    String content4 = "The house is open";
+                    List<String> contents = asList(content1, content2, content3, content4);
+
+                    for (String content : contents) {
+                        TextSegment textSegment = TextSegment.from(content);
+                        Embedding embedding = embeddingModel.embed(content).content();
+                        azureAiSearchContentRetriever.add(embedding, textSegment);
+                    }
+
+                    awaitUntilPersisted();
+                });
+
+        String content = "house";
+        Query query = Query.from(content);
 
         contextRunner
                 .withPropertyValues(
@@ -167,8 +210,6 @@ class AutoConfigIT {
     @Test
     void should_provide_ai_search_embedding_store() {
 
-        searchIndexClient.deleteIndex(INDEX_NAME);
-
         contextRunner
                 .withPropertyValues(
                         Properties.PREFIX + ".embedding-store.api-key=" + AZURE_SEARCH_KEY,
@@ -194,6 +235,7 @@ class AutoConfigIT {
                         Embedding embedding = embeddingModel.embed(content).content();
                         embeddingStore.add(embedding, textSegment);
                     }
+
                     Embedding relevantEmbedding = embeddingModel.embed("fruit").content();
                     List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(relevantEmbedding, 3);
                     assertThat(relevant).hasSize(3);
