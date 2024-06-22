@@ -1,35 +1,22 @@
 package dev.langchain4j.store.embedding.elasticsearch.spring;
 
-import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.embedding.AllMiniLmL6V2QuantizedEmbeddingModel;
-import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchEmbeddingStore;
+import dev.langchain4j.store.embedding.spring.EmbeddingStoreAutoConfigurationIT;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
-import java.util.List;
-
 import static dev.langchain4j.internal.Utils.randomUUID;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.Percentage.withPercentage;
 
-class ElasticsearchEmbeddingStoreAutoConfigurationIT {
+class ElasticsearchEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoConfigurationIT {
 
     static ElasticsearchContainer elasticsearch = new ElasticsearchContainer("elasticsearch:8.9.0")
             .withEnv("xpack.security.enabled", "false")
             .waitingFor(Wait.defaultWaitStrategy());
-
-    ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(ElasticsearchEmbeddingStoreAutoConfiguration.class));
 
     @BeforeAll
     static void beforeAll() {
@@ -41,40 +28,27 @@ class ElasticsearchEmbeddingStoreAutoConfigurationIT {
         elasticsearch.stop();
     }
 
-    @Test
-    void should_provide_elasticsearch_vector_store() {
-        TextSegment segment = TextSegment.from("hello");
-        contextRunner
-                .withBean(AllMiniLmL6V2QuantizedEmbeddingModel.class)
-                .withPropertyValues(
-                        "langchain4j.elasticsearch.serverUrl=" + elasticsearch.getHttpHostAddress(),
-                        "langchain4j.elasticsearch.indexName=" + randomUUID()
-                )
-                .run(context -> {
-                    EmbeddingModel embeddingModel = context.getBean(AllMiniLmL6V2QuantizedEmbeddingModel.class);
-                    Embedding embedding = embeddingModel.embed(segment.text()).content();
-
-                    EmbeddingStore<TextSegment> embeddingStore = context.getBean(ElasticsearchEmbeddingStore.class);
-                    assertThat(embeddingStore).isInstanceOf(ElasticsearchEmbeddingStore.class);
-
-                    String id = embeddingStore.add(embedding, segment);
-                    assertThat(id).isNotBlank();
-
-                    awaitUntilPersisted();
-
-                    List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(embedding, 10);
-                    assertThat(relevant).hasSize(1);
-
-                    EmbeddingMatch<TextSegment> match = relevant.get(0);
-                    assertThat(match.score()).isCloseTo(1, withPercentage(1));
-                    assertThat(match.embeddingId()).isEqualTo(id);
-                    assertThat(match.embedding()).isEqualTo(embedding);
-                    assertThat(match.embedded()).isEqualTo(segment);
-                });
+    @Override
+    protected Class<?> autoConfigurationClass() {
+        return ElasticsearchEmbeddingStoreAutoConfiguration.class;
     }
 
+    @Override
+    protected Class<? extends EmbeddingStore<TextSegment>> embeddingStoreClass() {
+        return ElasticsearchEmbeddingStore.class;
+    }
+
+    @Override
+    protected String[] properties() {
+        return new String[]{
+                "langchain4j.elasticsearch.serverUrl=" + elasticsearch.getHttpHostAddress(),
+                "langchain4j.elasticsearch.indexName=" + randomUUID()
+        };
+    }
+
+    @Override
     @SneakyThrows
-    private void awaitUntilPersisted() {
+    protected void awaitUntilPersisted() {
         Thread.sleep(1000);
     }
 }
