@@ -14,6 +14,7 @@
     <url>https://github.com/langchain4j/langchain4j-spring</url>
 
     <modules>
+        <module>langchain4j-spring-boot-core</module>
         <module>langchain4j-spring-boot-starter</module>
 
         <module>langchain4j-anthropic-spring-boot-starter</module>
