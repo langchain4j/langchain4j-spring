@@ -55,5 +55,7 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
                 });
     }
 
-    protected abstract void awaitUntilPersisted();
+    protected void awaitUntilPersisted() {
+
+    }
 }
