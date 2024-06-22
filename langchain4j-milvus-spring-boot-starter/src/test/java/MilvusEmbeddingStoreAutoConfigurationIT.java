@@ -37,13 +37,14 @@ class MilvusEmbeddingStoreAutoConfigurationIT {
     }
 
     @Test
-    void should_provide_elasticsearch_vector_store() {
+    void should_provide_milvus_vector_store() {
         TextSegment segment = TextSegment.from("hello");
         contextRunner
                 .withBean(AllMiniLmL6V2QuantizedEmbeddingModel.class)
                 .withPropertyValues(
                         "langchain4j.milvus.host=" + milvus.getHost(),
-                        "langchain4j.milvus.port=" + milvus.getMappedPort(19530)
+                        "langchain4j.milvus.port=" + milvus.getMappedPort(19530),
+                        "langchain4j.milvus.retrieveEmbeddingsOnSearch=true"
                 )
                 .run(context -> {
                     EmbeddingModel embeddingModel = context.getBean(AllMiniLmL6V2QuantizedEmbeddingModel.class);
