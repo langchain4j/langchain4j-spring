@@ -29,7 +29,6 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <tinylog.version>2.6.2</tinylog.version>
-        <langchain4j.embeddings.version>0.32.0-SNAPSHOT</langchain4j.embeddings.version>
         <spring.boot.version>3.2.6</spring.boot.version>
     </properties>
 
@@ -72,12 +71,6 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.32</version>
-            </dependency>
-
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-embeddings-all-minilm-l6-v2-q</artifactId>
-                <version>${langchain4j.embeddings.version}</version>
             </dependency>
 
             <dependency>
