@@ -14,6 +14,7 @@
     <url>https://github.com/langchain4j/langchain4j-spring</url>
 
     <modules>
+        <module>langchain4j-spring-boot-core</module>
         <module>langchain4j-spring-boot-starter</module>
 
         <module>langchain4j-anthropic-spring-boot-starter</module>
@@ -92,6 +93,18 @@
                 <version>${testcontainers.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.tinylog</groupId>
+                <artifactId>tinylog-impl</artifactId>
+                <version>${tinylog.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.tinylog</groupId>
+                <artifactId>slf4j-tinylog</artifactId>
+                <version>${tinylog.version}</version>
             </dependency>
 
         </dependencies>
