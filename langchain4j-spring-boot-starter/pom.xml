@@ -12,7 +12,6 @@
     </parent>
 
     <artifactId>langchain4j-spring-boot-starter</artifactId>
-    <packaging>pom</packaging>
     <name>Spring Boot starter for LangChain4j</name>
 
     <dependencies>
