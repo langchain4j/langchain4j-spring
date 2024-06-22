@@ -21,6 +21,7 @@
         <module>langchain4j-open-ai-spring-boot-starter</module>
         <module>langchain4j-azure-ai-search-spring-boot-starter</module>
         <module>langchain4j-azure-open-ai-spring-boot-starter</module>
+        <module>langchian4j-elasticsearch-spring-boot-starter</module>
     </modules>
 
     <properties>
@@ -28,10 +29,20 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.boot.version>3.2.6</spring.boot.version>
+        <testcontainers.version>1.19.8</testcontainers.version>
+        <tinylog.version>2.6.2</tinylog.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -64,9 +75,21 @@
             </dependency>
 
             <dependency>
+                <groupId>org.tinylog</groupId>
+                <artifactId>tinylog-impl</artifactId>
+                <version>${tinylog.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.tinylog</groupId>
+                <artifactId>slf4j-tinylog</artifactId>
+                <version>${tinylog.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
-                <version>1.19.8</version>
+                <version>${testcontainers.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
