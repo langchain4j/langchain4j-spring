@@ -10,8 +10,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>langchian4j-milvus-spring-boot-starter</artifactId>
-    <name>LangChain4j Spring Boot starter for Milvus Vector Store</name>
+    <artifactId>langchain4j-milvus-spring-boot-starter</artifactId>
+    <name>LangChain4j Spring Boot starter for Milvus</name>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -60,7 +60,7 @@
 
         <dependency>
             <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-spring-boot-core</artifactId>
+            <artifactId>langchain4j-spring-boot-tests</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>

@@ -4,11 +4,11 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.milvus.MilvusEmbeddingStore;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.lang.Nullable;
 
 import java.util.Optional;
 
@@ -21,14 +21,13 @@ public class MilvusEmbeddingStoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnBean(EmbeddingModel.class)
-    public MilvusEmbeddingStore milvusEmbeddingStore(EmbeddingModel embeddingModel,
-                                                     MilvusEmbeddingStoreProperties properties) {
+    public MilvusEmbeddingStore milvusEmbeddingStore(MilvusEmbeddingStoreProperties properties,
+                                                     @Nullable EmbeddingModel embeddingModel) {
         String host = Optional.ofNullable(properties.getHost()).orElse(DEFAULT_HOST);
         int port = Optional.ofNullable(properties.getPort()).orElse(DEFAULT_PORT);
         String collectionName = Optional.ofNullable(properties.getCollectionName()).orElse(DEFAULT_COLLECTION_NAME);
         ConsistencyLevelEnum consistencyLevel = Optional.ofNullable(properties.getConsistencyLevel()).orElse(DEFAULT_CONSISTENCY_LEVEL);
-        int dimension = Optional.ofNullable(properties.getDimension()).orElse(embeddingModel.dimension());
+        Integer dimension = Optional.ofNullable(properties.getDimension()).orElseGet(() -> embeddingModel == null ? null : embeddingModel.dimension());
 
         // get username and password from env variable
         String username = Optional.ofNullable(properties.getUsername()).orElse(System.getenv("MILVUS_USERNAME"));
