@@ -23,6 +23,13 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
 
     protected abstract String[] properties();
 
+    /**
+     * Property Key to configure {@link EmbeddingStore} dimension (if needed)
+     *
+     * @return {@link EmbeddingStore} dimension property key
+     */
+    protected abstract String dimensionPropertyKey();
+
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(autoConfigurationClass()));
 
@@ -31,14 +38,14 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
     @Test
     void should_provide_embedding_store_without_embedding_model() {
         // copy dimension property
+        EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
         String[] properties = new String[properties().length + 1];
         System.arraycopy(properties(), 0, properties, 0, properties().length);
-        properties[properties.length - 1] = dimensionProperty();
+        properties[properties.length - 1] = dimensionPropertyKey() + "=" + embeddingModel.dimension();
 
         contextRunner
                 .withPropertyValues(properties)
                 .run(context -> {
-                    EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
                     TextSegment segment = TextSegment.from("hello");
                     Embedding embedding = embeddingModel.embed(segment.text()).content();
 
@@ -92,14 +99,5 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
 
     protected void awaitUntilPersisted() {
 
-    }
-
-    /**
-     * Property to configure {@link EmbeddingStore} dimension (if needed)
-     *
-     * @return {@link EmbeddingStore} dimension property
-     */
-    protected String dimensionProperty() {
-        return null;
     }
 }
