@@ -10,7 +10,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>langchain4j-spring-boot-core</artifactId>
+    <artifactId>langchain4j-spring-boot-tests</artifactId>
     <name>LangChain4j Spring Boot Core</name>
     <packaging>jar</packaging>
 
