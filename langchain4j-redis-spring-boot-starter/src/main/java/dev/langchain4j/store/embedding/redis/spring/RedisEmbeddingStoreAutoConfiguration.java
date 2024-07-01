@@ -3,11 +3,11 @@ package dev.langchain4j.store.embedding.redis.spring;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.redis.RedisEmbeddingStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +26,12 @@ public class RedisEmbeddingStoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnBean(EmbeddingModel.class)
     public RedisEmbeddingStore redisEmbeddingStore(RedisEmbeddingStoreProperties properties,
-                                                   EmbeddingModel embeddingModel) {
+                                                   @Nullable EmbeddingModel embeddingModel) {
         String host = Optional.ofNullable(properties.getHost()).orElse(DEFAULT_HOST);
         int port = Optional.ofNullable(properties.getPort()).orElse(DEFAULT_PORT);
         String indexName = Optional.ofNullable(properties.getIndexName()).orElse(DEFAULT_INDEX_NAME);
-        int dimension = Optional.ofNullable(properties.getDimension()).orElse(embeddingModel.dimension());
+        Integer dimension = Optional.ofNullable(properties.getDimension()).orElseGet(() -> embeddingModel == null ? null : embeddingModel.dimension());
         List<String> metadataKeys = Optional.ofNullable(properties.getMetadataKeys()).orElse(new ArrayList<>());
 
         return RedisEmbeddingStore.builder()

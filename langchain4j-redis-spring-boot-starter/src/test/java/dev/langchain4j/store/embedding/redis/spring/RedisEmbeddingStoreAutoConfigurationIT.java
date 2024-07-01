@@ -7,7 +7,9 @@ import dev.langchain4j.store.embedding.redis.RedisEmbeddingStore;
 import dev.langchain4j.store.embedding.spring.EmbeddingStoreAutoConfigurationIT;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.wait.strategy.Wait;
+import redis.clients.jedis.JedisPooled;
 
 import static com.redis.testcontainers.RedisStackContainer.DEFAULT_IMAGE_NAME;
 import static com.redis.testcontainers.RedisStackContainer.DEFAULT_TAG;
@@ -27,6 +29,13 @@ class RedisEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoConfigura
         redis.stop();
     }
 
+    @BeforeEach
+    void beforeEach() {
+        try (JedisPooled jedis = new JedisPooled(redis.getHost(), redis.getFirstMappedPort())) {
+            jedis.flushDB(); // TODO fix: why redis returns embeddings from different indexes?
+        }
+    }
+
     @Override
     protected Class<?> autoConfigurationClass() {
         return RedisEmbeddingStoreAutoConfiguration.class;
@@ -43,5 +52,10 @@ class RedisEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoConfigura
                 "langchain4j.redis.host=" + redis.getHost(),
                 "langchain4j.redis.port=" + redis.getFirstMappedPort()
         };
+    }
+
+    @Override
+    protected String dimensionPropertyKey() {
+        return "langchain4j.redis.dimension";
     }
 }
