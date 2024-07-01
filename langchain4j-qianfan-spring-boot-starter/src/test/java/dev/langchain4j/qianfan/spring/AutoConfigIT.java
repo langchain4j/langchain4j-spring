@@ -10,6 +10,7 @@ import dev.langchain4j.model.language.StreamingLanguageModel;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.qianfan.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -24,7 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @version: 1.0
  * @Description:
  */
+@EnabledIfEnvironmentVariable(named = "QIANFAN_API_KEY", matches = ".+")
 class AutoConfigIT {
+
     private static final String API_KEY = System.getenv("QIANFAN_API_KEY");
     private static final String SECRET_KEY = System.getenv("QIANFAN_SECRET_KEY");
 
