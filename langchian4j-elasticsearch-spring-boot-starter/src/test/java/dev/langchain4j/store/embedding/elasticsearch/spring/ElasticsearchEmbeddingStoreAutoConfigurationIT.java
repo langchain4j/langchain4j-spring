@@ -47,6 +47,11 @@ class ElasticsearchEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoC
     }
 
     @Override
+    protected String dimensionPropertyKey() {
+        return "langchain4j.elasticsearch.dimension";
+    }
+
+    @Override
     @SneakyThrows
     protected void awaitUntilPersisted() {
         Thread.sleep(1000);
