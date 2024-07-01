@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>langchian4j-elasticsearch-spring-boot-starter</artifactId>
-    <name>LangChain4j Spring Boot starter for Elasticsearch Vector Store</name>
+    <name>LangChain4j Spring Boot starter for Elasticsearch</name>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -60,7 +60,7 @@
 
         <dependency>
             <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-spring-boot-core</artifactId>
+            <artifactId>langchain4j-spring-boot-tests</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>

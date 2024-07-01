@@ -26,6 +26,8 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(autoConfigurationClass()));
 
+    EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
+
     @Test
     void should_provide_embedding_store_without_embedding_model() {
         // copy dimension property
