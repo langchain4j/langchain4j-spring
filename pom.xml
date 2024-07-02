@@ -22,7 +22,10 @@
         <module>langchain4j-open-ai-spring-boot-starter</module>
         <module>langchain4j-azure-ai-search-spring-boot-starter</module>
         <module>langchain4j-azure-open-ai-spring-boot-starter</module>
+        <module>langchain4j-vertex-ai-gemini-spring-boot-starter</module>
+        <module>langchian4j-elasticsearch-spring-boot-starter</module>
         <module>langchain4j-redis-spring-boot-starter</module>
+        <module>langchain4j-qianfan-spring-boot-starter</module>
     </modules>
 
     <properties>
