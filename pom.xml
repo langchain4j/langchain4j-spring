@@ -26,6 +26,7 @@
         <module>langchian4j-elasticsearch-spring-boot-starter</module>
         <module>langchain4j-redis-spring-boot-starter</module>
         <module>langchain4j-qianfan-spring-boot-starter</module>
+        <module>langchain4j-milvus-spring-boot-starter</module>
     </modules>
 
     <properties>
