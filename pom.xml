@@ -15,6 +15,7 @@
 
     <modules>
         <module>langchain4j-spring-boot-starter</module>
+        <module>langchain4j-easy-rag-spring-boot-starter</module>
         <module>langchain4j-spring-boot-tests</module>
 
         <module>langchain4j-anthropic-spring-boot-starter</module>
