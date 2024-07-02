@@ -24,6 +24,7 @@
         <module>langchain4j-azure-open-ai-spring-boot-starter</module>
         <module>langchain4j-vertex-ai-gemini-spring-boot-starter</module>
         <module>langchian4j-elasticsearch-spring-boot-starter</module>
+        <module>langchain4j-redis-spring-boot-starter</module>
         <module>langchain4j-qianfan-spring-boot-starter</module>
     </modules>
 
@@ -31,6 +32,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <tinylog.version>2.6.2</tinylog.version>
         <spring.boot.version>3.2.6</spring.boot.version>
         <testcontainers.version>1.19.8</testcontainers.version>
         <tinylog.version>2.6.2</tinylog.version>
