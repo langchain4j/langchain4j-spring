@@ -9,6 +9,7 @@ import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import org.reflections.Reflections;
+import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -21,10 +22,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
@@ -155,8 +153,10 @@ public class AiServicesAutoConfig {
         String[] applicationBean = beanFactory.getBeanNamesForAnnotation(SpringBootApplication.class);
         BeanDefinition applicationBeanDefinition = beanFactory.getBeanDefinition(applicationBean[0]);
         String basePackage = applicationBeanDefinition.getResolvableType().resolve().getPackage().getName();
-        Reflections reflections = new Reflections(basePackage);
-        return reflections.getTypesAnnotatedWith(AiService.class);
+        Reflections reflections = new Reflections((new ConfigurationBuilder()).forPackage(basePackage));
+        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(AiService.class);
+        classes.removeIf(clazz -> !clazz.getName().startsWith(basePackage));
+        return classes;
     }
 
     private static void addBeanReference(Class<?> beanType,
