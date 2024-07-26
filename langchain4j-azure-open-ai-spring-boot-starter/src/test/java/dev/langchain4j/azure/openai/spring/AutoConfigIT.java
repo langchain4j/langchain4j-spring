@@ -33,7 +33,7 @@ class AutoConfigIT {
 
     @ParameterizedTest(name = "Deployment name: {0}")
     @CsvSource({
-            "gpt-35-turbo",
+            "gpt-4o-turbo",
             "gpt-4"
     })
     void should_provide_chat_model(String deploymentName) {
