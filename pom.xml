@@ -14,8 +14,15 @@
     <url>https://github.com/langchain4j/langchain4j-spring</url>
 
     <modules>
+        <module>langchain4j-spring-core</module>
+
+        <module>models/langchain4j-spring-mistral-ai</module>
+
+        <module>langchain4j-spring-boot-autoconfigure</module>
         <module>langchain4j-spring-boot-starter</module>
         <module>langchain4j-spring-boot-tests</module>
+
+        <module>langchain4j-spring-boot-starters/langchain4j-mistral-ai-spring-boot-starter</module>
 
         <module>langchain4j-anthropic-spring-boot-starter</module>
         <module>langchain4j-ollama-spring-boot-starter</module>
@@ -34,14 +41,12 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <tinylog.version>2.6.2</tinylog.version>
-        <spring.boot.version>3.2.6</spring.boot.version>
-        <testcontainers.version>1.19.8</testcontainers.version>
+        <spring-boot.version>3.2.7</spring-boot.version>
         <tinylog.version>2.6.2</tinylog.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-bom</artifactId>
@@ -52,40 +57,16 @@
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-autoconfigure-processor</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-configuration-processor</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <version>${spring.boot.version}</version>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>1.18.32</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${testcontainers.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
             </dependency>
 
             <dependency>
