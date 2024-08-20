@@ -6,7 +6,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -19,11 +18,11 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        ClassPathAiServiceScanner classPathAiServiceScanner = new ClassPathAiServiceScanner(registry, false);
-        classPathAiServiceScanner.addIncludeFilter(new AnnotationTypeFilter(AiService.class));
+        ClassPathAiServiceScanner classPathInterfaceScanner = new ClassPathAiServiceScanner(registry, false);
+        classPathInterfaceScanner.registerFilters();
         Set<String> basePackages = getBasePackages((ConfigurableListableBeanFactory) registry);
         for (String basePackage : basePackages) {
-            classPathAiServiceScanner.scan(basePackage);
+            classPathInterfaceScanner.scan(basePackage);
         }
     }
 

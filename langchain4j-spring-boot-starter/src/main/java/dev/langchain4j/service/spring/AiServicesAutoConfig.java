@@ -55,8 +55,8 @@ public class AiServicesAutoConfig {
                 }
             }
 
-            String[] aiServiceBean = beanFactory.getBeanNamesForAnnotation(AiService.class);
-            for (String aiService : aiServiceBean) {
+            String[] aiServices = beanFactory.getBeanNamesForAnnotation(AiService.class);
+            for (String aiService : aiServices) {
                 Class<?> aiServiceClass = beanFactory.getType(aiService);
 
                 GenericBeanDefinition aiServiceBeanDefinition = new GenericBeanDefinition();
