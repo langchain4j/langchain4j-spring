@@ -8,17 +8,12 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
-import org.reflections.Reflections;
-import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import java.lang.reflect.Method;
@@ -60,13 +55,9 @@ public class AiServicesAutoConfig {
                 }
             }
 
-            findAiServices(beanFactory).forEach(aiServiceClass -> {
-
-                if (beanFactory.getBeanNamesForType(aiServiceClass).length > 0) {
-                    // User probably wants to configure AI Service bean manually
-                    // TODO or better fail because user should not annotate it with @AiService then?
-                    return;
-                }
+            String[] aiServices = beanFactory.getBeanNamesForAnnotation(AiService.class);
+            for (String aiService : aiServices) {
+                Class<?> aiServiceClass = beanFactory.getType(aiService);
 
                 GenericBeanDefinition aiServiceBeanDefinition = new GenericBeanDefinition();
                 aiServiceBeanDefinition.setBeanClass(AiServiceFactory.class);
@@ -144,19 +135,10 @@ public class AiServicesAutoConfig {
                 }
 
                 BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-                registry.registerBeanDefinition(lowercaseFirstLetter(aiServiceClass.getSimpleName()), aiServiceBeanDefinition);
-            });
+                registry.removeBeanDefinition(aiService);
+                registry.registerBeanDefinition(lowercaseFirstLetter(aiService), aiServiceBeanDefinition);
+            }
         };
-    }
-
-    private static Set<Class<?>> findAiServices(ConfigurableListableBeanFactory beanFactory) {
-        String[] applicationBean = beanFactory.getBeanNamesForAnnotation(SpringBootApplication.class);
-        BeanDefinition applicationBeanDefinition = beanFactory.getBeanDefinition(applicationBean[0]);
-        String basePackage = applicationBeanDefinition.getResolvableType().resolve().getPackage().getName();
-        Reflections reflections = new Reflections((new ConfigurationBuilder()).forPackage(basePackage));
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(AiService.class);
-        classes.removeIf(clazz -> !clazz.getName().startsWith(basePackage));
-        return classes;
     }
 
     private static void addBeanReference(Class<?> beanType,
