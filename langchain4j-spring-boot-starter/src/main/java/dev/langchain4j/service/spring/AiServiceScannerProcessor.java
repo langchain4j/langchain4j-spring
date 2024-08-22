@@ -5,8 +5,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -44,6 +47,15 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
                         basePackages.add(basePackageClass.getPackage().getName());
                     }
                 }
+            }
+        }
+
+        String[] applicationBean = beanFactory.getBeanNamesForAnnotation(SpringBootApplication.class);
+        SpringBootApplication springbootApplication = AnnotationUtils.findAnnotation(beanFactory.getType(applicationBean[0]), SpringBootApplication.class);
+        if (springbootApplication != null) {
+            Collections.addAll(basePackages, springbootApplication.scanBasePackages());
+            for (Class<?> aClass : springbootApplication.scanBasePackageClasses()) {
+                basePackages.add(ClassUtils.getPackageName(aClass));
             }
         }
 
