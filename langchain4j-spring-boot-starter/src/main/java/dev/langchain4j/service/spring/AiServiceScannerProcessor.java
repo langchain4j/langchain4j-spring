@@ -21,11 +21,10 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        ClassPathAiServiceScanner classPathInterfaceScanner = new ClassPathAiServiceScanner(registry, false);
-        classPathInterfaceScanner.registerFilters();
+        ClassPathAiServiceScanner classPathAiServiceScanner = new ClassPathAiServiceScanner(registry, false);
         Set<String> basePackages = getBasePackages((ConfigurableListableBeanFactory) registry);
         for (String basePackage : basePackages) {
-            classPathInterfaceScanner.scan(basePackage);
+            classPathAiServiceScanner.scan(basePackage);
         }
     }
 
@@ -50,12 +49,15 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
             }
         }
 
-        String[] applicationBean = beanFactory.getBeanNamesForAnnotation(SpringBootApplication.class);
-        SpringBootApplication springbootApplication = AnnotationUtils.findAnnotation(beanFactory.getType(applicationBean[0]), SpringBootApplication.class);
-        if (springbootApplication != null) {
-            Collections.addAll(basePackages, springbootApplication.scanBasePackages());
-            for (Class<?> aClass : springbootApplication.scanBasePackageClasses()) {
-                basePackages.add(ClassUtils.getPackageName(aClass));
+        String[] applicationBeans = beanFactory.getBeanNamesForAnnotation(SpringBootApplication.class);
+        if (applicationBeans.length > 0) {
+            Class<?> applicationBeanClass = beanFactory.getType(applicationBeans[0]);
+            SpringBootApplication springBootApplication = AnnotationUtils.findAnnotation(applicationBeanClass, SpringBootApplication.class);
+            if (springBootApplication != null) {
+                Collections.addAll(basePackages, springBootApplication.scanBasePackages());
+                for (Class<?> aClass : springBootApplication.scanBasePackageClasses()) {
+                    basePackages.add(ClassUtils.getPackageName(aClass));
+                }
             }
         }
 
