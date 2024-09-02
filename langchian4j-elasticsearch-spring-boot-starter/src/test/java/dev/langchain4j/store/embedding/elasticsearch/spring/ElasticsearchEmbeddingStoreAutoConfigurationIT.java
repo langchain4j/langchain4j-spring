@@ -5,27 +5,38 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchEmbeddingStore;
 import dev.langchain4j.store.embedding.spring.EmbeddingStoreAutoConfigurationIT;
 import lombok.SneakyThrows;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.context.ApplicationContext;
+
+import java.io.IOException;
 
 import static dev.langchain4j.internal.Utils.randomUUID;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ElasticsearchEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoConfigurationIT {
 
-    static ElasticsearchContainer elasticsearch = new ElasticsearchContainer("elasticsearch:8.9.0")
-            .withEnv("xpack.security.enabled", "false")
-            .waitingFor(Wait.defaultWaitStrategy());
+    static ElasticsearchTestContainerHelper elasticsearchTestContainerHelper = new ElasticsearchTestContainerHelper();
+
+    String indexName;
 
     @BeforeAll
-    static void beforeAll() {
-        elasticsearch.start();
+    static void startServices() throws IOException {
+        elasticsearchTestContainerHelper.startServices();
+        assertThat(elasticsearchTestContainerHelper.restClient).isNotNull();
     }
 
     @AfterAll
-    static void afterAll() {
-        elasticsearch.stop();
+    static void stopServices() throws IOException {
+        elasticsearchTestContainerHelper.stopServices();
+    }
+
+    @BeforeEach
+    void setIndexName() {
+        indexName = randomUUID();
     }
 
     @Override
@@ -41,8 +52,10 @@ class ElasticsearchEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoC
     @Override
     protected String[] properties() {
         return new String[]{
-                "langchain4j.elasticsearch.serverUrl=" + elasticsearch.getHttpHostAddress(),
-                "langchain4j.elasticsearch.indexName=" + randomUUID()
+                "langchain4j.elasticsearch.serverUrl=https://" + elasticsearchTestContainerHelper.elasticsearch.getHttpHostAddress(),
+                "langchain4j.elasticsearch.password=changeme",
+                "langchain4j.elasticsearch.indexName=" + indexName,
+                "langchain4j.elasticsearch.caCertificateAsBase64String=" + elasticsearchTestContainerHelper.certAsBase64
         };
     }
 
@@ -53,7 +66,8 @@ class ElasticsearchEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoC
 
     @Override
     @SneakyThrows
-    protected void awaitUntilPersisted() {
-        Thread.sleep(1000);
+    protected void awaitUntilPersisted(ApplicationContext context) {
+        RestClient restClient = context.getBean(RestClient.class);
+        restClient.performRequest(new Request("POST", "/" + indexName + "/_refresh"));
     }
 }

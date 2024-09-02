@@ -14,6 +14,26 @@
     <name>LangChain4j Spring Boot starter for Elasticsearch</name>
     <packaging>jar</packaging>
 
+    <properties>
+        <!-- For tests only -->
+        <elastic.version>8.14.3</elastic.version>
+        <!-- You can run the tests using
+        # Elasticsearch Cloud
+        mvn verify -DELASTICSEARCH_URL=https://URL.elastic-cloud.com -DELASTICSEARCH_API_KEY=THE_KEY
+        # Elasticsearch running already Locally with a BASE64 encoded SSL CA Certificate
+        mvn verify -DELASTICSEARCH_URL=https://localhost:9200 -DELASTICSEARCH_PASSWORD=changeme -DELASTICSEARCH_CA_CERTIFICATE=BASE64-CONTENT
+        # Elasticsearch started by Testcontainers
+        mvn verify
+        # Elasticsearch started by Testcontainers with a specific password
+        mvn verify -DELASTICSEARCH_PASSWORD=changeme
+        -->
+        <ELASTICSEARCH_URL />
+        <ELASTICSEARCH_API_KEY />
+        <ELASTICSEARCH_USERNAME />
+        <ELASTICSEARCH_PASSWORD>changeme</ELASTICSEARCH_PASSWORD>
+        <ELASTICSEARCH_CA_CERTIFICATE />
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -86,4 +106,28 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <environmentVariables>
+                        <ELASTICSEARCH_URL>${ELASTICSEARCH_URL}</ELASTICSEARCH_URL>
+                        <ELASTICSEARCH_API_KEY>${ELASTICSEARCH_API_KEY}</ELASTICSEARCH_API_KEY>
+                        <ELASTICSEARCH_USERNAME>${ELASTICSEARCH_USERNAME}</ELASTICSEARCH_USERNAME>
+                        <ELASTICSEARCH_PASSWORD>${ELASTICSEARCH_PASSWORD}</ELASTICSEARCH_PASSWORD>
+                        <ELASTICSEARCH_CA_CERTIFICATE>${ELASTICSEARCH_CA_CERTIFICATE}</ELASTICSEARCH_CA_CERTIFICATE>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

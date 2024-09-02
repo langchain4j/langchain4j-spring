@@ -9,6 +9,7 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 
@@ -53,7 +54,7 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
                     String id = embeddingStore.add(embedding, segment);
                     assertThat(id).isNotBlank();
 
-                    awaitUntilPersisted();
+                    awaitUntilPersisted(context);
 
                     List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(embedding, 10);
                     assertThat(relevant).hasSize(1);
@@ -82,7 +83,7 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
                     String id = embeddingStore.add(embedding, segment);
                     assertThat(id).isNotBlank();
 
-                    awaitUntilPersisted();
+                    awaitUntilPersisted(context);
 
                     List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(embedding, 10);
                     assertThat(relevant).hasSize(1);
@@ -95,7 +96,7 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
                 });
     }
 
-    protected void awaitUntilPersisted() {
+    protected void awaitUntilPersisted(ApplicationContext context) {
 
     }
 }
