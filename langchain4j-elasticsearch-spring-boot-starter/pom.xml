@@ -10,7 +10,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>langchian4j-elasticsearch-spring-boot-starter</artifactId>
+    <artifactId>langchain4j-elasticsearch-spring-boot-starter</artifactId>
     <name>LangChain4j Spring Boot starter for Elasticsearch</name>
     <packaging>jar</packaging>
 
