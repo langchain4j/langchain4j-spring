@@ -23,7 +23,7 @@ Please provide a relevant code snippets to reproduce this bug.
 A clear and concise description of what you expected to happen.
 
 **Please complete the following information:**
-- LangChain4j version: e.g. 0.33.0
+- LangChain4j version: e.g. 0.34.0
 - Java version: e.g. 17
 - Spring Boot version: e.g. 3.3.1
 
