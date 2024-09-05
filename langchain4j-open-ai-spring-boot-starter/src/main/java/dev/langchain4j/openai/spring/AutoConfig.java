@@ -30,13 +30,17 @@ public class AutoConfig {
                 .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
                 .logitBias(chatModelProperties.getLogitBias())
                 .responseFormat(chatModelProperties.getResponseFormat())
+                .strictJsonSchema(chatModelProperties.getStrictJsonSchema())
                 .seed(chatModelProperties.getSeed())
                 .user(chatModelProperties.getUser())
+                .strictTools(chatModelProperties.getStrictTools())
+                .parallelToolCalls(chatModelProperties.getParallelToolCalls())
                 .timeout(chatModelProperties.getTimeout())
                 .maxRetries(chatModelProperties.getMaxRetries())
                 .proxy(ProxyProperties.convert(chatModelProperties.getProxy()))
                 .logRequests(chatModelProperties.getLogRequests())
                 .logResponses(chatModelProperties.getLogResponses())
+                .customHeaders(chatModelProperties.getCustomHeaders())
                 .build();
     }
 
@@ -59,10 +63,13 @@ public class AutoConfig {
                 .responseFormat(chatModelProperties.getResponseFormat())
                 .seed(chatModelProperties.getSeed())
                 .user(chatModelProperties.getUser())
+                .strictTools(chatModelProperties.getStrictTools())
+                .parallelToolCalls(chatModelProperties.getParallelToolCalls())
                 .timeout(chatModelProperties.getTimeout())
                 .proxy(ProxyProperties.convert(chatModelProperties.getProxy()))
                 .logRequests(chatModelProperties.getLogRequests())
                 .logResponses(chatModelProperties.getLogResponses())
+                .customHeaders(chatModelProperties.getCustomHeaders())
                 .build();
     }
 
@@ -81,6 +88,7 @@ public class AutoConfig {
                 .proxy(ProxyProperties.convert(languageModelProperties.getProxy()))
                 .logRequests(languageModelProperties.getLogRequests())
                 .logResponses(languageModelProperties.getLogResponses())
+                .customHeaders(languageModelProperties.getCustomHeaders())
                 .build();
     }
 
@@ -98,6 +106,7 @@ public class AutoConfig {
                 .proxy(ProxyProperties.convert(languageModelProperties.getProxy()))
                 .logRequests(languageModelProperties.getLogRequests())
                 .logResponses(languageModelProperties.getLogResponses())
+                .customHeaders(languageModelProperties.getCustomHeaders())
                 .build();
     }
 
@@ -117,6 +126,7 @@ public class AutoConfig {
                 .proxy(ProxyProperties.convert(embeddingModelProperties.getProxy()))
                 .logRequests(embeddingModelProperties.getLogRequests())
                 .logResponses(embeddingModelProperties.getLogResponses())
+                .customHeaders(embeddingModelProperties.getCustomHeaders())
                 .build();
     }
 
@@ -134,6 +144,7 @@ public class AutoConfig {
                 .proxy(ProxyProperties.convert(moderationModelProperties.getProxy()))
                 .logRequests(moderationModelProperties.getLogRequests())
                 .logResponses(moderationModelProperties.getLogResponses())
+                .customHeaders(moderationModelProperties.getCustomHeaders())
                 .build();
     }
 
@@ -158,6 +169,7 @@ public class AutoConfig {
                 .logResponses(imageModelProperties.getLogResponses())
                 .withPersisting(imageModelProperties.getWithPersisting())
                 .persistTo(imageModelProperties.getPersistTo())
+                .customHeaders(imageModelProperties.getCustomHeaders())
                 .build();
     }
 

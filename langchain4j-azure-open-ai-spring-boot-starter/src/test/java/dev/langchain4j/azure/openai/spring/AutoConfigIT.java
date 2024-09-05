@@ -33,8 +33,8 @@ class AutoConfigIT {
 
     @ParameterizedTest(name = "Deployment name: {0}")
     @CsvSource({
-            "gpt-4o-turbo",
-            "gpt-4"
+            "gpt-4o-mini",
+            "gpt-4o"
     })
     void should_provide_chat_model(String deploymentName) {
         contextRunner
@@ -77,8 +77,8 @@ class AutoConfigIT {
 
     @ParameterizedTest(name = "Deployment name: {0}")
     @CsvSource({
-            "gpt-35-turbo",
-            "gpt-4"
+            "gpt-4o-mini",
+            "gpt-4o"
     })
     void should_provide_streaming_chat_model(String deploymentName) {
         contextRunner
@@ -138,7 +138,7 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.azure-open-ai.image-model.api-key=" + AZURE_OPENAI_KEY,
                         "langchain4j.azure-open-ai.image-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
-                        "langchain4j.azure-open-ai.image-model.deployment-name=" + "dall-e-3"
+                        "langchain4j.azure-open-ai.image-model.deployment-name=" + "dall-e-3-30"
                 )
                 .run(context -> {
 

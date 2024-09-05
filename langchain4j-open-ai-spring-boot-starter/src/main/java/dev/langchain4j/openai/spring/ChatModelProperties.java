@@ -24,12 +24,16 @@ class ChatModelProperties {
     Double frequencyPenalty;
     Map<String, Integer> logitBias;
     String responseFormat;
+    Boolean strictJsonSchema;
     Integer seed;
     String user;
+    Boolean strictTools;
+    Boolean parallelToolCalls;
     Duration timeout;
     Integer maxRetries;
     @NestedConfigurationProperty
     ProxyProperties proxy;
     Boolean logRequests;
     Boolean logResponses;
+    Map<String, String> customHeaders;
 }
