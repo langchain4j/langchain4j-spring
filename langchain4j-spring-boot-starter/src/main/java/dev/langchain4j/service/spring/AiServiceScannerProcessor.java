@@ -6,18 +6,20 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
-public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProcessor {
+public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
+
+    private Environment environment;
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
@@ -26,6 +28,8 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
         for (String basePackage : basePackages) {
             classPathAiServiceScanner.scan(basePackage);
         }
+
+        filterBeanDefinitions(registry);
     }
 
     private Set<String> getBasePackages(ConfigurableListableBeanFactory beanFactory) {
@@ -62,5 +66,30 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
         }
 
         return basePackages;
+    }
+
+    private void filterBeanDefinitions(BeanDefinitionRegistry registry) {
+        Arrays.stream(registry.getBeanDefinitionNames())
+                .filter(beanName -> {
+                    try {
+                        Class<?> beanClass = Class.forName(registry.getBeanDefinition(beanName).getBeanClassName());
+                        if (beanClass.isAnnotationPresent(AiService.class) && beanClass.isAnnotationPresent(Profile.class)) {
+                            Profile profileAnnotation = beanClass.getAnnotation(Profile.class);
+                            String[] profiles = profileAnnotation.value();
+
+                            return !environment.matchesProfiles(profiles);
+                        } else {
+                            return false;
+                        }
+                    } catch (Exception e) {
+                        // TODO
+                        return false;
+                    }
+                }).forEach(registry::removeBeanDefinition);
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 }

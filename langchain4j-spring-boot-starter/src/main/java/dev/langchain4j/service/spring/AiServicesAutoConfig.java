@@ -15,9 +15,14 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
@@ -30,7 +35,7 @@ import static java.util.Arrays.asList;
 public class AiServicesAutoConfig {
 
     @Bean
-    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor() {
+    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor(Environment environment) {
         return beanFactory -> {
 
             // all components available in the application context
@@ -58,6 +63,15 @@ public class AiServicesAutoConfig {
             String[] aiServices = beanFactory.getBeanNamesForAnnotation(AiService.class);
             for (String aiService : aiServices) {
                 Class<?> aiServiceClass = beanFactory.getType(aiService);
+
+                // Check profile
+                if (aiServiceClass.isAnnotationPresent(Profile.class)) {
+                    Profile profileAnnotation = aiServiceClass.getAnnotation(Profile.class);
+                    String[] profiles = profileAnnotation.value();
+                    if (!environment.matchesProfiles(profiles)) {
+                        continue;
+                    }
+                }
 
                 GenericBeanDefinition aiServiceBeanDefinition = new GenericBeanDefinition();
                 aiServiceBeanDefinition.setBeanClass(AiServiceFactory.class);
