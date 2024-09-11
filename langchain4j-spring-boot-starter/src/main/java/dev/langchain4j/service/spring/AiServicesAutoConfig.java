@@ -64,15 +64,6 @@ public class AiServicesAutoConfig {
             for (String aiService : aiServices) {
                 Class<?> aiServiceClass = beanFactory.getType(aiService);
 
-                // Check profile
-                if (aiServiceClass.isAnnotationPresent(Profile.class)) {
-                    Profile profileAnnotation = aiServiceClass.getAnnotation(Profile.class);
-                    String[] profiles = profileAnnotation.value();
-                    if (!environment.matchesProfiles(profiles)) {
-                        continue;
-                    }
-                }
-
                 GenericBeanDefinition aiServiceBeanDefinition = new GenericBeanDefinition();
                 aiServiceBeanDefinition.setBeanClass(AiServiceFactory.class);
                 aiServiceBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(aiServiceClass);
