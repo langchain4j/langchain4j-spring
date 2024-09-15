@@ -27,6 +27,8 @@
         <module>langchain4j-redis-spring-boot-starter</module>
         <module>langchain4j-qianfan-spring-boot-starter</module>
         <module>langchain4j-milvus-spring-boot-starter</module>
+
+        <module>langchain4j-reactor</module>
     </modules>
 
     <properties>
@@ -53,6 +55,12 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-webflux</artifactId>
                 <version>${spring.boot.version}</version>
             </dependency>
 
