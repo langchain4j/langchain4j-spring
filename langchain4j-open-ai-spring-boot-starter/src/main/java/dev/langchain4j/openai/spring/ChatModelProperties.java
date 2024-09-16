@@ -20,6 +20,7 @@ class ChatModelProperties {
     Double topP;
     List<String> stop;
     Integer maxTokens;
+    Integer maxCompletionTokens;
     Double presencePenalty;
     Double frequencyPenalty;
     Map<String, Integer> logitBias;
