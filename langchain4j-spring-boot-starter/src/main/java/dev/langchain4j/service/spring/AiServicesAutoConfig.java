@@ -15,8 +15,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -35,7 +33,7 @@ import static java.util.Arrays.asList;
 public class AiServicesAutoConfig {
 
     @Bean
-    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor(Environment environment) {
+    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor() {
         return beanFactory -> {
 
             // all components available in the application context
