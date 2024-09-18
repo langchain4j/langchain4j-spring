@@ -1,6 +1,7 @@
 package dev.langchain4j.service.spring;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -29,7 +30,7 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
             classPathAiServiceScanner.scan(basePackage);
         }
 
-        filterBeanDefinitions(registry);
+        removeAiServicesWithInactiveProfiles(registry);
     }
 
     private Set<String> getBasePackages(ConfigurableListableBeanFactory beanFactory) {
@@ -68,22 +69,25 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
         return basePackages;
     }
 
-    private void filterBeanDefinitions(BeanDefinitionRegistry registry) {
+    private void removeAiServicesWithInactiveProfiles(BeanDefinitionRegistry registry) {
         Arrays.stream(registry.getBeanDefinitionNames())
                 .filter(beanName -> {
                     try {
-                        Class<?> beanClass = Class.forName(registry.getBeanDefinition(beanName).getBeanClassName());
-                        if (beanClass.isAnnotationPresent(AiService.class) && beanClass.isAnnotationPresent(Profile.class)) {
-                            Profile profileAnnotation = beanClass.getAnnotation(Profile.class);
-                            String[] profiles = profileAnnotation.value();
-
-                            return !environment.matchesProfiles(profiles);
-                        } else {
-                            return false;
+                        BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
+                        if (beanDefinition.getBeanClassName() != null) {
+                            Class<?> beanClass = Class.forName(beanDefinition.getBeanClassName());
+                            if (beanClass.isAnnotationPresent(AiService.class)
+                                    && beanClass.isAnnotationPresent(Profile.class)) {
+                                Profile profileAnnotation = beanClass.getAnnotation(Profile.class);
+                                String[] profiles = profileAnnotation.value();
+                                return !environment.matchesProfiles(profiles);
+                            }
                         }
                     } catch (ClassNotFoundException e) {
-                        return false;
+                        // should not happen
                     }
+
+                    return false;
                 }).forEach(registry::removeBeanDefinition);
     }
 
