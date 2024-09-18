@@ -81,7 +81,7 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
                         } else {
                             return false;
                         }
-                    } catch (Exception e) {
+                    } catch (ClassNotFoundException e) {
                         // TODO
                         return false;
                     }
