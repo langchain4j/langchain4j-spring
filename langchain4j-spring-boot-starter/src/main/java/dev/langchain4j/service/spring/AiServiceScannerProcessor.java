@@ -82,7 +82,6 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
                             return false;
                         }
                     } catch (ClassNotFoundException e) {
-                        // TODO
                         return false;
                     }
                 }).forEach(registry::removeBeanDefinition);
