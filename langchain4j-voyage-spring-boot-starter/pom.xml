@@ -15,7 +15,7 @@
     <name>LangChain4j Spring Boot starter for Voyage</name>
 
     <properties>
-        <skipOllamaITs>false</skipOllamaITs>
+        <skipVoyageITs>false</skipVoyageITs>
     </properties>
 
     <dependencies>
@@ -64,7 +64,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <skipTests>${skipOllamaITs}</skipTests>
+                    <skipTests>${skipVoyageITs}</skipTests>
                 </configuration>
             </plugin>
         </plugins>
