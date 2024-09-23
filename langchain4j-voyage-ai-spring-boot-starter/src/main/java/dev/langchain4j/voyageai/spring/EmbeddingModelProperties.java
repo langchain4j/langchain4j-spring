@@ -1,6 +1,4 @@
-package dev.langchain4j.voyage.spring;
-
-import dev.langchain4j.model.voyage.VoyageEmbeddingModelName;
+package dev.langchain4j.voyageai.spring;
 
 import java.time.Duration;
 
@@ -10,7 +8,7 @@ public class EmbeddingModelProperties {
     private Duration timeout;
     private Integer maxRetries;
     private String apiKey;
-    private VoyageEmbeddingModelName modelName;
+    private String modelName;
     private String inputType;
     private Boolean truncation;
     private String encodingFormat;
@@ -50,11 +48,11 @@ public class EmbeddingModelProperties {
         this.apiKey = apiKey;
     }
 
-    public VoyageEmbeddingModelName getModelName() {
+    public String getModelName() {
         return modelName;
     }
 
-    public void setModelName(VoyageEmbeddingModelName modelName) {
+    public void setModelName(String modelName) {
         this.modelName = modelName;
     }
 

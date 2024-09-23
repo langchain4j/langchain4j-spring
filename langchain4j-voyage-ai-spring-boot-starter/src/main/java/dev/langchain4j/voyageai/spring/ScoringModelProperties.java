@@ -1,6 +1,4 @@
-package dev.langchain4j.voyage.spring;
-
-import dev.langchain4j.model.voyage.VoyageScoringModelName;
+package dev.langchain4j.voyageai.spring;
 
 import java.time.Duration;
 
@@ -10,7 +8,7 @@ public class ScoringModelProperties {
     private Duration timeout;
     private Integer maxRetries;
     private String apiKey;
-    private VoyageScoringModelName modelName;
+    private String modelName;
     private Integer topK;
     private Boolean returnDocuments;
     private Boolean truncation;
@@ -49,11 +47,11 @@ public class ScoringModelProperties {
         this.apiKey = apiKey;
     }
 
-    public VoyageScoringModelName getModelName() {
+    public String getModelName() {
         return modelName;
     }
 
-    public void setModelName(VoyageScoringModelName modelName) {
+    public void setModelName(String modelName) {
         this.modelName = modelName;
     }
 

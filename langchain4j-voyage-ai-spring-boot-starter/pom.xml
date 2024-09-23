@@ -11,7 +11,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>langchain4j-voyage-spring-boot-starter</artifactId>
+    <artifactId>langchain4j-voyage-ai-spring-boot-starter</artifactId>
     <name>LangChain4j Spring Boot starter for Voyage</name>
 
     <properties>
@@ -22,7 +22,7 @@
 
         <dependency>
             <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-voyage</artifactId>
+            <artifactId>langchain4j-voyage-ai</artifactId>
             <version>${project.version}</version>
         </dependency>
 

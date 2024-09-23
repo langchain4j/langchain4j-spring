@@ -1,4 +1,4 @@
-package dev.langchain4j.voyage.spring;
+package dev.langchain4j.voyageai.spring;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 @ConfigurationProperties(prefix = Properties.PREFIX)
 public class Properties {
 
-    static final String PREFIX = "langchain4j.voyage";
+    static final String PREFIX = "langchain4j.voyage-ai";
 
     @NestedConfigurationProperty
     EmbeddingModelProperties embeddingModel;
