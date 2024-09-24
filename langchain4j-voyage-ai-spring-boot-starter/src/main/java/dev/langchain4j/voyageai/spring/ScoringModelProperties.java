@@ -10,7 +10,6 @@ public class ScoringModelProperties {
     private String apiKey;
     private String modelName;
     private Integer topK;
-    private Boolean returnDocuments;
     private Boolean truncation;
     private Boolean logRequests;
     private Boolean logResponses;
@@ -61,14 +60,6 @@ public class ScoringModelProperties {
 
     public void setTopK(Integer topK) {
         this.topK = topK;
-    }
-
-    public Boolean getReturnDocuments() {
-        return returnDocuments;
-    }
-
-    public void setReturnDocuments(Boolean returnDocuments) {
-        this.returnDocuments = returnDocuments;
     }
 
     public Boolean getTruncation() {

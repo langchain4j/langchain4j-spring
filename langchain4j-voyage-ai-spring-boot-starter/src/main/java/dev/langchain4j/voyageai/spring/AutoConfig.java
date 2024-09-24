@@ -43,7 +43,6 @@ public class AutoConfig {
                 .apiKey(scoringModelProperties.getApiKey())
                 .modelName(scoringModelProperties.getModelName())
                 .topK(scoringModelProperties.getTopK())
-                .returnDocuments(scoringModelProperties.getReturnDocuments())
                 .truncation(scoringModelProperties.getTruncation())
                 .logRequests(scoringModelProperties.getLogRequests())
                 .logResponses(scoringModelProperties.getLogResponses())
