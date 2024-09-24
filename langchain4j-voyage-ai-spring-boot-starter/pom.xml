@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>langchain4j-voyage-ai-spring-boot-starter</artifactId>
-    <name>LangChain4j Spring Boot starter for Voyage</name>
+    <name>LangChain4j Spring Boot starter for Voyage AI</name>
 
     <properties>
         <skipVoyageITs>false</skipVoyageITs>
