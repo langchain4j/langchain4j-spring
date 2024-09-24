@@ -7,8 +7,8 @@ import com.azure.search.documents.indexes.models.SearchIndex;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.internal.Utils;
-import dev.langchain4j.model.embedding.onnx.allminilml6v2.AllMiniLmL6V2EmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.embedding.onnx.allminilml6v2.AllMiniLmL6V2EmbeddingModel;
 import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.content.retriever.azure.search.AzureAiSearchContentRetriever;
@@ -239,7 +239,8 @@ class AutoConfigIT {
                     Embedding relevantEmbedding = embeddingModel.embed("fruit").content();
                     List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(relevantEmbedding, 3);
                     assertThat(relevant).hasSize(3);
-                    assertThat(relevant.get(0).embedding()).isNotNull();
+                    // TODO uncomment after https://github.com/langchain4j/langchain4j/issues/1617 is closed
+                    // assertThat(relevant.get(0).embedding()).isNotNull();
                     assertThat(relevant.get(0).embedded().text()).isIn(content1, content3, content5);
                 });
     }

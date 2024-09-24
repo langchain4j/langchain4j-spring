@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -28,4 +29,5 @@ class ImageModelProperties {
     Boolean logResponses;
     Boolean withPersisting;
     Path persistTo;
+    Map<String, String> customHeaders;
 }

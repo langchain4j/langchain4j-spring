@@ -6,7 +6,7 @@
 
     <groupId>dev.langchain4j</groupId>
     <artifactId>langchain4j-spring</artifactId>
-    <version>0.34.0-SNAPSHOT</version>
+    <version>0.35.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>langchain4j-spring parent POM</name>
@@ -23,11 +23,13 @@
         <module>langchain4j-azure-ai-search-spring-boot-starter</module>
         <module>langchain4j-azure-open-ai-spring-boot-starter</module>
         <module>langchain4j-vertex-ai-gemini-spring-boot-starter</module>
-        <module>langchian4j-elasticsearch-spring-boot-starter</module>
+        <module>langchain4j-elasticsearch-spring-boot-starter</module>
         <module>langchain4j-redis-spring-boot-starter</module>
         <module>langchain4j-qianfan-spring-boot-starter</module>
         <module>langchain4j-milvus-spring-boot-starter</module>
         <module>langchain4j-dashscope-spring-boot-starter</module>
+
+        <module>langchain4j-reactor</module>
     </modules>
 
     <properties>
@@ -54,6 +56,12 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-webflux</artifactId>
                 <version>${spring.boot.version}</version>
             </dependency>
 

@@ -96,6 +96,4 @@ public @interface AiService {
      * this attribute specifies the names of beans containing methods annotated with {@link Tool} that should be used by this AI Service.
      */
     String[] tools() default {};
-
-    // TODO support Flux return type for AI Service method(s) (for streaming)
 }

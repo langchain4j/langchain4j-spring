@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.time.Duration;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -22,4 +23,5 @@ class EmbeddingModelProperties {
     ProxyProperties proxy;
     Boolean logRequests;
     Boolean logResponses;
+    Map<String, String> customHeaders;
 }
