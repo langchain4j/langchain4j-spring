@@ -1,4 +1,6 @@
-package dev.langchain4j.model.github.spring;
+package dev.langchain4j.model.githubmodels.spring;
+
+import java.time.Duration;
 
 class EmbeddingModelProperties {
 
@@ -6,7 +8,7 @@ class EmbeddingModelProperties {
     private String gitHubToken;
     private String modelName;
     private Integer dimensions;
-    private Integer timeout;
+    private Duration timeout;
     private Integer maxRetries;
     private Boolean logRequestsAndResponses;
 
@@ -42,11 +44,11 @@ class EmbeddingModelProperties {
         this.dimensions = dimensions;
     }
 
-    public Integer getTimeout() {
+    public Duration getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(Integer timeout) {
+    public void setTimeout(Duration timeout) {
         this.timeout = timeout;
     }
 

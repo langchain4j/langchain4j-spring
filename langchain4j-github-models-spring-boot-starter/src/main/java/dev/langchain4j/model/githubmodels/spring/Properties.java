@@ -1,4 +1,4 @@
-package dev.langchain4j.model.github.spring;
+package dev.langchain4j.model.githubmodels.spring;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;

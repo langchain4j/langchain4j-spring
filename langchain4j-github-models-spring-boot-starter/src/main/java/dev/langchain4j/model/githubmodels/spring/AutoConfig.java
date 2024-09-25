@@ -1,4 +1,4 @@
-package dev.langchain4j.model.github.spring;
+package dev.langchain4j.model.githubmodels.spring;
 
 import com.azure.core.http.ProxyOptions;
 import com.azure.core.util.Configuration;
@@ -6,13 +6,9 @@ import dev.langchain4j.model.github.GitHubModelsChatModel;
 import dev.langchain4j.model.github.GitHubModelsEmbeddingModel;
 import dev.langchain4j.model.github.GitHubModelsStreamingChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.lang.Nullable;
-
-import java.time.Duration;
 
 @AutoConfiguration
 @EnableConfigurationProperties(Properties.class)
@@ -31,7 +27,7 @@ public class AutoConfig {
                 .maxTokens(chatModelProperties.getMaxTokens())
                 .presencePenalty(chatModelProperties.getPresencePenalty())
                 .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
-                .timeout(Duration.ofSeconds(chatModelProperties.getTimeout() == null ? 0 : chatModelProperties.getTimeout()))
+                .timeout(chatModelProperties.getTimeout())
                 .maxRetries(chatModelProperties.getMaxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses());
@@ -53,7 +49,7 @@ public class AutoConfig {
                 .maxTokens(chatModelProperties.getMaxTokens())
                 .presencePenalty(chatModelProperties.getPresencePenalty())
                 .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
-                .timeout(Duration.ofSeconds(chatModelProperties.getTimeout() == null ? 0 : chatModelProperties.getTimeout()))
+                .timeout(chatModelProperties.getTimeout())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses());
 
@@ -69,7 +65,7 @@ public class AutoConfig {
                 .gitHubToken(embeddingModelProperties.getGitHubToken())
                 .modelName(embeddingModelProperties.getModelName())
                 .maxRetries(embeddingModelProperties.getMaxRetries())
-                .timeout(Duration.ofSeconds(embeddingModelProperties.getTimeout() == null ? 0 : embeddingModelProperties.getTimeout()))
+                .timeout(embeddingModelProperties.getTimeout())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(embeddingModelProperties.getLogRequestsAndResponses() != null && embeddingModelProperties.getLogRequestsAndResponses());
 

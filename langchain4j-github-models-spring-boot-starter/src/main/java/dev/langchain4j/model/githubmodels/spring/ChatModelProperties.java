@@ -1,5 +1,6 @@
-package dev.langchain4j.model.github.spring;
+package dev.langchain4j.model.githubmodels.spring;
 
+import java.time.Duration;
 import java.util.List;
 
 class ChatModelProperties {
@@ -15,7 +16,7 @@ class ChatModelProperties {
     private String responseFormat;
     private Integer seed;
     private List<String> stop;
-    private Integer timeout;
+    private Duration timeout;
     private Integer maxRetries;
     private Boolean logRequestsAndResponses;
 
@@ -107,11 +108,11 @@ class ChatModelProperties {
         this.stop = stop;
     }
 
-    public Integer getTimeout() {
+    public Duration getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(Integer timeout) {
+    public void setTimeout(Duration timeout) {
         this.timeout = timeout;
     }
 

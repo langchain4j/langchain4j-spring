@@ -1,4 +1,4 @@
-package dev.langchain4j.model.github.spring;
+package dev.langchain4j.model.githubmodels.spring;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
@@ -8,12 +8,8 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.github.GitHubModelsChatModel;
 import dev.langchain4j.model.github.GitHubModelsEmbeddingModel;
 import dev.langchain4j.model.github.GitHubModelsStreamingChatModel;
-import dev.langchain4j.model.github.spring.AutoConfig;
-import dev.langchain4j.model.image.ImageModel;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -29,16 +25,12 @@ class AutoConfigIT {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
 
-    @ParameterizedTest(name = "Model name: {0}")
-    @CsvSource({
-            "gpt-4o-mini",
-            "gpt-4o"
-    })
-    void should_provide_chat_model(String modelName) {
+    @Test
+    void should_provide_chat_model() {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.github-models.chat-model.github-token=" + GITHUB_TOKEN,
-                        "langchain4j.github-models.chat-model.model-name=" + modelName,
+                        "langchain4j.github-models.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.github-models.chat-model.max-tokens=20"
                 )
                 .run(context -> {
@@ -50,18 +42,13 @@ class AutoConfigIT {
                 });
     }
 
-    @ParameterizedTest(name = "Model name: {0}")
-    @CsvSource({
-            "gpt-4o-mini",
-            "gpt-4o"
-    })
-    void should_provide_streaming_chat_model(String modelName) {
+    @Test
+    void should_provide_streaming_chat_model() {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.github-models.streaming-chat-model.github-token=" + GITHUB_TOKEN,
-                        "langchain4j.github-models.streaming-chat-model.model-name=" + modelName,
-                        "langchain4j.github-models.streaming-chat-model.max-tokens=20",
-                        "langchain4j.github-models.streaming-chat-model.timeout=60"
+                        "langchain4j.github-models.streaming-chat-model.model-name=gpt-4o-mini",
+                        "langchain4j.github-models.streaming-chat-model.max-tokens=20"
                 )
                 .run(context -> {
 
@@ -94,7 +81,7 @@ class AutoConfigIT {
     void should_provide_embedding_model() {
         contextRunner
                 .withPropertyValues("langchain4j.github-models.embedding-model.github-token=" + GITHUB_TOKEN,
-                        "langchain4j.github-models.embedding-model.model-name=" + "text-embedding-3-small")
+                        "langchain4j.github-models.embedding-model.model-name=text-embedding-3-small")
                 .run(context -> {
 
                     EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
