@@ -14,6 +14,7 @@ class ChatModelProperties {
 
     String baseUrl;
     String apiKey;
+    String apiVersion;
     String organizationId;
     String modelName;
     Double temperature;
