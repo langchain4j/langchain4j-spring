@@ -6,14 +6,15 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -24,11 +25,9 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        ClassPathAiServiceScanner classPathAiServiceScanner = new ClassPathAiServiceScanner(registry, false);
+        ClassPathAiServiceScanner scanner = new ClassPathAiServiceScanner(registry, false);
         Set<String> basePackages = getBasePackages((ConfigurableListableBeanFactory) registry);
-        for (String basePackage : basePackages) {
-            classPathAiServiceScanner.scan(basePackage);
-        }
+        scanner.scan(StringUtils.toStringArray(basePackages));
 
         removeAiServicesWithInactiveProfiles(registry);
     }
@@ -36,37 +35,36 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
     private Set<String> getBasePackages(ConfigurableListableBeanFactory beanFactory) {
         Set<String> basePackages = new LinkedHashSet<>();
 
+        // AutoConfiguration
         List<String> autoConfigPackages = AutoConfigurationPackages.get(beanFactory);
         basePackages.addAll(autoConfigPackages);
 
-        String[] beanNames = beanFactory.getBeanNamesForAnnotation(ComponentScan.class);
-        for (String beanName : beanNames) {
-            Class<?> beanClass = beanFactory.getType(beanName);
-            if (beanClass != null) {
-                ComponentScan componentScan = beanClass.getAnnotation(ComponentScan.class);
-                if (componentScan != null) {
-                    Collections.addAll(basePackages, componentScan.value());
-                    Collections.addAll(basePackages, componentScan.basePackages());
-                    for (Class<?> basePackageClass : componentScan.basePackageClasses()) {
-                        basePackages.add(basePackageClass.getPackage().getName());
-                    }
-                }
-            }
-        }
-
-        String[] applicationBeans = beanFactory.getBeanNamesForAnnotation(SpringBootApplication.class);
-        if (applicationBeans.length > 0) {
-            Class<?> applicationBeanClass = beanFactory.getType(applicationBeans[0]);
-            SpringBootApplication springBootApplication = AnnotationUtils.findAnnotation(applicationBeanClass, SpringBootApplication.class);
-            if (springBootApplication != null) {
-                Collections.addAll(basePackages, springBootApplication.scanBasePackages());
-                for (Class<?> aClass : springBootApplication.scanBasePackageClasses()) {
-                    basePackages.add(ClassUtils.getPackageName(aClass));
-                }
-            }
-        }
+        // ComponentScan
+        addComponentScanPackages(beanFactory, basePackages);
 
         return basePackages;
+    }
+
+    private void addComponentScanPackages(ConfigurableListableBeanFactory beanFactory, Set<String> collectedBasePackages) {
+        beanFactory.getBeansWithAnnotation(ComponentScan.class).forEach((beanName, instance) -> {
+            Set<ComponentScan> componentScans = AnnotatedElementUtils.getMergedRepeatableAnnotations(instance.getClass(), ComponentScan.class);
+            for (ComponentScan componentScan : componentScans) {
+                Set<String> basePackages = new LinkedHashSet<>();
+                String[] basePackagesArray = componentScan.basePackages();
+                for (String pkg : basePackagesArray) {
+                    String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
+                            ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+                    Collections.addAll(basePackages, tokenized);
+                }
+                for (Class<?> clazz : componentScan.basePackageClasses()) {
+                    basePackages.add(ClassUtils.getPackageName(clazz));
+                }
+                if (basePackages.isEmpty()) {
+                    basePackages.add(ClassUtils.getPackageName(instance.getClass()));
+                }
+                collectedBasePackages.addAll(basePackages);
+            }
+        });
     }
 
     private void removeAiServicesWithInactiveProfiles(BeanDefinitionRegistry registry) {
