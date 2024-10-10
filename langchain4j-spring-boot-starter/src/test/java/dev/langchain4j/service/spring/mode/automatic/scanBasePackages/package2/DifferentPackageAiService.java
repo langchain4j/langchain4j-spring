@@ -1,4 +1,4 @@
-package dev.langchain4j.service.spring.mode.automatic.differentPackage.package2;
+package dev.langchain4j.service.spring.mode.automatic.scanBasePackages.package2;
 
 import dev.langchain4j.service.spring.AiService;
 
