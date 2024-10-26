@@ -27,6 +27,10 @@ class DifferentPackageAiServiceIT {
     static class ComponentScanWithBasePackageClasses {
     }
 
+    @ComponentScan(basePackages = "${test.basePackages}")
+    static class ComponentScanWithPlaceholder {
+    }
+
     @Test
     void should_create_AI_service_that_use_componentScan_value() {
 
@@ -83,6 +87,31 @@ class DifferentPackageAiServiceIT {
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
                         "langchain4j.open-ai.chat-model.max-tokens=20",
                         "langchain4j.open-ai.chat-model.temperature=0.0"
+                )
+                .withUserConfiguration(DifferentPackageAiServiceApplication.class)
+                .withUserConfiguration(ComponentScanWithBasePackageClasses.class)
+                .run(context -> {
+
+                    // given
+                    DifferentPackageAiService aiService = context.getBean(DifferentPackageAiService.class);
+
+                    // when
+                    String answer = aiService.chat("What is the capital of Germany?");
+
+                    // then
+                    assertThat(answer).containsIgnoringCase("Berlin");
+                });
+    }
+
+    @Test
+    void should_create_AI_service_that_use_componentScan_with_placeholder() {
+
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
+                        "langchain4j.open-ai.chat-model.max-tokens=20",
+                        "langchain4j.open-ai.chat-model.temperature=0.0",
+                        "test.basePackages=dev.langchain4j.service.spring.mode.automatic.differentPackage.package2"
                 )
                 .withUserConfiguration(DifferentPackageAiServiceApplication.class)
                 .withUserConfiguration(ComponentScanWithBasePackageClasses.class)
