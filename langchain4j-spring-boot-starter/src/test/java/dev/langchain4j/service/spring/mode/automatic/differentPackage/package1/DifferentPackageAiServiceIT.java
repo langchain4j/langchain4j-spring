@@ -114,7 +114,7 @@ class DifferentPackageAiServiceIT {
                         "test.basePackages=dev.langchain4j.service.spring.mode.automatic.differentPackage.package2"
                 )
                 .withUserConfiguration(DifferentPackageAiServiceApplication.class)
-                .withUserConfiguration(ComponentScanWithBasePackageClasses.class)
+                .withUserConfiguration(ComponentScanWithPlaceholder.class)
                 .run(context -> {
 
                     // given
