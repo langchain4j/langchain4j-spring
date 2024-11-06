@@ -47,6 +47,7 @@ public class AutoConfig {
                 .timeout(Duration.ofSeconds(chatModelProperties.getTimeout() == null ? 0 : chatModelProperties.getTimeout()))
                 .maxRetries(chatModelProperties.getMaxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
+                .customHeaders(chatModelProperties.getCustomHeaders())
                 .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses());
         if (chatModelProperties.getNonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.getNonAzureApiKey());
@@ -81,6 +82,7 @@ public class AutoConfig {
                 .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
                 .timeout(Duration.ofSeconds(chatModelProperties.getTimeout() == null ? 0 : chatModelProperties.getTimeout()))
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
+                .customHeaders(chatModelProperties.getCustomHeaders())
                 .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses());
         if (chatModelProperties.getNonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.getNonAzureApiKey());
@@ -110,6 +112,7 @@ public class AutoConfig {
                 .tokenizer(tokenizer)
                 .timeout(Duration.ofSeconds(embeddingModelProperties.getTimeout() == null ? 0 : embeddingModelProperties.getTimeout()))
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
+                .customHeaders(embeddingModelProperties.getCustomHeaders())
                 .logRequestsAndResponses(embeddingModelProperties.getLogRequestsAndResponses() != null && embeddingModelProperties.getLogRequestsAndResponses());
 
         if (embeddingModelProperties.getNonAzureApiKey() != null) {
@@ -144,6 +147,7 @@ public class AutoConfig {
                 .timeout(imageModelProperties.getTimeout() == null ? null : Duration.ofSeconds(imageModelProperties.getTimeout()))
                 .maxRetries(imageModelProperties.getMaxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
+                .customHeaders(imageModelProperties.getCustomHeaders())
                 .logRequestsAndResponses(imageModelProperties.getLogRequestsAndResponses() != null && imageModelProperties.getLogRequestsAndResponses());
         if (imageModelProperties.getNonAzureApiKey() != null) {
             builder.nonAzureApiKey(imageModelProperties.getNonAzureApiKey());
