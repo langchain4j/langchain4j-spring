@@ -30,30 +30,30 @@ public class AutoConfig {
     }
 
     AzureOpenAiChatModel openAiChatModel(Properties properties) {
-        ChatModelProperties chatModelProperties = properties.getChatModel();
+        ChatModelProperties chatModelProperties = properties.chatModel();
         AzureOpenAiChatModel.Builder builder = AzureOpenAiChatModel.builder()
-                .endpoint(chatModelProperties.getEndpoint())
-                .serviceVersion(chatModelProperties.getServiceVersion())
-                .apiKey(chatModelProperties.getApiKey())
-                .deploymentName(chatModelProperties.getDeploymentName())
+                .endpoint(chatModelProperties.endpoint())
+                .serviceVersion(chatModelProperties.serviceVersion())
+                .apiKey(chatModelProperties.apiKey())
+                .deploymentName(chatModelProperties.deploymentName())
                 // TODO inject tokenizer?
-                .maxTokens(chatModelProperties.getMaxTokens())
-                .temperature(chatModelProperties.getTemperature())
-                .topP(chatModelProperties.getTopP())
-                .logitBias(chatModelProperties.getLogitBias())
-                .user(chatModelProperties.getUser())
-                .stop(chatModelProperties.getStop())
-                .presencePenalty(chatModelProperties.getPresencePenalty())
-                .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
-                .seed(chatModelProperties.getSeed())
-                .timeout(Duration.ofSeconds(chatModelProperties.getTimeout() == null ? 0 : chatModelProperties.getTimeout()))
-                .maxRetries(chatModelProperties.getMaxRetries())
+                .maxTokens(chatModelProperties.maxTokens())
+                .temperature(chatModelProperties.temperature())
+                .topP(chatModelProperties.topP())
+                .logitBias(chatModelProperties.logitBias())
+                .user(chatModelProperties.user())
+                .stop(chatModelProperties.stop())
+                .presencePenalty(chatModelProperties.presencePenalty())
+                .frequencyPenalty(chatModelProperties.frequencyPenalty())
+                .seed(chatModelProperties.seed())
+                .timeout(Duration.ofSeconds(chatModelProperties.timeout() == null ? 0 : chatModelProperties.timeout()))
+                .maxRetries(chatModelProperties.maxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
-                .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses())
-                .userAgentSuffix(chatModelProperties.getUserAgentSuffix())
-                .customHeaders(chatModelProperties.getCustomHeaders());
-        if (chatModelProperties.getNonAzureApiKey() != null) {
-            builder.nonAzureApiKey(chatModelProperties.getNonAzureApiKey());
+                .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses() != null && chatModelProperties.logRequestsAndResponses())
+                .userAgentSuffix(chatModelProperties.userAgentSuffix())
+                .customHeaders(chatModelProperties.customHeaders());
+        if (chatModelProperties.nonAzureApiKey() != null) {
+            builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
         }
         return builder.build();
     }
@@ -71,30 +71,30 @@ public class AutoConfig {
     }
 
     AzureOpenAiStreamingChatModel openAiStreamingChatModel(Properties properties) {
-        ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
+        ChatModelProperties chatModelProperties = properties.streamingChatModel();
         AzureOpenAiStreamingChatModel.Builder builder = AzureOpenAiStreamingChatModel.builder()
-                .endpoint(chatModelProperties.getEndpoint())
-                .serviceVersion(chatModelProperties.getServiceVersion())
-                .apiKey(chatModelProperties.getApiKey())
-                .deploymentName(chatModelProperties.getDeploymentName())
+                .endpoint(chatModelProperties.endpoint())
+                .serviceVersion(chatModelProperties.serviceVersion())
+                .apiKey(chatModelProperties.apiKey())
+                .deploymentName(chatModelProperties.deploymentName())
                 // TODO inject tokenizer?
-                .maxTokens(chatModelProperties.getMaxTokens())
-                .temperature(chatModelProperties.getTemperature())
-                .topP(chatModelProperties.getTopP())
-                .logitBias(chatModelProperties.getLogitBias())
-                .user(chatModelProperties.getUser())
-                .stop(chatModelProperties.getStop())
-                .presencePenalty(chatModelProperties.getPresencePenalty())
-                .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
-                .seed(chatModelProperties.getSeed())
-                .timeout(Duration.ofSeconds(chatModelProperties.getTimeout() == null ? 0 : chatModelProperties.getTimeout()))
-                .maxRetries(chatModelProperties.getMaxRetries())
+                .maxTokens(chatModelProperties.maxTokens())
+                .temperature(chatModelProperties.temperature())
+                .topP(chatModelProperties.topP())
+                .logitBias(chatModelProperties.logitBias())
+                .user(chatModelProperties.user())
+                .stop(chatModelProperties.stop())
+                .presencePenalty(chatModelProperties.presencePenalty())
+                .frequencyPenalty(chatModelProperties.frequencyPenalty())
+                .seed(chatModelProperties.seed())
+                .timeout(Duration.ofSeconds(chatModelProperties.timeout() == null ? 0 : chatModelProperties.timeout()))
+                .maxRetries(chatModelProperties.maxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
-                .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses())
-                .userAgentSuffix(chatModelProperties.getUserAgentSuffix())
-                .customHeaders(chatModelProperties.getCustomHeaders());
-        if (chatModelProperties.getNonAzureApiKey() != null) {
-            builder.nonAzureApiKey(chatModelProperties.getNonAzureApiKey());
+                .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses() != null && chatModelProperties.logRequestsAndResponses())
+                .userAgentSuffix(chatModelProperties.userAgentSuffix())
+                .customHeaders(chatModelProperties.customHeaders());
+        if (chatModelProperties.nonAzureApiKey() != null) {
+            builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
         }
         return builder.build();
     }
@@ -112,22 +112,22 @@ public class AutoConfig {
     }
 
     AzureOpenAiEmbeddingModel openAiEmbeddingModel(Properties properties, Tokenizer tokenizer) {
-        EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
+        EmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
         AzureOpenAiEmbeddingModel.Builder builder = AzureOpenAiEmbeddingModel.builder()
-                .endpoint(embeddingModelProperties.getEndpoint())
-                .serviceVersion(embeddingModelProperties.getServiceVersion())
-                .apiKey(embeddingModelProperties.getApiKey())
-                .deploymentName(embeddingModelProperties.getDeploymentName())
+                .endpoint(embeddingModelProperties.endpoint())
+                .serviceVersion(embeddingModelProperties.serviceVersion())
+                .apiKey(embeddingModelProperties.apiKey())
+                .deploymentName(embeddingModelProperties.deploymentName())
                 .tokenizer(tokenizer)
-                .timeout(Duration.ofSeconds(embeddingModelProperties.getTimeout() == null ? 0 : embeddingModelProperties.getTimeout()))
-                .maxRetries(embeddingModelProperties.getMaxRetries())
+                .timeout(Duration.ofSeconds(embeddingModelProperties.timeout() == null ? 0 : embeddingModelProperties.timeout()))
+                .maxRetries(embeddingModelProperties.maxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
-                .logRequestsAndResponses(embeddingModelProperties.getLogRequestsAndResponses() != null && embeddingModelProperties.getLogRequestsAndResponses())
-                .userAgentSuffix(embeddingModelProperties.getUserAgentSuffix())
-                .dimensions(embeddingModelProperties.getDimensions())
-                .customHeaders(embeddingModelProperties.getCustomHeaders());
-        if (embeddingModelProperties.getNonAzureApiKey() != null) {
-            builder.nonAzureApiKey(embeddingModelProperties.getNonAzureApiKey());
+                .logRequestsAndResponses(embeddingModelProperties.logRequestsAndResponses() != null && embeddingModelProperties.logRequestsAndResponses())
+                .userAgentSuffix(embeddingModelProperties.userAgentSuffix())
+                .dimensions(embeddingModelProperties.dimensions())
+                .customHeaders(embeddingModelProperties.customHeaders());
+        if (embeddingModelProperties.nonAzureApiKey() != null) {
+            builder.nonAzureApiKey(embeddingModelProperties.nonAzureApiKey());
         }
         return builder.build();
     }
@@ -145,25 +145,25 @@ public class AutoConfig {
     }
 
     AzureOpenAiImageModel openAiImageModel(Properties properties) {
-        ImageModelProperties imageModelProperties = properties.getImageModel();
+        ImageModelProperties imageModelProperties = properties.imageModel();
         AzureOpenAiImageModel.Builder builder = AzureOpenAiImageModel.builder()
-                .endpoint(imageModelProperties.getEndpoint())
-                .serviceVersion(imageModelProperties.getServiceVersion())
-                .apiKey(imageModelProperties.getApiKey())
-                .deploymentName(imageModelProperties.getDeploymentName())
-                .quality(imageModelProperties.getQuality())
-                .size(imageModelProperties.getSize())
-                .user(imageModelProperties.getUser())
-                .style(imageModelProperties.getStyle())
-                .responseFormat(imageModelProperties.getResponseFormat())
-                .timeout(imageModelProperties.getTimeout() == null ? null : Duration.ofSeconds(imageModelProperties.getTimeout()))
-                .maxRetries(imageModelProperties.getMaxRetries())
+                .endpoint(imageModelProperties.endpoint())
+                .serviceVersion(imageModelProperties.serviceVersion())
+                .apiKey(imageModelProperties.apiKey())
+                .deploymentName(imageModelProperties.deploymentName())
+                .quality(imageModelProperties.quality())
+                .size(imageModelProperties.size())
+                .user(imageModelProperties.user())
+                .style(imageModelProperties.style())
+                .responseFormat(imageModelProperties.responseFormat())
+                .timeout(imageModelProperties.timeout() == null ? null : Duration.ofSeconds(imageModelProperties.timeout()))
+                .maxRetries(imageModelProperties.maxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
-                .logRequestsAndResponses(imageModelProperties.getLogRequestsAndResponses() != null && imageModelProperties.getLogRequestsAndResponses())
-                .userAgentSuffix(imageModelProperties.getUserAgentSuffix())
-                .customHeaders(imageModelProperties.getCustomHeaders());
-        if (imageModelProperties.getNonAzureApiKey() != null) {
-            builder.nonAzureApiKey(imageModelProperties.getNonAzureApiKey());
+                .logRequestsAndResponses(imageModelProperties.logRequestsAndResponses() != null && imageModelProperties.logRequestsAndResponses())
+                .userAgentSuffix(imageModelProperties.userAgentSuffix())
+                .customHeaders(imageModelProperties.customHeaders());
+        if (imageModelProperties.nonAzureApiKey() != null) {
+            builder.nonAzureApiKey(imageModelProperties.nonAzureApiKey());
         }
         return builder.build();
     }
