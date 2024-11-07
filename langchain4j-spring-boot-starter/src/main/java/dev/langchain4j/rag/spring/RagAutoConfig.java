@@ -37,11 +37,11 @@ public class RagAutoConfig {
                 .embeddingModel(embeddingModel);
 
         if (ragProperties != null) {
-            RetrievalProperties retrievalProperties = ragProperties.getRetrieval();
+            RetrievalProperties retrievalProperties = ragProperties.retrieval();
             if (retrievalProperties != null) {
                 builder
-                        .maxResults(retrievalProperties.maxResults)
-                        .minScore(retrievalProperties.minScore);
+                        .maxResults(retrievalProperties.maxResults())
+                        .minScore(retrievalProperties.minScore());
             }
         }
 
