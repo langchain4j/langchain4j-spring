@@ -10,12 +10,14 @@ import java.util.Map;
 class EmbeddingModelProperties {
 
     String endpoint;
+    String serviceVersion;
     String apiKey;
-    String nonAzureApiKey;
     String deploymentName;
-    Integer dimensions;
-    Integer timeout;
+    Integer timeout; // TODO use duration instead
     Integer maxRetries;
     Boolean logRequestsAndResponses;
+    String userAgentSuffix;
+    Integer dimensions;
     Map<String, String> customHeaders;
+    String nonAzureApiKey;
 }

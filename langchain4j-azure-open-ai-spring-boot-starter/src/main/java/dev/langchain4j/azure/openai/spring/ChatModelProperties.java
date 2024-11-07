@@ -11,20 +11,23 @@ import java.util.Map;
 class ChatModelProperties {
 
     String endpoint;
+    String serviceVersion;
     String apiKey;
-    String nonAzureApiKey;
-    String organizationId;
     String deploymentName;
+    Integer maxTokens;
     Double temperature;
     Double topP;
-    Integer maxTokens;
+    Map<String, Integer> logitBias;
+    String user;
+    List<String> stop;
     Double presencePenalty;
     Double frequencyPenalty;
+    Long seed;
     String responseFormat;
-    Integer seed;
-    List<String> stop;
-    Integer timeout;
+    Integer timeout; // TODO use Duration instead
     Integer maxRetries;
     Boolean logRequestsAndResponses;
+    String userAgentSuffix;
     Map<String, String> customHeaders;
+    String nonAzureApiKey;
 }

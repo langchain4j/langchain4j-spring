@@ -10,16 +10,18 @@ import java.util.Map;
 class ImageModelProperties {
 
     String endpoint;
+    String serviceVersion;
     String apiKey;
-    String nonAzureApiKey;
     String deploymentName;
-    String size;
     String quality;
+    String size;
+    String user;
     String style;
     String responseFormat;
-    String user;
     Integer timeout;
     Integer maxRetries;
     Boolean logRequestsAndResponses;
+    String userAgentSuffix;
     Map<String, String> customHeaders;
+    String nonAzureApiKey;
 }
