@@ -4,6 +4,7 @@ import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
@@ -22,6 +23,7 @@ class AiServiceFactory implements FactoryBean<Object> {
     private ChatMemoryProvider chatMemoryProvider;
     private ContentRetriever contentRetriever;
     private RetrievalAugmentor retrievalAugmentor;
+    private ModerationModel moderationModel;
     private List<Object> tools;
 
     public AiServiceFactory(Class<Object> aiServiceClass) {
@@ -50,6 +52,10 @@ class AiServiceFactory implements FactoryBean<Object> {
 
     public void setRetrievalAugmentor(RetrievalAugmentor retrievalAugmentor) {
         this.retrievalAugmentor = retrievalAugmentor;
+    }
+
+    public void setModerationModel(ModerationModel moderationModel) {
+        this.moderationModel = moderationModel;
     }
 
     public void setTools(List<Object> tools) {
@@ -81,6 +87,10 @@ class AiServiceFactory implements FactoryBean<Object> {
             builder = builder.retrievalAugmentor(retrievalAugmentor);
         } else if (contentRetriever != null) {
             builder = builder.contentRetriever(contentRetriever);
+        }
+
+        if (moderationModel != null) {
+            builder = builder.moderationModel(moderationModel);
         }
 
         if (!isNullOrEmpty(tools)) {

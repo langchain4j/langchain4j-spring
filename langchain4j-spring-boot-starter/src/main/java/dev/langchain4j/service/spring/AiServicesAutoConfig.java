@@ -6,6 +6,7 @@ import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import org.springframework.beans.MutablePropertyValues;
@@ -43,6 +44,7 @@ public class AiServicesAutoConfig {
             String[] chatMemoryProviders = beanFactory.getBeanNamesForType(ChatMemoryProvider.class);
             String[] contentRetrievers = beanFactory.getBeanNamesForType(ContentRetriever.class);
             String[] retrievalAugmentors = beanFactory.getBeanNamesForType(RetrievalAugmentor.class);
+            String[] moderationModels = beanFactory.getBeanNamesForType(ModerationModel.class);
 
             Set<String> tools = new HashSet<>();
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
@@ -126,6 +128,16 @@ public class AiServicesAutoConfig {
                         retrievalAugmentors,
                         "retrievalAugmentor",
                         "retrievalAugmentor",
+                        propertyValues
+                );
+
+                addBeanReference(
+                        ModerationModel.class,
+                        aiServiceAnnotation,
+                        aiServiceAnnotation.moderationModel(),
+                        moderationModels,
+                        "moderationModel",
+                        "moderationModel",
                         propertyValues
                 );
 
