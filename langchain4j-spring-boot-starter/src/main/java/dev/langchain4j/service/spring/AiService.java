@@ -5,6 +5,7 @@ import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
@@ -90,6 +91,12 @@ public @interface AiService {
      * this attribute specifies the name of a {@link RetrievalAugmentor} bean that should be used by this AI Service.
      */
     String retrievalAugmentor() default "";
+
+    /**
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the name of a {@link ModerationModel} bean that should be used by this AI Service.
+     */
+    String moderationModel() default "";
 
     /**
      * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
