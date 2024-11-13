@@ -6,15 +6,18 @@
       <option name="ignoredModules">
         <list>
           <option value="langchain4j-google-ai-gemini" />
+          <option value="langchain4j-google-ai-gemini" />
         </list>
       </option>
       <option name="ignoredPackages">
         <list>
           <option value="org.xmlunit:xmlunit-core:2.9.1" />
+          <option value="org.springframework:spring-context:6.1.8" />
         </list>
       </option>
       <option name="ignoredReasons">
         <list>
+          <option value="Not exploitable" />
           <option value="Not exploitable" />
         </list>
       </option>

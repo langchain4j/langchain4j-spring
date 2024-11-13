@@ -1,15 +1,15 @@
 package dev.langchain4j.googleaigemini;
 
-
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.chat.request.ResponseFormat;
-import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
+import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-
 
 import static dev.langchain4j.googleaigemini.Properties.PREFIX;
 
@@ -28,7 +28,22 @@ public class AutoConfig {
                 .topP(chatModelProperties.getTopP())
                 .topK(chatModelProperties.getTopK())
                 .maxOutputTokens(chatModelProperties.getMaxOutputTokens())
-                .responseFormat(ResponseFormat.builder().type(ResponseFormatType.JSON).build())
+                .responseFormat(ResponseFormat.JSON)
+                .build();
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = PREFIX + ".streamingChatModel.enabled", havingValue = "true")
+    StreamingChatLanguageModel googleAiGeminiStreamingChatModel(Properties properties) {
+        ChatModelProperties chatModelProperties = properties.getChatModel();
+        return GoogleAiGeminiStreamingChatModel.builder()
+                .apiKey(chatModelProperties.getAPI_KEY())
+                .modelName(chatModelProperties.getModelName())
+                .temperature(chatModelProperties.getTemperature())
+                .topP(chatModelProperties.getTopP())
+                .topK(chatModelProperties.getTopK())
+                .maxOutputTokens(chatModelProperties.getMaxOutputTokens())
+                .responseFormat(ResponseFormat.JSON)
                 .build();
     }
 }
