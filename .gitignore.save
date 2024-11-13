@@ -1,7 +1,6 @@
 target/
 
 ### IntelliJ IDEA ###
-.idea/*
 **/.idea/
 .idea/modules.xml
 .idea/jarRepositories.xml
