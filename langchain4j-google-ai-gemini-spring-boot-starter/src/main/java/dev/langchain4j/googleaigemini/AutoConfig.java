@@ -22,7 +22,7 @@ public class AutoConfig {
     ChatLanguageModel googleAiGeminiChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         return GoogleAiGeminiChatModel.builder()
-                .apiKey(chatModelProperties.getApikey())
+                .apiKey(chatModelProperties.getApiKey())
                 .modelName(chatModelProperties.getModelName())
                 .temperature(chatModelProperties.getTemperature())
                 .topP(chatModelProperties.getTopP())
