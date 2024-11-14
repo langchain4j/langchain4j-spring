@@ -31,6 +31,7 @@
         <module>langchain4j-qianfan-spring-boot-starter</module>
         <module>langchain4j-milvus-spring-boot-starter</module>
         <module>langchain4j-dashscope-spring-boot-starter</module>
+        <module>langchain4j-pgvector-spring-boot-starter</module>
 
         <module>langchain4j-reactor</module>
     </modules>
