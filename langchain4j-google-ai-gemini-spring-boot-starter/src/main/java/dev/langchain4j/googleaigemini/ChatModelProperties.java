@@ -3,18 +3,19 @@ package dev.langchain4j.googleaigemini;
 
 public class ChatModelProperties {
 
-    private String API_KEY;
+    private String apikey;
     private String modelName;
     private double temperature;
     private double topP;
     private Integer topK;
 
-    public String getAPI_KEY() {
-        return API_KEY;
+
+    public String getApikey() {
+        return apikey;
     }
 
-    public void setAPI_KEY(String API_KEY) {
-        this.API_KEY = API_KEY;
+    public void setApikey(String apikey) {
+        this.apikey = apikey;
     }
 
     public String getModelName() {
