@@ -1,6 +1,8 @@
 package dev.langchain4j.googleaigemini;
 
 
+import dev.langchain4j.model.chat.request.ResponseFormat;
+
 public class ChatModelProperties {
 
     private String apiKey;
@@ -8,7 +10,15 @@ public class ChatModelProperties {
     private double temperature;
     private double topP;
     private Integer topK;
+    private ResponseFormat responseFormat;
 
+    public ResponseFormat getResponseFormat() {
+        return responseFormat;
+    }
+
+    public void setResponseFormat(ResponseFormat responseFormat) {
+        this.responseFormat = responseFormat;
+    }
 
     public String getApiKey() {
         return apiKey;

@@ -28,7 +28,7 @@ public class AutoConfig {
                 .topP(chatModelProperties.getTopP())
                 .topK(chatModelProperties.getTopK())
                 .maxOutputTokens(chatModelProperties.getMaxOutputTokens())
-                .responseFormat(ResponseFormat.JSON)
+                .responseFormat(chatModelProperties.getResponseFormat())
                 .build();
     }
 
@@ -42,7 +42,7 @@ public class AutoConfig {
                 .temperature(chatModelProperties.getTemperature())
                 .topP(chatModelProperties.getTopP())
                 .topK(chatModelProperties.getTopK())
-                .maxOutputTokens(chatModelProperties.getMaxOutputTokens())
+                .responseFormat(chatModelProperties.getResponseFormat())
                 .responseFormat(ResponseFormat.JSON)
                 .build();
     }
