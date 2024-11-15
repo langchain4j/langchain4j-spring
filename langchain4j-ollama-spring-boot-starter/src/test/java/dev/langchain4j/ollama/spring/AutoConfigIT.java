@@ -9,16 +9,17 @@ import dev.langchain4j.model.language.LanguageModel;
 import dev.langchain4j.model.language.StreamingLanguageModel;
 import dev.langchain4j.model.ollama.*;
 import dev.langchain4j.model.output.Response;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.ollama.OllamaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.concurrent.CompletableFuture;
 
-import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,14 +29,22 @@ class AutoConfigIT {
     private static final String MODEL_NAME = "phi";
 
     @Container
-    static GenericContainer<?> ollama = new GenericContainer<>("langchain4j/ollama-" + MODEL_NAME)
+    static OllamaContainer ollama = new OllamaContainer(
+            DockerImageName.parse("alpine/ollama:latest")
+                    .asCompatibleSubstituteFor("ollama/ollama")
+    )
             .withExposedPorts(11434);
+
+    @BeforeAll
+    static void beforeAll() throws Exception {
+        ollama.execInContainer("ollama", "pull", MODEL_NAME);
+    }
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
 
     private static String baseUrl() {
-        return format("http://%s:%s", ollama.getHost(), ollama.getFirstMappedPort());
+        return ollama.getEndpoint();
     }
 
     @Test
