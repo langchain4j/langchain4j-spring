@@ -29,6 +29,7 @@ public class AutoConfig {
                 .topK(chatModelProperties.getTopK())
                 .maxOutputTokens(chatModelProperties.getMaxOutputTokens())
                 .responseFormat(chatModelProperties.getResponseFormat())
+                .logRequestsAndResponses(chatModelProperties.isLogRequestsAndResponses())
                 .build();
     }
 
@@ -43,7 +44,8 @@ public class AutoConfig {
                 .topP(chatModelProperties.getTopP())
                 .topK(chatModelProperties.getTopK())
                 .responseFormat(chatModelProperties.getResponseFormat())
-                .responseFormat(ResponseFormat.JSON)
+                .responseFormat(chatModelProperties.getResponseFormat())
+                .logRequestsAndResponses(chatModelProperties.isLogRequestsAndResponses())
                 .build();
     }
 }

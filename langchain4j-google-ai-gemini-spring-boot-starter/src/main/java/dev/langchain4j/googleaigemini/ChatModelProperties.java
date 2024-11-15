@@ -11,6 +11,15 @@ public class ChatModelProperties {
     private double topP;
     private Integer topK;
     private ResponseFormat responseFormat;
+    private boolean logRequestsAndResponses;
+
+    public boolean isLogRequestsAndResponses() {
+        return logRequestsAndResponses;
+    }
+
+    public void setLogRequestsAndResponses(boolean logRequestsAndResponses) {
+        this.logRequestsAndResponses = logRequestsAndResponses;
+    }
 
     public ResponseFormat getResponseFormat() {
         return responseFormat;
