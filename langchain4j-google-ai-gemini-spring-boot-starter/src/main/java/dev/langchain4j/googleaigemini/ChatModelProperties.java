@@ -5,7 +5,6 @@
 
     public class ChatModelProperties {
 
-        private String apiKey;
         private String modelName;
         private double temperature;
         private double topP;
@@ -28,14 +27,6 @@
 
         public void setResponseFormat(ResponseFormat responseFormat) {
             this.responseFormat = responseFormat;
-        }
-
-        public String getApiKey() {
-            return apiKey;
-        }
-
-        public void setApiKey(String apiKey) {
-            this.apiKey = apiKey;
         }
 
         public String getModelName() {

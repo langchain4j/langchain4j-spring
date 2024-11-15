@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = AutoConfig.class)
 class AutoConfigIT {
 
-    private static final String API_KEY = System.getenv("GOOGLE_API_KEY");
+    private static final String API_KEY = " AIzaSyCML0GPDaTfToi18eHdyntRnV1QsTO_bek";
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));

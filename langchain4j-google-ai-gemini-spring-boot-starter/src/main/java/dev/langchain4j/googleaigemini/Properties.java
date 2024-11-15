@@ -11,6 +11,16 @@ public class Properties {
     @NestedConfigurationProperty
     ChatModelProperties chatModel;
 
+    public String apiKey;
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
     public ChatModelProperties getStreamingChatModel() {
         return streamingChatModel;
     }

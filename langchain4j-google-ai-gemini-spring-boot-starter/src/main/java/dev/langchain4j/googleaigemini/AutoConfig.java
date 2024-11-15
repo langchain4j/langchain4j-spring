@@ -21,7 +21,7 @@ public class AutoConfig {
     ChatLanguageModel googleAiGeminiChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         return GoogleAiGeminiChatModel.builder()
-                .apiKey(chatModelProperties.getApiKey())
+                .apiKey(properties.getApiKey())
                 .modelName(chatModelProperties.getModelName())
                 .temperature(chatModelProperties.getTemperature())
                 .topP(chatModelProperties.getTopP())
@@ -37,7 +37,7 @@ public class AutoConfig {
     StreamingChatLanguageModel googleAiGeminiStreamingChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         return GoogleAiGeminiStreamingChatModel.builder()
-                .apiKey(chatModelProperties.getApiKey())
+                .apiKey(properties.getApiKey())
                 .modelName(chatModelProperties.getModelName())
                 .temperature(chatModelProperties.getTemperature())
                 .topP(chatModelProperties.getTopP())
