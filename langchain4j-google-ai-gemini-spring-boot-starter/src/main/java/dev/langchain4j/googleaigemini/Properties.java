@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 @ConfigurationProperties(prefix = Properties.PREFIX)
 public class Properties {
 
-    static final String PREFIX = "langchain4j.googleaigemini";
+    static final String PREFIX = "langchain4j.google-ai-gemini";
 
     @NestedConfigurationProperty
     ChatModelProperties chatModel;

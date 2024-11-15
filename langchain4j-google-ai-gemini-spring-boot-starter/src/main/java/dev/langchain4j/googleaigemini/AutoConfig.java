@@ -2,7 +2,6 @@ package dev.langchain4j.googleaigemini;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel;
 
@@ -43,7 +42,6 @@ public class AutoConfig {
                 .temperature(chatModelProperties.getTemperature())
                 .topP(chatModelProperties.getTopP())
                 .topK(chatModelProperties.getTopK())
-                .responseFormat(chatModelProperties.getResponseFormat())
                 .responseFormat(chatModelProperties.getResponseFormat())
                 .logRequestsAndResponses(chatModelProperties.isLogRequestsAndResponses())
                 .build();
