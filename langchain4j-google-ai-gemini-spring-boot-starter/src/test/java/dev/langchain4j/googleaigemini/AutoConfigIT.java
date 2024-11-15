@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = AutoConfig.class)
 class AutoConfigIT {
 
-    private static final String API_KEY = " YOUR_API_KEY";
+    private static final String API_KEY = "YOUR_API_KEY"; // Replace with your actual API key
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));

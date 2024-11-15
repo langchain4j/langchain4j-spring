@@ -35,7 +35,7 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(name = PREFIX + ".streamingChatModel.enabled", havingValue = "true")
     StreamingChatLanguageModel googleAiGeminiStreamingChatModel(Properties properties) {
-        ChatModelProperties chatModelProperties = properties.getChatModel();
+        ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         return GoogleAiGeminiStreamingChatModel.builder()
                 .apiKey(properties.getApiKey())
                 .modelName(chatModelProperties.getModelName())

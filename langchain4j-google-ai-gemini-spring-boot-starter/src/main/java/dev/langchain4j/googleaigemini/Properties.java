@@ -9,9 +9,12 @@ public class Properties {
     static final String PREFIX = "langchain4j.google-ai-gemini";
 
     @NestedConfigurationProperty
-    ChatModelProperties chatModel;
+    private ChatModelProperties chatModel;
 
-    public String apiKey;
+    @NestedConfigurationProperty
+    private ChatModelProperties streamingChatModel;
+
+    private String apiKey;
 
     public String getApiKey() {
         return apiKey;
@@ -36,7 +39,4 @@ public class Properties {
     public void setChatModel(ChatModelProperties chatModel) {
         this.chatModel = chatModel;
     }
-
-    @NestedConfigurationProperty
-    ChatModelProperties streamingChatModel;
 }
