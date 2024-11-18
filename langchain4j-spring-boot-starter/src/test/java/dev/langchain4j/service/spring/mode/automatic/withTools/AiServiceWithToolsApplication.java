@@ -2,14 +2,17 @@ package dev.langchain4j.service.spring.mode.automatic.withTools;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
-import dev.langchain4j.service.spring.event.AiServiceRegisteredEventListener;
+import dev.langchain4j.service.spring.mode.automatic.withTools.listener.AbstractApplicationListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 
+@Import(AbstractApplicationListener.class)
 @SpringBootApplication
-class AiServiceWithToolsApplication implements AiServiceRegisteredEventListener {
+class AiServiceWithToolsApplication implements ApplicationListener<AiServiceRegisteredEvent> {
 
     public static void main(String[] args) {
         SpringApplication.run(AiServiceWithToolsApplication.class, args);

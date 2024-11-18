@@ -1,14 +1,22 @@
 package dev.langchain4j.service.spring.mode.automatic.withTools;
 
+import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
+import dev.langchain4j.service.spring.mode.automatic.withTools.listener.AiServiceRegisteredEventListener;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+
+import java.util.List;
 
 import static dev.langchain4j.service.spring.mode.ApiKeys.OPENAI_API_KEY;
 import static dev.langchain4j.service.spring.mode.automatic.withTools.PackagePrivateTools.CURRENT_TIME;
 import static dev.langchain4j.service.spring.mode.automatic.withTools.PublicTools.CURRENT_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AiServicesAutoConfigIT {
 
@@ -58,6 +66,30 @@ class AiServicesAutoConfigIT {
 
                     // then should use PackagePrivateTools.getCurrentTime()
                     assertThat(answer).contains(String.valueOf(CURRENT_TIME.getMinute()));
+                });
+    }
+
+    @Test
+    void should_receive_ai_service_registered_event() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithToolsApplication.class)
+                .run(context -> {
+
+                    // given
+                    AiServiceRegisteredEventListener listener = context.getBean(AiServiceRegisteredEventListener.class);
+
+                    // then should receive AiServiceRegisteredEvent
+                    assertTrue(listener.isEventReceived());
+                    assertEquals(1, listener.getReceivedEvents().size());
+
+                    AiServiceRegisteredEvent event = listener.getReceivedEvents().stream().findFirst().orElse(null);
+                    assertNotNull(event);
+                    assertEquals(AiServiceWithTools.class, event.getAiServiceClass());
+                    assertEquals(2, event.getToolSpecifications().size());
+
+                    List<String> tools = event.getToolSpecifications().stream().map(ToolSpecification::name).toList();
+                    assertTrue(tools.contains("getCurrentDate"));
+                    assertTrue(tools.contains("getCurrentTime"));
                 });
     }
 
