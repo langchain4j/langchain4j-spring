@@ -1,9 +1,11 @@
-package dev.langchain4j.googleaigemini;
+package dev.langchain4j.googleaigemini.spring;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
+import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -15,10 +17,9 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = AutoConfig.class)
 class AutoConfigIT {
 
-    private static final String API_KEY = "YOUR_API_KEY"; // Replace with your actual API key
+    private static final String API_KEY =System.getenv("GOOGLE_API_KEY");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
@@ -38,6 +39,7 @@ class AutoConfigIT {
                 .run(context -> {
                     ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
                     assertThat(chatLanguageModel).isInstanceOf(ChatLanguageModel.class);
+                    assertThat(context.getBean(GoogleAiGeminiChatModel.class)).isSameAs(chatLanguageModel);
                     String response = chatLanguageModel.generate("What is the capital of India");
                     assertThat(response).contains("Delhi");
                 });
@@ -58,7 +60,7 @@ class AutoConfigIT {
                 .run(context -> {
                     StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
                     assertThat(streamingChatLanguageModel).isInstanceOf(StreamingChatLanguageModel.class);
-
+                    assertThat(context.getBean(GoogleAiGeminiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
                     CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
                     streamingChatLanguageModel.generate("What is the capital of India", new StreamingResponseHandler<>() {
                         @Override

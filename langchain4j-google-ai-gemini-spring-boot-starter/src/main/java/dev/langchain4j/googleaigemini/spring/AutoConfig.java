@@ -1,4 +1,4 @@
-package dev.langchain4j.googleaigemini;
+package dev.langchain4j.googleaigemini.spring;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import static dev.langchain4j.googleaigemini.Properties.PREFIX;
+import static dev.langchain4j.googleaigemini.spring.Properties.PREFIX;
 
 @AutoConfiguration
 @EnableConfigurationProperties(Properties.class)

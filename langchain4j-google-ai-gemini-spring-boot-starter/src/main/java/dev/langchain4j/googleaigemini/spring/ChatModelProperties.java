@@ -1,4 +1,4 @@
-    package dev.langchain4j.googleaigemini;
+    package dev.langchain4j.googleaigemini.spring;
 
 
     import dev.langchain4j.model.chat.request.ResponseFormat;
