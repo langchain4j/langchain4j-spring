@@ -1,34 +1,74 @@
 package dev.langchain4j.store.embedding.pgvector.spring;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@Getter
-@Setter
 @ConfigurationProperties(prefix = PgVectorEmbeddingStoreProperties.PREFIX)
 public class PgVectorEmbeddingStoreProperties {
 
     static final String PREFIX = "langchain4j.pgvector";
-    static final String DEFAULT_HOST = "localhost";
-    static final int DEFAULT_PORT = 5432;
-    static final String DEFAULT_DATABASE = "langchain4j_database";
-    static final String DEFAULT_TABLE = "langchain4j_table";
 
-    private String host;
-    private Integer port;
-    private String database;
+    /**
+     * The database table.
+     */
     private String table;
+
+    /**
+     * The vector dimension.
+     */
     private Integer dimension;
-    private String user;
-    private String password;
 
-    private Boolean useIndex;
-    private Integer indexListSize;
+    /**
+     * Should create table automatically, default value is <code>false</code>.
+     */
     private Boolean createTable;
-    private Boolean dropTableFirst;
 
-    @NestedConfigurationProperty
-    private MetadataStorageConfigProperties metadataStorageConfig;
+    /**
+     * Should use <a href="https://github.com/pgvector/pgvector#ivfflat">IVFFlat</a> index.
+     */
+    private Boolean useIndex;
+
+    /**
+     * The IVFFlat number of lists.
+     */
+    private Integer indexListSize;
+
+    public String getTable() {
+        return table;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
+    }
+
+    public Integer getDimension() {
+        return dimension;
+    }
+
+    public void setDimension(Integer dimension) {
+        this.dimension = dimension;
+    }
+
+    public Boolean getCreateTable() {
+        return createTable;
+    }
+
+    public void setCreateTable(Boolean createTable) {
+        this.createTable = createTable;
+    }
+
+    public Boolean getUseIndex() {
+        return useIndex;
+    }
+
+    public void setUseIndex(Boolean useIndex) {
+        this.useIndex = useIndex;
+    }
+
+    public Integer getIndexListSize() {
+        return indexListSize;
+    }
+
+    public void setIndexListSize(Integer indexListSize) {
+        this.indexListSize = indexListSize;
+    }
 }

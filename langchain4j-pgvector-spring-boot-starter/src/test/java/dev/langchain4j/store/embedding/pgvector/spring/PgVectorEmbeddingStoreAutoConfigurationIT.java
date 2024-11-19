@@ -54,12 +54,14 @@ class PgVectorEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoConfig
     @Override
     protected String[] properties() {
         return new String[]{
-                "langchain4j.pgvector.host=" + pgVector.getHost(),
-                "langchain4j.pgvector.port=" + pgVector.getMappedPort(5432),
-                "langchain4j.pgvector.database=" + pgVector.getDatabaseName(),
-                "langchain4j.pgvector.user=" + pgVector.getUsername(),
-                "langchain4j.pgvector.password=" + pgVector.getPassword(),
+                "spring.datasource.url=" + pgVector.getJdbcUrl(),
+                "spring.datasource.username=" + pgVector.getUsername(),
+                "spring.datasource.password=" + pgVector.getPassword(),
+                "spring.datasource.driver-class-name=" + pgVector.getDriverClassName(),
+                "langchain4j.pgvector.create-table=true",
                 "langchain4j.pgvector.table=" + DEFAULT_TABLE,
+                "langchain4j.pgvector.use-index=true",
+                "langchain4j.pgvector.index-list-size=100",
                 "langchain4j.pgvector.dimension=384"
         };
     }
