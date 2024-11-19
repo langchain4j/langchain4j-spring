@@ -2,33 +2,42 @@ package dev.langchain4j.store.embedding.pgvector.spring;
 
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
-import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.Nullable;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.Optional;
 
+import static dev.langchain4j.internal.ValidationUtils.*;
 import static dev.langchain4j.store.embedding.pgvector.spring.PgVectorEmbeddingStoreProperties.*;
+import static org.springframework.util.StringUtils.startsWithIgnoreCase;
 
 @AutoConfiguration
-@EnableConfigurationProperties(PgVectorEmbeddingStoreProperties.class)
+@EnableConfigurationProperties({PgVectorEmbeddingStoreProperties.class, PgVectorDataSourceProperties.class})
 @ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-@ConditionalOnClass({PgVectorEmbeddingStore.class, DataSource.class})
 public class PgVectorEmbeddingStoreAutoConfiguration {
+
+    private static final Logger log = LoggerFactory.getLogger(PgVectorEmbeddingStoreAutoConfiguration.class);
 
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnBean(DataSource.class)
+    @ConditionalOnProperty(prefix = PgVectorDataSourceProperties.PREFIX, name = "enabled", havingValue = "false")
     public PgVectorEmbeddingStore pgVectorEmbeddingStore(DataSource dataSource, PgVectorEmbeddingStoreProperties properties,
                                                          @Nullable EmbeddingModel embeddingModel) {
+        // Check if the context's data source is a Postgres datasource
+        ensureTrue(isPostgresqlDataSource(dataSource), "The DataSource in Spring Context is not a Postgres datasource, you need to manually specify the Postgres datasource configuration via 'langchain4j.pgvector.datasource'.");
+
         Integer dimension = Optional.ofNullable(properties.getDimension()).orElseGet(() -> embeddingModel == null ? null : embeddingModel.dimension());
 
         return PgVectorEmbeddingStore.datasourceBuilder()
@@ -41,14 +50,44 @@ public class PgVectorEmbeddingStoreAutoConfiguration {
                 .build();
     }
 
-    @Configuration
-    @ConditionalOnMissingBean(DataSource.class)
-    protected static class DataSourceNotFoundConfiguration {
-        @PostConstruct
-        public void logWarning() {
-            throw new IllegalStateException(
-                    "No DataSource found. Please configure a DataSource (e.g., by including spring-boot-starter-jdbc) to use PgVector."
-            );
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = PgVectorDataSourceProperties.PREFIX, name = "enabled", havingValue = "true")
+    public PgVectorEmbeddingStore pgVectorEmbeddingStore(PgVectorEmbeddingStoreProperties properties, PgVectorDataSourceProperties dataSourceProperties,
+                                                         @Nullable EmbeddingModel embeddingModel) {
+        Integer dimension = Optional.ofNullable(properties.getDimension()).orElseGet(() -> embeddingModel == null ? null : embeddingModel.dimension());
+        String host = ensureNotBlank(dataSourceProperties.getHost(), "langchain4j.pgvector.datasource.host");
+        Integer port = ensureGreaterThanZero(dataSourceProperties.getPort(), "langchain4j.pgvector.datasource.port");
+        String user = ensureNotBlank(dataSourceProperties.getUser(), "langchain4j.pgvector.datasource.user");
+        String password = ensureNotBlank(dataSourceProperties.getPassword(), "langchain4j.pgvector.datasource.password");
+        String database = ensureNotBlank(dataSourceProperties.getDatabase(), "langchain4j.pgvector.datasource.database");
+
+        return PgVectorEmbeddingStore.builder()
+                .host(host)
+                .port(port)
+                .user(user)
+                .password(password)
+                .database(database)
+                .table(properties.getTable())
+                .createTable(properties.getCreateTable())
+                .dimension(dimension)
+                .useIndex(properties.getUseIndex())
+                .indexListSize(properties.getIndexListSize())
+                .build();
+    }
+
+    /**
+     * Check if the datasource is <code>postgresql</code>`.
+     * @param dataSource instance of {@link DataSource}.
+     * @return true means it is a postgresql data source, otherwise it is not.
+     */
+    private boolean isPostgresqlDataSource(DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection()) {
+            DatabaseMetaData metaData = connection.getMetaData();
+            return startsWithIgnoreCase(metaData.getURL(), "jdbc:postgresql");
+        } catch (SQLException e) {
+            log.warn("Exception checking datasource driver type during PgVector auto-configuration .");
+            return false;
         }
     }
 }
