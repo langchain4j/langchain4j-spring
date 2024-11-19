@@ -8,7 +8,7 @@ public class PgVectorEmbeddingStoreProperties {
     static final String PREFIX = "langchain4j.pgvector";
 
     /**
-     * The database table.
+     * The pgvector database table.
      */
     private String table;
 
