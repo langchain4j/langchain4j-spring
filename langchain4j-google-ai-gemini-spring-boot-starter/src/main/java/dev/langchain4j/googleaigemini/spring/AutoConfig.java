@@ -2,6 +2,7 @@ package dev.langchain4j.googleaigemini.spring;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.googleai.GeminiSafetySetting;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel;
 
@@ -9,6 +10,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+
+
+import java.util.Map;
 
 import static dev.langchain4j.googleaigemini.spring.Properties.PREFIX;
 
@@ -29,6 +33,12 @@ public class AutoConfig {
                 .maxOutputTokens(chatModelProperties.getMaxOutputTokens())
                 .responseFormat(chatModelProperties.getResponseFormat())
                 .logRequestsAndResponses(chatModelProperties.isLogRequestsAndResponses())
+                .safetySettings(
+                        Map.of(properties.getSafetySetting().getGeminiHarmCategory(),
+                                properties.getSafetySetting().getGeminiHarmBlockThreshold()))
+                .toolConfig(
+                        properties.getFunctionCallingConfig().getGeminiMode(),
+                        properties.getFunctionCallingConfig().getAllowedFunctionNames().toArray(new String[0]))
                 .build();
     }
 
@@ -44,6 +54,11 @@ public class AutoConfig {
                 .topK(chatModelProperties.getTopK())
                 .responseFormat(chatModelProperties.getResponseFormat())
                 .logRequestsAndResponses(chatModelProperties.isLogRequestsAndResponses())
+//                .safetySettings(
+//                        List.of(GeminiSafetySetting))
+//                .toolConfig(
+//                        properties.getFunctionCallingConfig().getGeminiMode(),
+//                        properties.getFunctionCallingConfig().getAllowedFunctionNames().toArray(new String[0]))
                 .build();
     }
 }

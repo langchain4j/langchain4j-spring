@@ -3,6 +3,8 @@
 
     import dev.langchain4j.model.chat.request.ResponseFormat;
 
+    import java.time.Duration;
+
     public class ChatModelProperties {
 
         private String modelName;
@@ -12,6 +14,25 @@
         private Integer maxOutputTokens;
         private ResponseFormat responseFormat;
         private boolean logRequestsAndResponses;
+        private Integer maxRetries;
+
+        public Integer getMaxRetries() {
+            return maxRetries;
+        }
+
+        public void setMaxRetries(Integer maxRetries) {
+            this.maxRetries = maxRetries;
+        }
+
+        public Duration getTimeout() {
+            return timeout;
+        }
+
+        public void setTimeout(Duration timeout) {
+            this.timeout = timeout;
+        }
+
+        private Duration timeout;
 
         public boolean isLogRequestsAndResponses() {
             return logRequestsAndResponses;
