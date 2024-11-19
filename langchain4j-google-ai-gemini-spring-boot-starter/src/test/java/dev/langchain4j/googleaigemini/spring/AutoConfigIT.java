@@ -30,11 +30,15 @@ class AutoConfigIT {
                         "langchain4j.google-ai-gemini.apiKey=" + API_KEY,
                         "langchain4j.google-ai-gemini.enabled=true",
                         "langchain4j.google-ai-gemini.chatModel.enabled=true",
-                        "langchain4j.google-ai-gemini.chatModel.modelName=gemini-1.5-flash",
+                        "langchain4j.google-ai-gemini.chatModel.modelName=gemini-1.0-pro  ",
                         "langchain4j.google-ai-gemini.chatModel.temperature=0.7",
                         "langchain4j.google-ai-gemini.chatModel.topP=0.9",
                         "langchain4j.google-ai-gemini.chatModel.topK=40",
-                        "langchain4j.google-ai-gemini.chatModel.maxOutputTokens=100"
+                        "langchain4j.google-ai-gemini.chatModel.maxOutputTokens=100",
+                        "langchain4j.google-ai-gemini.safetySetting.geminiHarmCategory=HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        "langchain4j.google-ai-gemini.safetySetting.geminiHarmBlockThreshold=HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+                        "langchain4j.google-ai-gemini.functionCallingConfig.geminiMode=ANY",
+                        "langchain4j.google-ai-gemini.functionCallingConfig.allowedFunctionNames=allowCodeExecution,includeCodeExecutionOutput"
                 )
                 .run(context -> {
                     ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
@@ -42,6 +46,8 @@ class AutoConfigIT {
                     assertThat(context.getBean(GoogleAiGeminiChatModel.class)).isSameAs(chatLanguageModel);
                     String response = chatLanguageModel.generate("What is the capital of India");
                     assertThat(response).contains("Delhi");
+                    String newResponse = chatLanguageModel.generate("Calculate the Fibonacci of 22 and return the result as an integer value along with the code. ");
+                    assertThat(newResponse).contains("17711");
                 });
     }
 
