@@ -1,15 +1,18 @@
 package dev.langchain4j.googleaigemini.spring;
 
+import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.googleai.GoogleAiEmbeddingModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel;
 import dev.langchain4j.model.output.Response;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import java.util.concurrent.CompletableFuture;
@@ -19,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AutoConfigIT {
 
-    private static final String API_KEY =System.getenv("GOOGLE_AI_GEMINI_API_KEY");
+private static final String API_KEY =System.getenv("GOOGLE_AI_GEMINI_API_KEY");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
@@ -86,5 +89,26 @@ class AutoConfigIT {
                     Response<AiMessage> response = future.get(60, SECONDS);
                     assertThat(response.content().text()).contains("Delhi");
                 });
+    }
+
+    @Test
+    void provide_embedding_model(){
+        contextRunner.withPropertyValues(
+                "langchain4j.google-ai-gemini.apiKey=" + API_KEY,
+                "langchain4j.google-ai-gemini.embeddingModel.enabled=true",
+                "langchain4j.google-ai-gemini.embeddingModel.titleMetadataKey=title-key",
+                "langchain4j.google-ai-gemini.embeddingModel.modelName=text-embedding-004",
+                "langchain4j.google-ai-gemini.embeddingModel.logRequestsAndResponses=true",
+                "langchain4j.google-ai-gemini.embeddingModel.maxRetries=3",
+                "langchain4j.google-ai-gemini.embeddingModel.outputDimensionality=512",
+                "langchain4j.google-ai-gemini.embeddingModel.taskType=CLASSIFICATION",
+                "langchain4j.google-ai-gemini.embeddingModel.timeout=PT30S"
+        ).run(context -> {
+            EmbeddingModel embeddingModel = context.getBean(GoogleAiEmbeddingModel.class);
+            assertThat(embeddingModel).isInstanceOf(EmbeddingModel.class);
+            assertThat(context.getBean(GoogleAiEmbeddingModel.class)).isSameAs(embeddingModel);
+            Response<Embedding> response= embeddingModel.embed("Hi, I live in India");
+            assertThat(response.content().dimension()==512);
+        });
     }
 }

@@ -1,6 +1,5 @@
     package dev.langchain4j.googleaigemini.spring;
 
-
     import dev.langchain4j.model.chat.request.ResponseFormat;
 
     import java.time.Duration;
@@ -15,6 +14,7 @@
         private ResponseFormat responseFormat;
         private boolean logRequestsAndResponses;
         private Integer maxRetries;
+        private Duration timeout;
 
         public Integer getMaxRetries() {
             return maxRetries;
@@ -31,8 +31,6 @@
         public void setTimeout(Duration timeout) {
             this.timeout = timeout;
         }
-
-        private Duration timeout;
 
         public boolean isLogRequestsAndResponses() {
             return logRequestsAndResponses;

@@ -1,11 +1,7 @@
 package dev.langchain4j.googleaigemini.spring;
 
-import dev.langchain4j.googleaigemini.spring.GeminiSafetySetting;
-import dev.langchain4j.googleaigemini.spring.GeminiFunctionCallingConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-
-import java.util.List;
 
 @ConfigurationProperties(prefix = Properties.PREFIX)
 public class Properties {
@@ -18,10 +14,24 @@ public class Properties {
     @NestedConfigurationProperty
     private ChatModelProperties streamingChatModel;
 
-    private String apiKey;
-
     @NestedConfigurationProperty
     private GeminiSafetySetting safetySetting;
+
+    @NestedConfigurationProperty
+    private EmbeddingModelProperties embeddingModel;
+
+    @NestedConfigurationProperty
+    private GeminiFunctionCallingConfig functionCallingConfig;
+
+    private String apiKey;
+
+    public EmbeddingModelProperties getEmbeddingModel() {
+        return embeddingModel;
+    }
+
+    public void setEmbeddingModel(EmbeddingModelProperties embeddingModel) {
+        this.embeddingModel = embeddingModel;
+    }
 
     public GeminiSafetySetting getSafetySetting() {
         return safetySetting;
@@ -38,9 +48,6 @@ public class Properties {
     public void setFunctionCallingConfig(GeminiFunctionCallingConfig functionCallingConfig) {
         this.functionCallingConfig = functionCallingConfig;
     }
-
-    @NestedConfigurationProperty
-    private GeminiFunctionCallingConfig functionCallingConfig;
 
     public String getApiKey() {
         return apiKey;
