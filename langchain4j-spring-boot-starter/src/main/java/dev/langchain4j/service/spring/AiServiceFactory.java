@@ -46,7 +46,7 @@ class AiServiceFactory implements FactoryBean<Object> {
         this.chatMemoryProvider = chatMemoryProvider;
     }
 
-    public void setContentRetriever(ContentRetriever contentRetriever) {
+    public void  setContentRetriever(ContentRetriever contentRetriever) {
         this.contentRetriever = contentRetriever;
     }
 
