@@ -49,7 +49,12 @@ public class AiServicesAutoConfig {
             Set<String> tools = new HashSet<>();
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
                 try {
-                    Class<?> beanClass = Class.forName(beanFactory.getBeanDefinition(beanName).getBeanClassName());
+                    String beanClassName = beanFactory.getBeanDefinition(beanName).getBeanClassName();
+                    if (beanClassName == null) {
+                        // skip if class name of bean is null
+                        continue;
+                    }
+                    Class<?> beanClass = Class.forName(beanClassName);
                     for (Method beanMethod : beanClass.getDeclaredMethods()) {
                         if (beanMethod.isAnnotationPresent(Tool.class)) {
                             tools.add(beanName);

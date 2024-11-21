@@ -1,14 +1,18 @@
 package dev.langchain4j.service.spring.mode.automatic.withTools;
 
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.mode.automatic.withTools.aop.CustomAnnotationAspect;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import static dev.langchain4j.service.spring.mode.ApiKeys.OPENAI_API_KEY;
+import static dev.langchain4j.service.spring.mode.automatic.withTools.AopEnhancedTools.ASPECT_PACKAGE;
+import static dev.langchain4j.service.spring.mode.automatic.withTools.AopEnhancedTools.TOOL_DESCRIPTION;
 import static dev.langchain4j.service.spring.mode.automatic.withTools.PackagePrivateTools.CURRENT_TIME;
 import static dev.langchain4j.service.spring.mode.automatic.withTools.PublicTools.CURRENT_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AiServicesAutoConfigIT {
 
@@ -58,6 +62,34 @@ class AiServicesAutoConfigIT {
 
                     // then should use PackagePrivateTools.getCurrentTime()
                     assertThat(answer).contains(String.valueOf(CURRENT_TIME.getMinute()));
+                });
+    }
+
+    @Test
+    void should_create_AI_service_with_tool_which_is_enhanced_by_spring_aop() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
+                        "langchain4j.open-ai.chat-model.temperature=0.0",
+                        "langchain4j.open-ai.chat-model.log-requests=true",
+                        "langchain4j.open-ai.chat-model.log-responses=true"
+                )
+                .withUserConfiguration(AiServiceWithToolsApplication.class)
+                .run(context -> {
+
+                    // given
+                    AiServiceWithTools aiService = context.getBean(AiServiceWithTools.class);
+
+                    // when
+                    String answer = aiService.chat("In Spring Boot, which package is the @Aspect annotation located in?");
+
+                    // then should use AopEnhancedTools.getAspectPackage()
+                    assertThat(answer).contains(ASPECT_PACKAGE);
+
+                    // and AOP aspect should be enabled
+                    CustomAnnotationAspect aspect = context.getBean(CustomAnnotationAspect.class);
+                    assertTrue(aspect.isAspectEnabled());
+                    assertTrue(aspect.getToolsDescription().contains(TOOL_DESCRIPTION));
                 });
     }
 
