@@ -7,12 +7,12 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CustomAnnotation {
+public @interface ToolObserver {
 
     /**
      * key just for example
      *
      * @return the key
      */
-    String customKey();
+    String key();
 }

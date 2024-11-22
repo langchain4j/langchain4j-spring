@@ -12,8 +12,6 @@ import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
 import dev.langchain4j.service.tool.ToolExecutor;
-import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.FactoryBean;
 
 import java.lang.reflect.Method;
@@ -24,6 +22,8 @@ import java.util.Map;
 
 import static dev.langchain4j.agent.tool.ToolSpecifications.toolSpecificationFrom;
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
+import static org.springframework.aop.framework.AopProxyUtils.ultimateTargetClass;
+import static org.springframework.aop.support.AopUtils.isAopProxy;
 
 class AiServiceFactory implements FactoryBean<Object> {
 
@@ -105,10 +105,15 @@ class AiServiceFactory implements FactoryBean<Object> {
         }
 
         if (!isNullOrEmpty(tools)) {
-            builder = builder.tools(tools);
-            builder = builder.tools(aopEnhancedTools());
+            for (Object tool : tools) {
+                if (isAopProxy(tool)) {
+                    builder = builder.tools(aopEnhancedTools(tool));
+                } else {
+                    builder = builder.tools(tool);
+                }
+            }
         }
-        
+
         return builder.build();
     }
 
@@ -133,20 +138,20 @@ class AiServiceFactory implements FactoryBean<Object> {
      * Instead, a FactoryBean should implement DisposableBean and delegate any such close call to the underlying object.
      */
 
-    private Map<ToolSpecification, ToolExecutor> aopEnhancedTools() {
+    private Map<ToolSpecification, ToolExecutor> aopEnhancedTools(Object enhancedTool) {
         Map<ToolSpecification, ToolExecutor> toolExecutors = new HashMap<>();
-        tools.stream().filter(AopUtils::isAopProxy).forEach(enhancedTool -> {
-            Class<?> originalToolClass = AopProxyUtils.ultimateTargetClass(enhancedTool);
-            for (Method method : originalToolClass.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(Tool.class)) {
-                    Arrays.stream(enhancedTool.getClass().getDeclaredMethods())
-                          .filter(m -> m.getName().equals(method.getName()))
-                          .findFirst()
-                          .ifPresent(enhancedMethod -> toolExecutors.put(toolSpecificationFrom(method),
-                                  new DefaultToolExecutor(enhancedTool, enhancedMethod)));
-                }
+        Class<?> originalToolClass = ultimateTargetClass(enhancedTool);
+        for (Method originalToolMethod : originalToolClass.getDeclaredMethods()) {
+            if (originalToolMethod.isAnnotationPresent(Tool.class)) {
+                Arrays.stream(enhancedTool.getClass().getDeclaredMethods())
+                      .filter(m -> m.getName().equals(originalToolMethod.getName()))
+                      .findFirst()
+                      .ifPresent(enhancedMethod -> {
+                          ToolSpecification toolSpecification = toolSpecificationFrom(originalToolMethod);
+                          toolExecutors.put(toolSpecification, new DefaultToolExecutor(enhancedTool, enhancedMethod));
+                      });
             }
-        });
+        }
         return toolExecutors;
     }
 }
