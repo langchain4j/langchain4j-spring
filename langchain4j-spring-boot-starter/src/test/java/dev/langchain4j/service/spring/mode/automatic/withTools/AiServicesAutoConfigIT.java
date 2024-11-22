@@ -86,14 +86,17 @@ class AiServicesAutoConfigIT {
 
                     // when
                     String answer = aiService.chat("Which package is the @ToolObserver annotation located in? " +
-                            "And what is the key of the @ToolObserver annotation?");
+                            "And what is the key of the @ToolObserver annotation?" +
+                            "And What is the current time?");
 
                     System.out.println("Answer: " + answer);
 
                     // then should use AopEnhancedTools.getAspectPackage()
                     // & AopEnhancedTools.getToolObserverKey()
+                    // & PackagePrivateTools.getCurrentTime()
                     assertThat(answer).contains(TOOL_OBSERVER_PACKAGE_NAME);
                     assertThat(answer).contains(TOOL_OBSERVER_KEY);
+                    assertThat(answer).contains(String.valueOf(CURRENT_TIME.getMinute()));
 
                     // and AOP aspect should be called
                     // & only for getToolObserverKey() which is annotated with @ToolObserver
