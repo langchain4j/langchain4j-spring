@@ -191,7 +191,7 @@
                         <configuration>
                             <boms>
                                 <bom>
-                                    <artifactId>langchain4j-spring-boot-bom</artifactId>
+                                    <artifactId>langchain4j-spring-bom</artifactId>
                                     <name>LangChain4j Spring Boot:: BOM</name>
                                     <description>Bill of Materials POM for getting full, complete set of compatible versions of LangChain4j Spring Boot modules</description>
                                     <properties>
