@@ -1,5 +1,7 @@
 package dev.langchain4j.service.spring;
 
+import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -8,11 +10,20 @@ import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.tool.DefaultToolExecutor;
+import dev.langchain4j.service.tool.ToolExecutor;
 import org.springframework.beans.factory.FactoryBean;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static dev.langchain4j.agent.tool.ToolSpecifications.toolSpecificationFrom;
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
+import static org.springframework.aop.framework.AopProxyUtils.ultimateTargetClass;
+import static org.springframework.aop.support.AopUtils.isAopProxy;
 
 class AiServiceFactory implements FactoryBean<Object> {
 
@@ -94,7 +105,13 @@ class AiServiceFactory implements FactoryBean<Object> {
         }
 
         if (!isNullOrEmpty(tools)) {
-            builder = builder.tools(tools);
+            for (Object tool : tools) {
+                if (isAopProxy(tool)) {
+                    builder = builder.tools(aopEnhancedTools(tool));
+                } else {
+                    builder = builder.tools(tool);
+                }
+            }
         }
 
         return builder.build();
@@ -120,4 +137,21 @@ class AiServiceFactory implements FactoryBean<Object> {
      * (such as java.io.Closeable.close()) will not be called automatically.
      * Instead, a FactoryBean should implement DisposableBean and delegate any such close call to the underlying object.
      */
+
+    private Map<ToolSpecification, ToolExecutor> aopEnhancedTools(Object enhancedTool) {
+        Map<ToolSpecification, ToolExecutor> toolExecutors = new HashMap<>();
+        Class<?> originalToolClass = ultimateTargetClass(enhancedTool);
+        for (Method originalToolMethod : originalToolClass.getDeclaredMethods()) {
+            if (originalToolMethod.isAnnotationPresent(Tool.class)) {
+                Arrays.stream(enhancedTool.getClass().getDeclaredMethods())
+                      .filter(m -> m.getName().equals(originalToolMethod.getName()))
+                      .findFirst()
+                      .ifPresent(enhancedMethod -> {
+                          ToolSpecification toolSpecification = toolSpecificationFrom(originalToolMethod);
+                          toolExecutors.put(toolSpecification, new DefaultToolExecutor(enhancedTool, enhancedMethod));
+                      });
+            }
+        }
+        return toolExecutors;
+    }
 }
