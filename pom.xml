@@ -178,6 +178,38 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>io.sundr</groupId>
+                <artifactId>sundr-maven-plugin</artifactId>
+                <version>0.200.0</version>
+                <executions>
+                    <execution>
+                        <inherited>false</inherited>
+                        <goals>
+                            <goal>generate-bom</goal>
+                        </goals>
+                        <configuration>
+                            <boms>
+                                <bom>
+                                    <artifactId>langchain4j-spring-bom</artifactId>
+                                    <name>LangChain4j Spring :: BOM</name>
+                                    <description>Bill of Materials POM for getting full, complete set of compatible versions of LangChain4j Spring modules</description>
+                                    <properties>
+                                        <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
+                                        <sonar.skip>true</sonar.skip>
+                                    </properties>
+                                    <modules>
+                                        <excludes>
+                                            <exclude>*:langchain4j-spring-boot-tests</exclude>
+                                        </excludes>
+                                    </modules>
+                                </bom>
+                            </boms>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -193,11 +225,13 @@
     <developers>
         <developer>
             <id>deep-learning-dynamo</id>
+            <name>deep-learning-dynamo</name>
             <email>deeplearningdynamo@gmail.com</email>
             <url>https://github.com/deep-learning-dynamo</url>
         </developer>
         <developer>
             <id>kuraleta</id>
+            <name>kuraleta</name>
             <email>digital.kuraleta@gmail.com</email>
             <url>https://github.com/kuraleta</url>
         </developer>
@@ -212,6 +246,7 @@
     <repositories>
         <repository>
             <id>ossrh-snapshots</id>
+            <name>Sonatype Central Snapshots</name>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
@@ -222,6 +257,7 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
+            <name>Sonatype Central Snapshots</name>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
