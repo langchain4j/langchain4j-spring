@@ -51,7 +51,6 @@ public class AiServicesAutoConfig {
                 try {
                     String beanClassName = beanFactory.getBeanDefinition(beanName).getBeanClassName();
                     if (beanClassName == null) {
-                        // skip if class name of bean is null
                         continue;
                     }
                     Class<?> beanClass = Class.forName(beanClassName);
