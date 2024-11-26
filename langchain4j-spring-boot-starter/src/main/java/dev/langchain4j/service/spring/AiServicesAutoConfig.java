@@ -65,7 +65,11 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
             Map<String, ToolSpecification> toolSpecifications = new HashMap<>();
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
                 try {
-                    Class<?> beanClass = Class.forName(beanFactory.getBeanDefinition(beanName).getBeanClassName());
+                    String beanClassName = beanFactory.getBeanDefinition(beanName).getBeanClassName();
+                    if (beanClassName == null) {
+                        continue;
+                    }
+                    Class<?> beanClass = Class.forName(beanClassName);
                     for (Method beanMethod : beanClass.getDeclaredMethods()) {
                         if (beanMethod.isAnnotationPresent(Tool.class)) {
                             if (tools.add(beanName)) {

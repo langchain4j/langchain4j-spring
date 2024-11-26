@@ -4,6 +4,7 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
 import dev.langchain4j.service.spring.mode.automatic.withTools.listener.AiServiceRegisteredEventListener;
+import dev.langchain4j.service.spring.mode.automatic.withTools.aop.ToolObserverAspect;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -11,11 +12,16 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import java.util.List;
 
 import static dev.langchain4j.service.spring.mode.ApiKeys.OPENAI_API_KEY;
+import static dev.langchain4j.service.spring.mode.automatic.withTools.AopEnhancedTools.TOOL_OBSERVER_KEY;
+import static dev.langchain4j.service.spring.mode.automatic.withTools.AopEnhancedTools.TOOL_OBSERVER_KEY_NAME_DESCRIPTION;
+import static dev.langchain4j.service.spring.mode.automatic.withTools.AopEnhancedTools.TOOL_OBSERVER_PACKAGE_NAME;
+import static dev.langchain4j.service.spring.mode.automatic.withTools.AopEnhancedTools.TOOL_OBSERVER_PACKAGE_NAME_DESCRIPTION;
 import static dev.langchain4j.service.spring.mode.automatic.withTools.PackagePrivateTools.CURRENT_TIME;
 import static dev.langchain4j.service.spring.mode.automatic.withTools.PublicTools.CURRENT_DATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AiServicesAutoConfigIT {
@@ -90,6 +96,45 @@ class AiServicesAutoConfigIT {
                     List<String> tools = event.getToolSpecifications().stream().map(ToolSpecification::name).toList();
                     assertTrue(tools.contains("getCurrentDate"));
                     assertTrue(tools.contains("getCurrentTime"));
+                 });
+     }
+
+      void should_create_AI_service_with_tool_which_is_enhanced_by_spring_aop() {
+          contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
+                        "langchain4j.open-ai.chat-model.temperature=0.0",
+                        "langchain4j.open-ai.chat-model.log-requests=true",
+                        "langchain4j.open-ai.chat-model.log-responses=true"
+                )
+                .withUserConfiguration(AiServiceWithToolsApplication.class)
+                .run(context -> {
+                  
+                    // given
+                    AiServiceWithTools aiService = context.getBean(AiServiceWithTools.class);
+
+                    // when
+                    String answer = aiService.chat("Which package is the @ToolObserver annotation located in? " +
+                            "And what is the key of the @ToolObserver annotation?" +
+                            "And What is the current time?");
+
+                    System.out.println("Answer: " + answer);
+
+                    // then should use AopEnhancedTools.getAspectPackage()
+                    // & AopEnhancedTools.getToolObserverKey()
+                    // & PackagePrivateTools.getCurrentTime()
+                    assertThat(answer).contains(TOOL_OBSERVER_PACKAGE_NAME);
+                    assertThat(answer).contains(TOOL_OBSERVER_KEY);
+                    assertThat(answer).contains(String.valueOf(CURRENT_TIME.getMinute()));
+
+                    // and AOP aspect should be called
+                    // & only for getToolObserverKey() which is annotated with @ToolObserver
+                    ToolObserverAspect aspect = context.getBean(ToolObserverAspect.class);
+                    assertTrue(aspect.aspectHasBeenCalled());
+
+                    assertEquals(1, aspect.getObservedTools().size());
+                    assertTrue(aspect.getObservedTools().contains(TOOL_OBSERVER_KEY_NAME_DESCRIPTION));
+                    assertFalse(aspect.getObservedTools().contains(TOOL_OBSERVER_PACKAGE_NAME_DESCRIPTION));
                 });
     }
 
