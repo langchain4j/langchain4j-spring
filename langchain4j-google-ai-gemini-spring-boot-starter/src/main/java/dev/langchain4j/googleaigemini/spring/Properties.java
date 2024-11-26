@@ -15,13 +15,7 @@ public class Properties {
     private ChatModelProperties streamingChatModel;
 
     @NestedConfigurationProperty
-    private GeminiSafetySetting safetySetting;
-
-    @NestedConfigurationProperty
     private EmbeddingModelProperties embeddingModel;
-
-    @NestedConfigurationProperty
-    private GeminiFunctionCallingConfig functionCallingConfig;
 
     private String apiKey;
 
@@ -31,22 +25,6 @@ public class Properties {
 
     public void setEmbeddingModel(EmbeddingModelProperties embeddingModel) {
         this.embeddingModel = embeddingModel;
-    }
-
-    public GeminiSafetySetting getSafetySetting() {
-        return safetySetting;
-    }
-
-    public void setSafetySetting(GeminiSafetySetting safetySetting) {
-        this.safetySetting = safetySetting;
-    }
-
-    public GeminiFunctionCallingConfig getFunctionCallingConfig() {
-        return functionCallingConfig;
-    }
-
-    public void setFunctionCallingConfig(GeminiFunctionCallingConfig functionCallingConfig) {
-        this.functionCallingConfig = functionCallingConfig;
     }
 
     public String getApiKey() {

@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>langchain4j-google-ai-gemini-spring-boot-starter</artifactId>
-    <name>LangChain4j Spring Boot starter for Google Gemini AI</name>
+    <name>LangChain4j Spring Boot starter for Google AI Gemini</name>
     <packaging>jar</packaging>
 
     <dependencies>

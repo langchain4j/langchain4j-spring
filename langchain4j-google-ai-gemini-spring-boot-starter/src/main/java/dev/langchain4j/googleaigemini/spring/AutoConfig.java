@@ -32,13 +32,13 @@ public class AutoConfig {
                 .topK(chatModelProperties.getTopK())
                 .maxOutputTokens(chatModelProperties.getMaxOutputTokens())
                 .responseFormat(chatModelProperties.getResponseFormat())
-                .logRequestsAndResponses(chatModelProperties.isLogRequestsAndResponses())
+                .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses())
                 .safetySettings(
-                        Map.of(properties.getSafetySetting().getGeminiHarmCategory(),
-                                properties.getSafetySetting().getGeminiHarmBlockThreshold()))
+                        Map.of(chatModelProperties.getSafetySetting().getGeminiHarmCategory(),
+                                chatModelProperties.getSafetySetting().getGeminiHarmBlockThreshold()))
                 .toolConfig(
-                        properties.getFunctionCallingConfig().getGeminiMode(),
-                        properties.getFunctionCallingConfig().getAllowedFunctionNames().toArray(new String[0]))
+                        chatModelProperties.getFunctionCallingConfig().getGeminiMode(),
+                        chatModelProperties.getFunctionCallingConfig().getAllowedFunctionNames().toArray(new String[0]))
                 .build();
     }
 
@@ -53,7 +53,7 @@ public class AutoConfig {
                 .topP(chatModelProperties.getTopP())
                 .topK(chatModelProperties.getTopK())
                 .responseFormat(chatModelProperties.getResponseFormat())
-                .logRequestsAndResponses(chatModelProperties.isLogRequestsAndResponses())
+                .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses())
                 .build();
     }
 
@@ -69,7 +69,7 @@ public class AutoConfig {
                 .outputDimensionality(embeddingModelProperties.getOutputDimensionality())
                 .taskType(embeddingModelProperties.getTaskType())
                 .timeout(embeddingModelProperties.getTimeout())
-                .titleMetadataKey("title")
+                .titleMetadataKey(embeddingModelProperties.getTitleMetadataKey())
                 .build();
     }
 }

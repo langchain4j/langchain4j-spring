@@ -1,20 +1,25 @@
     package dev.langchain4j.googleaigemini.spring;
 
     import dev.langchain4j.model.chat.request.ResponseFormat;
+    import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
     import java.time.Duration;
 
     public class ChatModelProperties {
 
         private String modelName;
-        private double temperature;
-        private double topP;
+        private Double temperature;
+        private Double topP;
         private Integer topK;
         private Integer maxOutputTokens;
         private ResponseFormat responseFormat;
-        private boolean logRequestsAndResponses;
+        private Boolean logRequestsAndResponses;
         private Integer maxRetries;
         private Duration timeout;
+
+        private GeminiSafetySetting safetySetting;
+
+        private GeminiFunctionCallingConfig functionCallingConfig;
 
         public Integer getMaxRetries() {
             return maxRetries;
@@ -30,14 +35,6 @@
 
         public void setTimeout(Duration timeout) {
             this.timeout = timeout;
-        }
-
-        public boolean isLogRequestsAndResponses() {
-            return logRequestsAndResponses;
-        }
-
-        public void setLogRequestsAndResponses(boolean logRequestsAndResponses) {
-            this.logRequestsAndResponses = logRequestsAndResponses;
         }
 
         public ResponseFormat getResponseFormat() {
@@ -56,19 +53,19 @@
             this.modelName = modelName;
         }
 
-        public double getTemperature() {
+        public Double getTemperature() {
             return temperature;
         }
 
-        public void setTemperature(double temperature) {
+        public void setTemperature(Double temperature) {
             this.temperature = temperature;
         }
 
-        public double getTopP() {
+        public Double getTopP() {
             return topP;
         }
 
-        public void setTopP(double topP) {
+        public void setTopP(Double topP) {
             this.topP = topP;
         }
 
@@ -78,6 +75,30 @@
 
         public void setTopK(Integer topK) {
             this.topK = topK;
+        }
+
+        public Boolean getLogRequestsAndResponses() {
+            return logRequestsAndResponses;
+        }
+
+        public void setLogRequestsAndResponses(Boolean logRequestsAndResponses) {
+            this.logRequestsAndResponses = logRequestsAndResponses;
+        }
+
+        public GeminiSafetySetting getSafetySetting() {
+            return safetySetting;
+        }
+
+        public void setSafetySetting(GeminiSafetySetting safetySetting) {
+            this.safetySetting = safetySetting;
+        }
+
+        public GeminiFunctionCallingConfig getFunctionCallingConfig() {
+            return functionCallingConfig;
+        }
+
+        public void setFunctionCallingConfig(GeminiFunctionCallingConfig functionCallingConfig) {
+            this.functionCallingConfig = functionCallingConfig;
         }
 
         public Integer getMaxOutputTokens() {

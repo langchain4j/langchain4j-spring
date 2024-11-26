@@ -9,7 +9,7 @@ public class EmbeddingModelProperties {
 
     private String titleMetadataKey;
     private String modelName;
-    private boolean logRequestsAndResponses;
+    private Boolean logRequestsAndResponses;
     private Integer maxRetries;
     private Integer outputDimensionality;
     private TaskType taskType;
@@ -31,7 +31,7 @@ public class EmbeddingModelProperties {
         this.modelName = modelName;
     }
 
-    public boolean isLogRequestsAndResponses() {
+    public Boolean isLogRequestsAndResponses() {
         return logRequestsAndResponses;
     }
 
