@@ -1,6 +1,8 @@
 package dev.langchain4j.service.spring;
 
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.agent.tool.ToolSpecifications;
 import dev.langchain4j.exception.IllegalConfigurationException;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
@@ -9,19 +11,27 @@ import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
+import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Bean;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
@@ -31,7 +41,14 @@ import static dev.langchain4j.service.spring.AiServiceWiringMode.AUTOMATIC;
 import static dev.langchain4j.service.spring.AiServiceWiringMode.EXPLICIT;
 import static java.util.Arrays.asList;
 
-public class AiServicesAutoConfig {
+public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
+
+    private ApplicationEventPublisher eventPublisher;
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.eventPublisher = applicationEventPublisher;
+    }
 
     @Bean
     BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor() {
@@ -47,6 +64,7 @@ public class AiServicesAutoConfig {
             String[] moderationModels = beanFactory.getBeanNamesForType(ModerationModel.class);
 
             Set<String> tools = new HashSet<>();
+            Map<String, List<ToolSpecification>> beanToolSpecifications = new HashMap<>();
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
                 try {
                     String beanClassName = beanFactory.getBeanDefinition(beanName).getBeanClassName();
@@ -58,6 +76,10 @@ public class AiServicesAutoConfig {
                     for (Method beanMethod : beanClass.getDeclaredMethods()) {
                         if (beanMethod.isAnnotationPresent(Tool.class)) {
                             tools.add(beanName);
+                            List<ToolSpecification> toolSpecifications =
+                                    beanToolSpecifications.getOrDefault(beanName, new ArrayList<>());
+                            toolSpecifications.add(ToolSpecifications.toolSpecificationFrom(beanMethod));
+                            beanToolSpecifications.put(beanName, toolSpecifications);
                         }
                     }
                 } catch (Exception e) {
@@ -146,10 +168,13 @@ public class AiServicesAutoConfig {
                         propertyValues
                 );
 
+                AiServiceRegisteredEvent registeredEvent;
                 if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
                     propertyValues.add("tools", toManagedList(asList(aiServiceAnnotation.tools())));
+                    registeredEvent = buildEvent(aiServiceClass, beanToolSpecifications, asList(aiServiceAnnotation.tools()));
                 } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
                     propertyValues.add("tools", toManagedList(tools));
+                    registeredEvent = buildEvent(aiServiceClass, beanToolSpecifications, tools);
                 } else {
                     throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
                 }
@@ -157,6 +182,10 @@ public class AiServicesAutoConfig {
                 BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
                 registry.removeBeanDefinition(aiService);
                 registry.registerBeanDefinition(lowercaseFirstLetter(aiService), aiServiceBeanDefinition);
+
+                if (eventPublisher != null) {
+                    eventPublisher.publishEvent(registeredEvent);
+                }
             }
         };
     }
@@ -203,5 +232,15 @@ public class AiServicesAutoConfig {
             managedList.add(new RuntimeBeanReference(beanName));
         }
         return managedList;
+    }
+
+    private static AiServiceRegisteredEvent buildEvent(Class<?> aiServiceClass,
+                                                       Map<String, List<ToolSpecification>> toolSpecifications,
+                                                       Collection<String> tools) {
+        return new AiServiceRegisteredEvent(aiServiceClass, aiServiceClass,
+                tools.stream()
+                     .filter(toolSpecifications::containsKey)
+                     .flatMap(tool -> toolSpecifications.get(tool).stream())
+                     .collect(Collectors.toList()));
     }
 }
