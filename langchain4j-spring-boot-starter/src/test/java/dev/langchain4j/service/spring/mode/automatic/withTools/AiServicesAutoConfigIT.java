@@ -99,8 +99,9 @@ class AiServicesAutoConfigIT {
                  });
      }
 
-      void should_create_AI_service_with_tool_which_is_enhanced_by_spring_aop() {
-          contextRunner
+    @Test
+    void should_create_AI_service_with_tool_which_is_enhanced_by_spring_aop() {
+        contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
                         "langchain4j.open-ai.chat-model.temperature=0.0",
