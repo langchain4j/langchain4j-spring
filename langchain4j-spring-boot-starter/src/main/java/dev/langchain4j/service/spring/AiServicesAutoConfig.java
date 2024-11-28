@@ -21,6 +21,7 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
     private ApplicationEventPublisher eventPublisher;
 
     @Override
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+    public void setApplicationEventPublisher(@NonNull ApplicationEventPublisher applicationEventPublisher) {
         this.eventPublisher = applicationEventPublisher;
     }
 
@@ -236,7 +237,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
     private static AiServiceRegisteredEvent buildEvent(Class<?> aiServiceClass,
                                                        Map<String, List<ToolSpecification>> toolSpecifications,
                                                        Collection<String> tools) {
-        return new AiServiceRegisteredEvent(aiServiceClass, aiServiceClass,
+        return new AiServiceRegisteredEvent(AiServicesAutoConfig.class, aiServiceClass,
                 tools.stream()
                      .filter(toolSpecifications::containsKey)
                      .flatMap(tool -> toolSpecifications.get(tool).stream())

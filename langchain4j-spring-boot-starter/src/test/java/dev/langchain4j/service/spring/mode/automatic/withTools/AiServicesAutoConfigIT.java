@@ -90,10 +90,10 @@ class AiServicesAutoConfigIT {
 
                     AiServiceRegisteredEvent event = listener.getReceivedEvents().stream().findFirst().orElse(null);
                     assertNotNull(event);
-                    assertEquals(AiServiceWithTools.class, event.getAiServiceClass());
-                    assertEquals(4, event.getToolSpecifications().size());
+                    assertEquals(AiServiceWithTools.class, event.aiServiceClass());
+                    assertEquals(4, event.toolSpecifications().size());
 
-                    List<String> tools = event.getToolSpecifications().stream().map(ToolSpecification::name).toList();
+                    List<String> tools = event.toolSpecifications().stream().map(ToolSpecification::name).toList();
                     assertTrue(tools.contains("getCurrentDate"));
                     assertTrue(tools.contains("getCurrentTime"));
                     assertTrue(tools.contains("getToolObserverPackageName"));

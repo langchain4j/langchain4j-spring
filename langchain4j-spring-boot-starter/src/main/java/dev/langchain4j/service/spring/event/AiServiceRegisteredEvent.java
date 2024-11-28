@@ -16,11 +16,11 @@ public class AiServiceRegisteredEvent extends ApplicationEvent {
         this.toolSpecifications = toolSpecifications;
     }
 
-    public Class<?> getAiServiceClass() {
+    public Class<?> aiServiceClass() {
         return aiServiceClass;
     }
 
-    public List<ToolSpecification> getToolSpecifications() {
+    public List<ToolSpecification> toolSpecifications() {
         return toolSpecifications;
     }
 }
