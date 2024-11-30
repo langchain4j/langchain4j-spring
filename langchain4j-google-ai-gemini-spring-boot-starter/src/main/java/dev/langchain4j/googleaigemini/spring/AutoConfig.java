@@ -54,6 +54,12 @@ public class AutoConfig {
                 .topK(chatModelProperties.getTopK())
                 .responseFormat(chatModelProperties.getResponseFormat())
                 .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses())
+                .safetySettings(
+                        Map.of(chatModelProperties.getSafetySetting().getGeminiHarmCategory(),
+                                chatModelProperties.getSafetySetting().getGeminiHarmBlockThreshold()))
+                .toolConfig(
+                        chatModelProperties.getFunctionCallingConfig().getGeminiMode(),
+                        chatModelProperties.getFunctionCallingConfig().getAllowedFunctionNames().toArray(new String[0]))
                 .build();
     }
 

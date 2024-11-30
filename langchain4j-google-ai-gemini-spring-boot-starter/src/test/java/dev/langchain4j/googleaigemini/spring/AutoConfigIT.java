@@ -62,7 +62,11 @@ private static final String API_KEY =System.getenv("GOOGLE_AI_GEMINI_API_KEY");
                         "langchain4j.google-ai-gemini.streamingChatModel.temperature=0.7",
                         "langchain4j.google-ai-gemini.streamingChatModel.topP=0.9",
                         "langchain4j.google-ai-gemini.streamingChatModel.topK=40",
-                        "langchain4j.google-ai-gemini.streamingChatModel.maxOutputTokens=100"
+                        "langchain4j.google-ai-gemini.streamingChatModel.maxOutputTokens=100",
+                        "langchain4j.google-ai-gemini.chatModel.safetySetting.gemini-harm-category=HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        "langchain4j.google-ai-gemini.chatModel.safetySetting.gemini-harm-block-threshold=HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+                        "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.gemini-mode=ANY",
+                        "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
                 )
                 .run(context -> {
                     StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
