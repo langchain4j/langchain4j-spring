@@ -24,6 +24,7 @@
         <module>langchain4j-azure-open-ai-spring-boot-starter</module>
         <module>langchain4j-voyage-ai-spring-boot-starter</module>
         <module>langchain4j-github-models-spring-boot-starter</module>
+        <module>langchain4j-google-ai-gemini-spring-boot-starter</module>
 
         <module>langchain4j-vertex-ai-gemini-spring-boot-starter</module>
         <module>langchain4j-elasticsearch-spring-boot-starter</module>
