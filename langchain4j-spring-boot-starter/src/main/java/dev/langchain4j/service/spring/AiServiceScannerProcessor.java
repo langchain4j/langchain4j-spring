@@ -46,25 +46,27 @@ public class AiServiceScannerProcessor implements BeanDefinitionRegistryPostProc
     }
 
     private void addComponentScanPackages(ConfigurableListableBeanFactory beanFactory, Set<String> collectedBasePackages) {
-        beanFactory.getBeansWithAnnotation(ComponentScan.class).forEach((beanName, instance) -> {
-            Set<ComponentScan> componentScans = AnnotatedElementUtils.getMergedRepeatableAnnotations(instance.getClass(), ComponentScan.class);
-            for (ComponentScan componentScan : componentScans) {
-                Set<String> basePackages = new LinkedHashSet<>();
-                String[] basePackagesArray = componentScan.basePackages();
-                for (String pkg : basePackagesArray) {
-                    String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
-                            ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
-                    Collections.addAll(basePackages, tokenized);
+        for (String beanName : beanFactory.getBeanNamesForAnnotation(ComponentScan.class)) {
+            Class<?> beanClass = beanFactory.getType(beanName);
+            if (beanClass != null) {
+                Set<ComponentScan> componentScans = AnnotatedElementUtils.getMergedRepeatableAnnotations(beanClass, ComponentScan.class);
+                for (ComponentScan componentScan : componentScans) {
+                    Set<String> basePackages = new LinkedHashSet<>();
+                    for (String pkg : componentScan.basePackages()) {
+                        String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
+                                ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+                        Collections.addAll(basePackages, tokenized);
+                    }
+                    for (Class<?> clazz : componentScan.basePackageClasses()) {
+                        basePackages.add(ClassUtils.getPackageName(clazz));
+                    }
+                    if (basePackages.isEmpty()) {
+                        basePackages.add(ClassUtils.getPackageName(beanClass));
+                    }
+                    collectedBasePackages.addAll(basePackages);
                 }
-                for (Class<?> clazz : componentScan.basePackageClasses()) {
-                    basePackages.add(ClassUtils.getPackageName(clazz));
-                }
-                if (basePackages.isEmpty()) {
-                    basePackages.add(ClassUtils.getPackageName(instance.getClass()));
-                }
-                collectedBasePackages.addAll(basePackages);
             }
-        });
+        }
     }
 
     private void removeAiServicesWithInactiveProfiles(BeanDefinitionRegistry registry) {
