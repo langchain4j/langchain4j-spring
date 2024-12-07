@@ -1,8 +1,5 @@
 package dev.langchain4j.googleaigemini.spring;
 
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.googleai.GoogleAiEmbeddingModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel;
@@ -22,60 +19,60 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(name = PREFIX + ".chatModel.enabled", havingValue = "true")
-    ChatLanguageModel googleAiGeminiChatModel(Properties properties) {
+    GoogleAiGeminiChatModel googleAiGeminiChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         return GoogleAiGeminiChatModel.builder()
                 .apiKey(properties.getApiKey())
-                .modelName(chatModelProperties.getModelName())
-                .temperature(chatModelProperties.getTemperature())
-                .topP(chatModelProperties.getTopP())
-                .topK(chatModelProperties.getTopK())
-                .maxOutputTokens(chatModelProperties.getMaxOutputTokens())
-                .responseFormat(chatModelProperties.getResponseFormat())
-                .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses())
+                .modelName(chatModelProperties.modelName())
+                .temperature(chatModelProperties.temperature())
+                .topP(chatModelProperties.topP())
+                .topK(chatModelProperties.topK())
+                .maxOutputTokens(chatModelProperties.maxOutputTokens())
+                .responseFormat(chatModelProperties.responseFormat())
+                .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
                 .safetySettings(
-                        Map.of(chatModelProperties.getSafetySetting().getGeminiHarmCategory(),
-                                chatModelProperties.getSafetySetting().getGeminiHarmBlockThreshold()))
+                        Map.of(chatModelProperties.safetySetting().geminiHarmCategory(),
+                                chatModelProperties.safetySetting().geminiHarmBlockThreshold()))
                 .toolConfig(
-                        chatModelProperties.getFunctionCallingConfig().getGeminiMode(),
-                        chatModelProperties.getFunctionCallingConfig().getAllowedFunctionNames().toArray(new String[0]))
+                        chatModelProperties.functionCallingConfig().getGeminiMode(),
+                        chatModelProperties.functionCallingConfig().getAllowedFunctionNames().toArray(new String[0]))
                 .build();
     }
 
     @Bean
     @ConditionalOnProperty(name = PREFIX + ".streamingChatModel.enabled", havingValue = "true")
-    StreamingChatLanguageModel googleAiGeminiStreamingChatModel(Properties properties) {
+    GoogleAiGeminiStreamingChatModel googleAiGeminiStreamingChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         return GoogleAiGeminiStreamingChatModel.builder()
                 .apiKey(properties.getApiKey())
-                .modelName(chatModelProperties.getModelName())
-                .temperature(chatModelProperties.getTemperature())
-                .topP(chatModelProperties.getTopP())
-                .topK(chatModelProperties.getTopK())
-                .responseFormat(chatModelProperties.getResponseFormat())
-                .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses())
+                .modelName(chatModelProperties.modelName())
+                .temperature(chatModelProperties.temperature())
+                .topP(chatModelProperties.topP())
+                .topK(chatModelProperties.topK())
+                .responseFormat(chatModelProperties.responseFormat())
+                .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
                 .safetySettings(
-                        Map.of(chatModelProperties.getSafetySetting().getGeminiHarmCategory(),
-                                chatModelProperties.getSafetySetting().getGeminiHarmBlockThreshold()))
+                        Map.of(chatModelProperties.safetySetting().geminiHarmCategory(),
+                                chatModelProperties.safetySetting().geminiHarmBlockThreshold()))
                 .toolConfig(
-                        chatModelProperties.getFunctionCallingConfig().getGeminiMode(),
-                        chatModelProperties.getFunctionCallingConfig().getAllowedFunctionNames().toArray(new String[0]))
+                        chatModelProperties.functionCallingConfig().getGeminiMode(),
+                        chatModelProperties.functionCallingConfig().getAllowedFunctionNames().toArray(new String[0]))
                 .build();
     }
 
     @Bean
     @ConditionalOnProperty(name = PREFIX + ".embeddingModel.enabled", havingValue = "true")
-    EmbeddingModel googleAiGeminiEmbeddingModel(Properties properties) {
+    GoogleAiEmbeddingModel googleAiGeminiEmbeddingModel(Properties properties) {
         EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         return GoogleAiEmbeddingModel.builder()
                 .apiKey(properties.getApiKey())
-                .modelName(embeddingModelProperties.getModelName())
-                .logRequestsAndResponses(embeddingModelProperties.isLogRequestsAndResponses())
-                .maxRetries(embeddingModelProperties.getMaxRetries())
-                .outputDimensionality(embeddingModelProperties.getOutputDimensionality())
-                .taskType(embeddingModelProperties.getTaskType())
-                .timeout(embeddingModelProperties.getTimeout())
-                .titleMetadataKey(embeddingModelProperties.getTitleMetadataKey())
+                .modelName(embeddingModelProperties.modelName())
+                .logRequestsAndResponses(embeddingModelProperties.logRequestsAndResponses())
+                .maxRetries(embeddingModelProperties.maxRetries())
+                .outputDimensionality(embeddingModelProperties.outputDimensionality())
+                .taskType(embeddingModelProperties.taskType())
+                .timeout(embeddingModelProperties.timeout())
+                .titleMetadataKey(embeddingModelProperties.titleMetadataKey())
                 .build();
     }
 }
