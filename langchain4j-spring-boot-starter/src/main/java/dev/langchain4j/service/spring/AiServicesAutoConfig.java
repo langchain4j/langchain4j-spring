@@ -25,12 +25,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
@@ -56,7 +53,7 @@ public class AiServicesAutoConfig {
             String[] moderationModels = beanFactory.getBeanNamesForType(ModerationModel.class);
 
             Set<String> toolBeanNames = new HashSet<>();
-            Map<String, List<ToolSpecification>> beanToolSpecifications = new HashMap<>();
+            List<ToolSpecification> toolSpecifications = new ArrayList<>();
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
                 try {
                     String beanClassName = beanFactory.getBeanDefinition(beanName).getBeanClassName();
@@ -67,10 +64,7 @@ public class AiServicesAutoConfig {
                     for (Method beanMethod : beanClass.getDeclaredMethods()) {
                         if (beanMethod.isAnnotationPresent(Tool.class)) {
                             toolBeanNames.add(beanName);
-                            List<ToolSpecification> toolSpecifications =
-                                    beanToolSpecifications.getOrDefault(beanName, new ArrayList<>());
                             toolSpecifications.add(ToolSpecifications.toolSpecificationFrom(beanMethod));
-                            beanToolSpecifications.put(beanName, toolSpecifications);
                         }
                     }
                 } catch (Exception e) {
@@ -162,10 +156,10 @@ public class AiServicesAutoConfig {
                 AiServiceRegisteredEvent registeredEvent;
                 if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
                     propertyValues.add("tools", toManagedList(asList(aiServiceAnnotation.tools())));
-                    registeredEvent = buildEvent(aiServiceClass, beanToolSpecifications, asList(aiServiceAnnotation.tools()));
+                    registeredEvent = new AiServiceRegisteredEvent(this, aiServiceClass, toolSpecifications);
                 } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
                     propertyValues.add("tools", toManagedList(toolBeanNames));
-                    registeredEvent = buildEvent(aiServiceClass, beanToolSpecifications, toolBeanNames);
+                    registeredEvent = new AiServiceRegisteredEvent(this, aiServiceClass, toolSpecifications);
                 } else {
                     throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
                 }
@@ -223,15 +217,5 @@ public class AiServicesAutoConfig {
             managedList.add(new RuntimeBeanReference(beanName));
         }
         return managedList;
-    }
-
-    private AiServiceRegisteredEvent buildEvent(Class<?> aiServiceClass,
-                                                Map<String, List<ToolSpecification>> beanToolSpecifications,
-                                                Collection<String> toolBeanNames) {
-        return new AiServiceRegisteredEvent(this, aiServiceClass,
-                toolBeanNames.stream()
-                             .filter(beanToolSpecifications::containsKey)
-                             .flatMap(toolBeanName -> beanToolSpecifications.get(toolBeanName).stream())
-                             .collect(Collectors.toList()));
     }
 }
