@@ -18,11 +18,11 @@ import static dev.langchain4j.googleaigemini.spring.Properties.PREFIX;
 public class AutoConfig {
 
     @Bean
-    @ConditionalOnProperty(name = PREFIX + ".chatModel.enabled", havingValue = "true")
+    @ConditionalOnProperty(name = {PREFIX + ".chatModel.api-key", PREFIX + ".chatModel.model-name"})
     GoogleAiGeminiChatModel googleAiGeminiChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         return GoogleAiGeminiChatModel.builder()
-                .apiKey(properties.getApiKey())
+                .apiKey(chatModelProperties.apiKey())
                 .modelName(chatModelProperties.modelName())
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
@@ -40,11 +40,11 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = PREFIX + ".streamingChatModel.enabled", havingValue = "true")
+    @ConditionalOnProperty(name = {PREFIX + ".streamingChatModel.api-key", PREFIX + ".streamingChatModel.model-name"})
     GoogleAiGeminiStreamingChatModel googleAiGeminiStreamingChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         return GoogleAiGeminiStreamingChatModel.builder()
-                .apiKey(properties.getApiKey())
+                .apiKey(chatModelProperties.apiKey())
                 .modelName(chatModelProperties.modelName())
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
@@ -65,7 +65,7 @@ public class AutoConfig {
     GoogleAiEmbeddingModel googleAiGeminiEmbeddingModel(Properties properties) {
         EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         return GoogleAiEmbeddingModel.builder()
-                .apiKey(properties.getApiKey())
+                .apiKey(embeddingModelProperties.apiKey())
                 .modelName(embeddingModelProperties.modelName())
                 .logRequestsAndResponses(embeddingModelProperties.logRequestsAndResponses())
                 .maxRetries(embeddingModelProperties.maxRetries())

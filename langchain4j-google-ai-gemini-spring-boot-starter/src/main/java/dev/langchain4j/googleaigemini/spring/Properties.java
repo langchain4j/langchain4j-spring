@@ -17,22 +17,12 @@ public class Properties {
     @NestedConfigurationProperty
     private EmbeddingModelProperties embeddingModel;
 
-    private String apiKey;
-
     public EmbeddingModelProperties getEmbeddingModel() {
         return embeddingModel;
     }
 
     public void setEmbeddingModel(EmbeddingModelProperties embeddingModel) {
         this.embeddingModel = embeddingModel;
-    }
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
     }
 
     public ChatModelProperties getStreamingChatModel() {

@@ -16,6 +16,7 @@ public record ChatModelProperties(
         Integer maxRetries,
         Duration timeout,
         GeminiSafetySetting safetySetting,
-        GeminiFunctionCallingConfig functionCallingConfig
+        GeminiFunctionCallingConfig functionCallingConfig,
+        String apiKey
 ) {
 }

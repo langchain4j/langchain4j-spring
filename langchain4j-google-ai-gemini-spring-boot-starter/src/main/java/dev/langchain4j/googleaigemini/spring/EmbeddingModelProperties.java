@@ -11,4 +11,5 @@ public record EmbeddingModelProperties( String titleMetadataKey,
                                         Integer maxRetries,
                                         Integer outputDimensionality,
                                         TaskType taskType,
-                                        Duration timeout){}
+                                        Duration timeout,
+                                        String apiKey){}

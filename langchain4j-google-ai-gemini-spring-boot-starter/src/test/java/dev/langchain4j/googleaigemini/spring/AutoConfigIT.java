@@ -30,8 +30,7 @@ private static final String API_KEY = System.getenv("GOOGLE_AI_GEMINI_API_KEY");
     @Test
     void provide_chat_model() {
         contextRunner.withPropertyValues(
-                        "langchain4j.google-ai-gemini.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.chatModel.enabled=true",
+                        "langchain4j.google-ai-gemini.chatModel.api-key=" + API_KEY,
                         "langchain4j.google-ai-gemini.chatModel.model-name=gemini-1.5-flash",
                         "langchain4j.google-ai-gemini.chatModel.temperature=0.7",
                         "langchain4j.google-ai-gemini.chatModel.topP=0.9",
@@ -56,9 +55,8 @@ private static final String API_KEY = System.getenv("GOOGLE_AI_GEMINI_API_KEY");
     @Test
     void provide_streaming_chat_model() {
         contextRunner.withPropertyValues(
-                        "langchain4j.google-ai-gemini.apiKey=" + API_KEY,
-                        "langchain4j.google-ai-gemini.streamingChatModel.enabled=true",
-                        "langchain4j.google-ai-gemini.streamingChatModel.modelName=gemini-1.5-flash",
+                        "langchain4j.google-ai-gemini.streamingChatModel.api-key=" + API_KEY,
+                        "langchain4j.google-ai-gemini.streamingChatModel.model-name=gemini-1.5-flash",
                         "langchain4j.google-ai-gemini.streamingChatModel.temperature=0.7",
                         "langchain4j.google-ai-gemini.streamingChatModel.topP=0.9",
                         "langchain4j.google-ai-gemini.streamingChatModel.topK=40",
@@ -96,7 +94,7 @@ private static final String API_KEY = System.getenv("GOOGLE_AI_GEMINI_API_KEY");
     @Test
     void provide_embedding_model(){
         contextRunner.withPropertyValues(
-                "langchain4j.google-ai-gemini.apiKey=" + API_KEY,
+                "langchain4j.google-ai-gemini.embeddingModel.apiKey=" + API_KEY,
                 "langchain4j.google-ai-gemini.embeddingModel.enabled=true",
                 "langchain4j.google-ai-gemini.embeddingModel.title-metadata-key=title-key",
                 "langchain4j.google-ai-gemini.embeddingModel.model-name=text-embedding-004",
