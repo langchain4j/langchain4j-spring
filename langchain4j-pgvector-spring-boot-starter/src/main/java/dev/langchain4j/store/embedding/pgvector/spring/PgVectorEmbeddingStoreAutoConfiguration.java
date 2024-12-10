@@ -4,11 +4,13 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.Nullable;
 
@@ -16,6 +18,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Optional;
 
 import static dev.langchain4j.internal.ValidationUtils.*;
@@ -29,12 +32,40 @@ public class PgVectorEmbeddingStoreAutoConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(PgVectorEmbeddingStoreAutoConfiguration.class);
 
+    private final ApplicationContext applicationContext;
+
+    public PgVectorEmbeddingStoreAutoConfiguration(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnBean(DataSource.class)
     @ConditionalOnProperty(prefix = PgVectorDataSourceProperties.PREFIX, name = "enabled", havingValue = "false")
-    public PgVectorEmbeddingStore pgVectorEmbeddingStoreWithExistingDataSource(DataSource dataSource, PgVectorEmbeddingStoreProperties properties,
-                                                         @Nullable EmbeddingModel embeddingModel) {
+    public PgVectorEmbeddingStore pgVectorEmbeddingStoreWithExistingDataSource(ObjectProvider<DataSource> dataSources, PgVectorEmbeddingStoreProperties properties,
+                                                                               @Nullable EmbeddingModel embeddingModel) {
+
+        // The PostgreSQL data source is selected based on the configured dataSourceBeanName or automatically.
+        DataSource dataSource = dataSources.stream()
+                .filter(ds -> {
+                    // Preferentially matches the configured dataSourceBeanName.
+                    String beanName = properties.getDataSourceBeanName();
+                    if (beanName != null && !beanName.isEmpty()) {
+                        String actualBeanName = getBeanNameForDataSource(ds);
+                        return beanName.equals(actualBeanName);
+                    }
+                    return false;
+                })
+                .findFirst()
+                // If no dataSourceBeanName is specified, the first PostgreSQL data source is selected.
+                .orElseGet(() -> dataSources.stream()
+                        .filter(this::isPostgresqlDataSource)
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("No suitable PostgreSQL DataSource found in the application context. "
+                                + "Please configure a valid PostgreSQL DataSource.")));
+
+        log.info("Using DataSource bean: {}", dataSource.getClass().getSimpleName());
+
         // Check if the context's data source is a Postgres datasource
         ensureTrue(isPostgresqlDataSource(dataSource), "The DataSource in Spring Context is not a Postgres datasource, you need to manually specify the Postgres datasource configuration via 'langchain4j.pgvector.datasource'.");
 
@@ -58,11 +89,11 @@ public class PgVectorEmbeddingStoreAutoConfiguration {
         Integer dimension = Optional.ofNullable(properties.getDimension()).orElseGet(() -> embeddingModel == null ? null : embeddingModel.dimension());
 
         return PgVectorEmbeddingStore.builder()
-                .host(dataSourceProperties.getHost())
-                .port(dataSourceProperties.getPort())
-                .user(dataSourceProperties.getUser())
-                .password(dataSourceProperties.getPassword())
-                .database(dataSourceProperties.getDatabase())
+                .host(dataSourceProperties.host())
+                .port(dataSourceProperties.port())
+                .user(dataSourceProperties.user())
+                .password(dataSourceProperties.password())
+                .database(dataSourceProperties.database())
                 .table(properties.getTable())
                 .createTable(properties.getCreateTable())
                 .dimension(dimension)
@@ -84,5 +115,19 @@ public class PgVectorEmbeddingStoreAutoConfiguration {
             log.warn("Exception checking datasource driver type during PgVector auto-configuration .");
             return false;
         }
+    }
+
+    /**
+     * Get the BeanName of the DataSource instance from the ApplicationContext.
+     * @param dataSource Target DataSource instance.
+     * @return bean name of target DataSource .
+     */
+    private String getBeanNameForDataSource(DataSource dataSource) {
+        // 遍历所有 DataSource Bean，找到与当前实例匹配的 Bean 名称
+        return applicationContext.getBeansOfType(DataSource.class).entrySet().stream()
+                .filter(entry -> entry.getValue().equals(dataSource))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
     }
 }

@@ -32,6 +32,9 @@ public class PgVectorEmbeddingStoreProperties {
      */
     private Integer indexListSize;
 
+    private String dataSourceBeanName;
+
+
     public String getTable() {
         return table;
     }
@@ -70,5 +73,13 @@ public class PgVectorEmbeddingStoreProperties {
 
     public void setIndexListSize(Integer indexListSize) {
         this.indexListSize = indexListSize;
+    }
+
+    public String getDataSourceBeanName() {
+        return dataSourceBeanName;
+    }
+
+    public void setDataSourceBeanName(String dataSourceBeanName) {
+        this.dataSourceBeanName = dataSourceBeanName;
     }
 }
