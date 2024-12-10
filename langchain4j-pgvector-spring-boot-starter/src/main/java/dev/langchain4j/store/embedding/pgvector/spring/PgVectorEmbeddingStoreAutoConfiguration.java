@@ -123,7 +123,7 @@ public class PgVectorEmbeddingStoreAutoConfiguration {
      * @return bean name of target DataSource .
      */
     private String getBeanNameForDataSource(DataSource dataSource) {
-        // 遍历所有 DataSource Bean，找到与当前实例匹配的 Bean 名称
+        // Iterate through all DataSource beans to find the bean name that matches the current instance
         return applicationContext.getBeansOfType(DataSource.class).entrySet().stream()
                 .filter(entry -> entry.getValue().equals(dataSource))
                 .map(Map.Entry::getKey)

@@ -124,7 +124,7 @@ class PgVectorEmbeddingStoreAutoConfigurationForDataSourceIT {
                     assertThat(startupFailure)
                             .isInstanceOf(BeanCreationException.class) // Validating Exception Types
                             .hasRootCauseInstanceOf(IllegalStateException.class) // Verification of root cause type
-                            .hasMessageContaining("No suitable PostgreSQL DataSource found in the application context"); // 验证异常信息
+                            .hasMessageContaining("No suitable PostgreSQL DataSource found in the application context");
                 });
     }
 
