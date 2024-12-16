@@ -4,8 +4,8 @@ import dev.langchain4j.model.chat.request.ResponseFormat;
 
 import java.time.Duration;
 
-
 public record ChatModelProperties(
+        String apiKey,
         String modelName,
         Double temperature,
         Double topP,
@@ -16,7 +16,6 @@ public record ChatModelProperties(
         Integer maxRetries,
         Duration timeout,
         GeminiSafetySetting safetySetting,
-        GeminiFunctionCallingConfig functionCallingConfig,
-        String apiKey
+        GeminiFunctionCallingConfig functionCallingConfig
 ) {
 }
