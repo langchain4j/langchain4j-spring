@@ -1,6 +1,8 @@
 package dev.langchain4j.service.spring;
 
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.agent.tool.ToolSpecifications;
 import dev.langchain4j.exception.IllegalConfigurationException;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
@@ -9,18 +11,22 @@ import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
+import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
@@ -34,7 +40,7 @@ import static java.util.Arrays.asList;
 public class AiServicesAutoConfig {
 
     @Bean
-    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor() {
+    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor(ApplicationEventPublisher eventPublisher) {
         return beanFactory -> {
 
             // all components available in the application context
@@ -46,7 +52,8 @@ public class AiServicesAutoConfig {
             String[] retrievalAugmentors = beanFactory.getBeanNamesForType(RetrievalAugmentor.class);
             String[] moderationModels = beanFactory.getBeanNamesForType(ModerationModel.class);
 
-            Set<String> tools = new HashSet<>();
+            Set<String> toolBeanNames = new HashSet<>();
+            List<ToolSpecification> toolSpecifications = new ArrayList<>();
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
                 try {
                     String beanClassName = beanFactory.getBeanDefinition(beanName).getBeanClassName();
@@ -56,7 +63,8 @@ public class AiServicesAutoConfig {
                     Class<?> beanClass = Class.forName(beanClassName);
                     for (Method beanMethod : beanClass.getDeclaredMethods()) {
                         if (beanMethod.isAnnotationPresent(Tool.class)) {
-                            tools.add(beanName);
+                            toolBeanNames.add(beanName);
+                            toolSpecifications.add(ToolSpecifications.toolSpecificationFrom(beanMethod));
                         }
                     }
                 } catch (Exception e) {
@@ -145,10 +153,13 @@ public class AiServicesAutoConfig {
                         propertyValues
                 );
 
+                AiServiceRegisteredEvent registeredEvent;
                 if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
                     propertyValues.add("tools", toManagedList(asList(aiServiceAnnotation.tools())));
+                    registeredEvent = new AiServiceRegisteredEvent(this, aiServiceClass, toolSpecifications);
                 } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
-                    propertyValues.add("tools", toManagedList(tools));
+                    propertyValues.add("tools", toManagedList(toolBeanNames));
+                    registeredEvent = new AiServiceRegisteredEvent(this, aiServiceClass, toolSpecifications);
                 } else {
                     throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
                 }
@@ -156,6 +167,10 @@ public class AiServicesAutoConfig {
                 BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
                 registry.removeBeanDefinition(aiService);
                 registry.registerBeanDefinition(lowercaseFirstLetter(aiService), aiServiceBeanDefinition);
+
+                if (eventPublisher != null) {
+                    eventPublisher.publishEvent(registeredEvent);
+                }
             }
         };
     }
