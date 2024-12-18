@@ -122,6 +122,7 @@ public class AutoConfig {
                 .organizationId(embeddingModelProperties.organizationId())
                 .modelName(embeddingModelProperties.modelName())
                 .dimensions(embeddingModelProperties.dimensions())
+                .maxSegmentsPerBatch(embeddingModelProperties.maxSegmentsPerBatch())
                 .user(embeddingModelProperties.user())
                 .timeout(embeddingModelProperties.timeout())
                 .maxRetries(embeddingModelProperties.maxRetries())

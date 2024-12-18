@@ -13,6 +13,7 @@ record EmbeddingModelProperties(
     String organizationId,
     String modelName,
     Integer dimensions,
+    Integer maxSegmentsPerBatch,
     String user,
     Duration timeout,
     Integer maxRetries,
