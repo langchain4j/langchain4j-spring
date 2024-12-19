@@ -19,6 +19,7 @@ record ChatModelProperties(
     Double frequencyPenalty,
     Long seed,
     String responseFormat,
+    Boolean strictJsonSchema,
     Integer timeout, // TODO use Duration instead
     Integer maxRetries,
     Boolean logRequestsAndResponses,

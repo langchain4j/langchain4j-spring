@@ -4,6 +4,7 @@ import com.azure.core.http.ProxyOptions;
 import com.azure.core.util.Configuration;
 import dev.langchain4j.model.Tokenizer;
 import dev.langchain4j.model.azure.*;
+import dev.langchain4j.model.chat.request.ResponseFormat;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -46,6 +47,8 @@ public class AutoConfig {
                 .presencePenalty(chatModelProperties.presencePenalty())
                 .frequencyPenalty(chatModelProperties.frequencyPenalty())
                 .seed(chatModelProperties.seed())
+                .responseFormat(chatModelProperties.responseFormat() != null && chatModelProperties.responseFormat().equalsIgnoreCase("json") ? ResponseFormat.JSON : ResponseFormat.TEXT)
+                .strictJsonSchema(chatModelProperties.strictJsonSchema())
                 .timeout(Duration.ofSeconds(chatModelProperties.timeout() == null ? 0 : chatModelProperties.timeout()))
                 .maxRetries(chatModelProperties.maxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
