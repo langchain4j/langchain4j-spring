@@ -21,15 +21,11 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Bean;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
@@ -39,12 +35,19 @@ import static dev.langchain4j.service.spring.AiServiceWiringMode.AUTOMATIC;
 import static dev.langchain4j.service.spring.AiServiceWiringMode.EXPLICIT;
 import static java.util.Arrays.asList;
 
-public class AiServicesAutoConfig {
+public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
 
     private static final Logger log = LoggerFactory.getLogger(AiServicesAutoConfig.class);
 
+    private ApplicationEventPublisher eventPublisher;
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
+
     @Bean
-    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor(ApplicationEventPublisher eventPublisher) {
+    BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor() {
         return beanFactory -> {
 
             // all components available in the application context
