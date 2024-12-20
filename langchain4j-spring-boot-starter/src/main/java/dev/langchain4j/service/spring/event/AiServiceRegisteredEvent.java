@@ -5,6 +5,8 @@ import org.springframework.context.ApplicationEvent;
 
 import java.util.List;
 
+import static dev.langchain4j.internal.Utils.copyIfNotNull;
+
 public class AiServiceRegisteredEvent extends ApplicationEvent {
 
     private final Class<?> aiServiceClass;
@@ -13,7 +15,7 @@ public class AiServiceRegisteredEvent extends ApplicationEvent {
     public AiServiceRegisteredEvent(Object source, Class<?> aiServiceClass, List<ToolSpecification> toolSpecifications) {
         super(source);
         this.aiServiceClass = aiServiceClass;
-        this.toolSpecifications = toolSpecifications;
+        this.toolSpecifications = copyIfNotNull(toolSpecifications);
     }
 
     public Class<?> aiServiceClass() {

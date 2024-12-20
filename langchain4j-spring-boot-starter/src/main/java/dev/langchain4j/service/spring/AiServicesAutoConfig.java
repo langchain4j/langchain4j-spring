@@ -153,13 +153,10 @@ public class AiServicesAutoConfig {
                         propertyValues
                 );
 
-                AiServiceRegisteredEvent registeredEvent;
                 if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
                     propertyValues.add("tools", toManagedList(asList(aiServiceAnnotation.tools())));
-                    registeredEvent = new AiServiceRegisteredEvent(this, aiServiceClass, toolSpecifications);
                 } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
                     propertyValues.add("tools", toManagedList(toolBeanNames));
-                    registeredEvent = new AiServiceRegisteredEvent(this, aiServiceClass, toolSpecifications);
                 } else {
                     throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
                 }
@@ -169,7 +166,7 @@ public class AiServicesAutoConfig {
                 registry.registerBeanDefinition(lowercaseFirstLetter(aiService), aiServiceBeanDefinition);
 
                 if (eventPublisher != null) {
-                    eventPublisher.publishEvent(registeredEvent);
+                    eventPublisher.publishEvent(new AiServiceRegisteredEvent(this, aiServiceClass, toolSpecifications));
                 }
             }
         };
