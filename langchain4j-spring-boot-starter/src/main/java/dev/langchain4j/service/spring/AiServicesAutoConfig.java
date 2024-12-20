@@ -1,6 +1,8 @@
 package dev.langchain4j.service.spring;
 
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.agent.tool.ToolSpecifications;
 import dev.langchain4j.exception.IllegalConfigurationException;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
@@ -9,19 +11,21 @@ import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
+import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Bean;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
@@ -31,7 +35,16 @@ import static dev.langchain4j.service.spring.AiServiceWiringMode.AUTOMATIC;
 import static dev.langchain4j.service.spring.AiServiceWiringMode.EXPLICIT;
 import static java.util.Arrays.asList;
 
-public class AiServicesAutoConfig {
+public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
+
+    private static final Logger log = LoggerFactory.getLogger(AiServicesAutoConfig.class);
+
+    private ApplicationEventPublisher eventPublisher;
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     @Bean
     BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor() {
@@ -46,7 +59,8 @@ public class AiServicesAutoConfig {
             String[] retrievalAugmentors = beanFactory.getBeanNamesForType(RetrievalAugmentor.class);
             String[] moderationModels = beanFactory.getBeanNamesForType(ModerationModel.class);
 
-            Set<String> tools = new HashSet<>();
+            Set<String> toolBeanNames = new HashSet<>();
+            List<ToolSpecification> toolSpecifications = new ArrayList<>();
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
                 try {
                     String beanClassName = beanFactory.getBeanDefinition(beanName).getBeanClassName();
@@ -56,7 +70,13 @@ public class AiServicesAutoConfig {
                     Class<?> beanClass = Class.forName(beanClassName);
                     for (Method beanMethod : beanClass.getDeclaredMethods()) {
                         if (beanMethod.isAnnotationPresent(Tool.class)) {
-                            tools.add(beanName);
+                            toolBeanNames.add(beanName);
+                            try {
+                                toolSpecifications.add(ToolSpecifications.toolSpecificationFrom(beanMethod));
+                            } catch (Exception e) {
+                                log.warn("Cannot convert %s.%s method annotated with @Tool into ToolSpecification"
+                                        .formatted(beanClass.getName(), beanMethod.getName()), e);
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -148,7 +168,7 @@ public class AiServicesAutoConfig {
                 if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
                     propertyValues.add("tools", toManagedList(asList(aiServiceAnnotation.tools())));
                 } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
-                    propertyValues.add("tools", toManagedList(tools));
+                    propertyValues.add("tools", toManagedList(toolBeanNames));
                 } else {
                     throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
                 }
@@ -156,6 +176,10 @@ public class AiServicesAutoConfig {
                 BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
                 registry.removeBeanDefinition(aiService);
                 registry.registerBeanDefinition(lowercaseFirstLetter(aiService), aiServiceBeanDefinition);
+
+                if (eventPublisher != null) {
+                    eventPublisher.publishEvent(new AiServiceRegisteredEvent(this, aiServiceClass, toolSpecifications));
+                }
             }
         };
     }
