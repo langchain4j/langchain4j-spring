@@ -12,6 +12,8 @@ import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -39,6 +41,8 @@ import static java.util.Arrays.asList;
 
 public class AiServicesAutoConfig {
 
+    private static final Logger log = LoggerFactory.getLogger(AiServicesAutoConfig.class);
+
     @Bean
     BeanFactoryPostProcessor aiServicesRegisteringBeanFactoryPostProcessor(ApplicationEventPublisher eventPublisher) {
         return beanFactory -> {
@@ -64,7 +68,12 @@ public class AiServicesAutoConfig {
                     for (Method beanMethod : beanClass.getDeclaredMethods()) {
                         if (beanMethod.isAnnotationPresent(Tool.class)) {
                             toolBeanNames.add(beanName);
-                            toolSpecifications.add(ToolSpecifications.toolSpecificationFrom(beanMethod));
+                            try {
+                                toolSpecifications.add(ToolSpecifications.toolSpecificationFrom(beanMethod));
+                            } catch (Exception e) {
+                                log.warn("Cannot convert %s.%s method annotated with @Tool into ToolSpecification"
+                                        .formatted(beanClass.getName(), beanMethod.getName()), e);
+                            }
                         }
                     }
                 } catch (Exception e) {
