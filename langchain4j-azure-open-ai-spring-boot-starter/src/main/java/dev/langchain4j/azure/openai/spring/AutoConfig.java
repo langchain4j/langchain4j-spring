@@ -54,7 +54,8 @@ public class AutoConfig {
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses() != null && chatModelProperties.logRequestsAndResponses())
                 .userAgentSuffix(chatModelProperties.userAgentSuffix())
-                .customHeaders(chatModelProperties.customHeaders());
+                .customHeaders(chatModelProperties.customHeaders())
+                .supportedCapabilities(chatModelProperties.supportedCapabilities());
         if (chatModelProperties.nonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
         }

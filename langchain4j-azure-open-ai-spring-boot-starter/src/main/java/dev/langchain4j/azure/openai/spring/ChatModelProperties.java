@@ -1,7 +1,10 @@
 package dev.langchain4j.azure.openai.spring;
 
+import dev.langchain4j.model.chat.Capability;
+
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 record ChatModelProperties(
 
@@ -25,6 +28,7 @@ record ChatModelProperties(
     Boolean logRequestsAndResponses,
     String userAgentSuffix,
     Map<String, String> customHeaders,
-    String nonAzureApiKey
+    String nonAzureApiKey,
+    Set<Capability> supportedCapabilities
 ) {
 }
