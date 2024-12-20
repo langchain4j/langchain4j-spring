@@ -21,7 +21,6 @@ record ChatModelProperties(
     Double presencePenalty,
     Double frequencyPenalty,
     Long seed,
-    String responseFormat,
     Boolean strictJsonSchema,
     Integer timeout, // TODO use Duration instead
     Integer maxRetries,
