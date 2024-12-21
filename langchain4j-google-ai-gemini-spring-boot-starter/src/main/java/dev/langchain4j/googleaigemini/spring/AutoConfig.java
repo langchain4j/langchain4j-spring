@@ -1,16 +1,17 @@
 package dev.langchain4j.googleaigemini.spring;
 
-import dev.langchain4j.model.googleai.GoogleAiEmbeddingModel;
-import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
-import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel;
+import dev.langchain4j.model.googleai.*;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static dev.langchain4j.googleaigemini.spring.Properties.PREFIX;
+import static dev.langchain4j.model.googleai.GeminiHarmBlockThreshold.HARM_BLOCK_THRESHOLD_UNSPECIFIED;
+import static dev.langchain4j.model.googleai.GeminiHarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY;
 
 @AutoConfiguration
 @EnableConfigurationProperties(Properties.class)
@@ -32,15 +33,10 @@ public class AutoConfig {
                 .maxOutputTokens(chatModelProperties.maxOutputTokens())
                 .responseFormat(chatModelProperties.responseFormat())
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
-                .safetySettings(Map.of(
-                        // TODO NPE?
-                        chatModelProperties.safetySetting().geminiHarmCategory(),
-                        chatModelProperties.safetySetting().geminiHarmBlockThreshold()
-                ))
+                .safetySettings(checkSafetySettingForNull(chatModelProperties.safetySetting()))
                 .toolConfig(
-                        // TODO NPE?
-                        chatModelProperties.functionCallingConfig().geminiMode(),
-                        chatModelProperties.functionCallingConfig().allowedFunctionNames().toArray(new String[0])
+                        checkGeminiModeForNull(chatModelProperties.functionCallingConfig()),
+                        checkFunctionNamesForNull(chatModelProperties.functionCallingConfig())
                 )
                 .build();
     }
@@ -60,15 +56,10 @@ public class AutoConfig {
                 .topK(chatModelProperties.topK())
                 .responseFormat(chatModelProperties.responseFormat())
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
-                .safetySettings(Map.of(
-                        // TODO NPE?
-                        chatModelProperties.safetySetting().geminiHarmCategory(),
-                        chatModelProperties.safetySetting().geminiHarmBlockThreshold()
-                ))
+                .safetySettings(checkSafetySettingForNull(chatModelProperties.safetySetting()))
                 .toolConfig(
-                        // TODO NPE?
-                        chatModelProperties.functionCallingConfig().geminiMode(),
-                        chatModelProperties.functionCallingConfig().allowedFunctionNames().toArray(new String[0])
+                        checkGeminiModeForNull(chatModelProperties.functionCallingConfig()),
+                        checkFunctionNamesForNull(chatModelProperties.functionCallingConfig())
                 )
                 .build();
     }
@@ -91,4 +82,31 @@ public class AutoConfig {
                 .titleMetadataKey(embeddingModelProperties.titleMetadataKey())
                 .build();
     }
+
+    private String[] checkFunctionNamesForNull(GeminiFunctionCallingConfig geminiFunctionCallingConfig) {
+        if(geminiFunctionCallingConfig==null){
+            return new String[0];
+        }
+        return geminiFunctionCallingConfig.allowedFunctionNames().toArray(new String[0]);
+    }
+
+    private GeminiMode checkGeminiModeForNull(GeminiFunctionCallingConfig geminiFunctionCallingConfig) {
+        if(geminiFunctionCallingConfig==null){
+            return GeminiMode.NONE;
+        }
+        return geminiFunctionCallingConfig.geminiMode();
+    }
+
+    private Map<GeminiHarmCategory,GeminiHarmBlockThreshold> checkSafetySettingForNull(GeminiSafetySetting safetySetting) {
+        if(safetySetting==null){
+            Map<GeminiHarmCategory,GeminiHarmBlockThreshold> defaultMap= new HashMap<>();
+            defaultMap.put(HARM_CATEGORY_CIVIC_INTEGRITY,HARM_BLOCK_THRESHOLD_UNSPECIFIED);
+            return defaultMap;
+        }
+        return Map.of(
+                safetySetting.geminiHarmCategory(),
+                safetySetting.geminiHarmBlockThreshold()
+        );
+    }
+
 }
