@@ -46,12 +46,14 @@ public class AutoConfig {
                 .presencePenalty(chatModelProperties.presencePenalty())
                 .frequencyPenalty(chatModelProperties.frequencyPenalty())
                 .seed(chatModelProperties.seed())
+                .strictJsonSchema(chatModelProperties.strictJsonSchema())
                 .timeout(Duration.ofSeconds(chatModelProperties.timeout() == null ? 0 : chatModelProperties.timeout()))
                 .maxRetries(chatModelProperties.maxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses() != null && chatModelProperties.logRequestsAndResponses())
                 .userAgentSuffix(chatModelProperties.userAgentSuffix())
-                .customHeaders(chatModelProperties.customHeaders());
+                .customHeaders(chatModelProperties.customHeaders())
+                .supportedCapabilities(chatModelProperties.supportedCapabilities());
         if (chatModelProperties.nonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
         }
