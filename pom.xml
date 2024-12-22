@@ -6,7 +6,7 @@
 
     <groupId>dev.langchain4j</groupId>
     <artifactId>langchain4j-spring</artifactId>
-    <version>0.37.0-SNAPSHOT</version>
+    <version>1.0.0-alpha1</version>
     <packaging>pom</packaging>
 
     <name>langchain4j-spring parent POM</name>
@@ -28,9 +28,9 @@
         <module>langchain4j-vertex-ai-gemini-spring-boot-starter</module>
         <module>langchain4j-elasticsearch-spring-boot-starter</module>
         <module>langchain4j-redis-spring-boot-starter</module>
-        <module>langchain4j-qianfan-spring-boot-starter</module>
+<!--        <module>langchain4j-qianfan-spring-boot-starter</module>-->
         <module>langchain4j-milvus-spring-boot-starter</module>
-        <module>langchain4j-dashscope-spring-boot-starter</module>
+<!--        <module>langchain4j-dashscope-spring-boot-starter</module>-->
 
         <module>langchain4j-reactor</module>
     </modules>
