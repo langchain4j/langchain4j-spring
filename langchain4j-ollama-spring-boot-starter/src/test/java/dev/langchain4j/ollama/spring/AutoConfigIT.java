@@ -18,6 +18,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.concurrent.CompletableFuture;
 
+import static dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,6 +57,25 @@ class AutoConfigIT {
                     assertThat(context.getBean(OllamaChatModel.class)).isSameAs(chatLanguageModel);
                 });
     }
+
+    @Test
+    void should_provide_chat_model_with_supported_capabilities() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.ollama.chat-model.base-url=" + baseUrl(),
+                        "langchain4j.ollama.chat-model.model-name=" + MODEL_NAME,
+                        "langchain4j.ollama.chat-model.supportedCapabilities=RESPONSE_FORMAT_JSON_SCHEMA"
+                )
+                .run(context -> {
+
+                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
+                    assertThat(chatLanguageModel).isInstanceOf(OllamaChatModel.class);
+                    assertThat(chatLanguageModel.supportedCapabilities()).contains(RESPONSE_FORMAT_JSON_SCHEMA);
+
+                    assertThat(context.getBean(OllamaChatModel.class)).isSameAs(chatLanguageModel);
+                });
+    }
+
 
     @Test
     void should_provide_streaming_chat_model() {

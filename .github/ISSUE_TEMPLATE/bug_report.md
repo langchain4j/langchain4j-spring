@@ -23,9 +23,9 @@ Please provide a relevant code snippets to reproduce this bug.
 A clear and concise description of what you expected to happen.
 
 **Please complete the following information:**
-- LangChain4j version: e.g. 0.36.1
-- Java version: e.g. 17
-- Spring Boot version: e.g. 3.3.1
+- LangChain4j version: 
+- Java version: 
+- Spring Boot version: 
 
 **Additional context**
 Add any other context about the problem here.

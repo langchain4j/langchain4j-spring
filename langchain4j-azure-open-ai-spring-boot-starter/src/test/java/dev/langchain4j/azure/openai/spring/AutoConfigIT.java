@@ -8,6 +8,12 @@ import dev.langchain4j.model.azure.AzureOpenAiImageModel;
 import dev.langchain4j.model.azure.AzureOpenAiStreamingChatModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.ResponseFormat;
+import dev.langchain4j.model.chat.request.json.JsonArraySchema;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import dev.langchain4j.model.chat.request.json.JsonSchema;
+import dev.langchain4j.model.chat.request.json.JsonStringSchema;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
 import dev.langchain4j.model.output.Response;
@@ -17,8 +23,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static dev.langchain4j.data.message.UserMessage.userMessage;
+import static dev.langchain4j.model.chat.request.ResponseFormatType.JSON;
+import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,6 +59,52 @@ class AutoConfigIT {
                     ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
                     assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
                     assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+                    assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
+                });
+    }
+
+    class Person {
+
+        String name;
+        List<String> favouriteColors;
+    }
+
+    @ParameterizedTest(name = "Deployment name: {0}")
+    @CsvSource({
+            "gpt-4o-mini"
+    })
+    void should_provide_chat_model_with_json_schema(String deploymentName) {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.chat-model.api-key=" + AZURE_OPENAI_KEY,
+                        "langchain4j.azure-open-ai.chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
+                        "langchain4j.azure-open-ai.chat-model.deployment-name=" + deploymentName,
+                        "langchain4j.azure-open-ai.chat-model.strict-json-schema=true"
+                )
+                .run(context -> {
+
+                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
+
+                    ChatRequest chatRequest = ChatRequest.builder()
+                            .messages(singletonList(userMessage("Julien likes blue, white and red")))
+                            .responseFormat(ResponseFormat.builder()
+                                    .type(JSON)
+                                    .jsonSchema(JsonSchema.builder()
+                                            .name("Person")
+                                            .rootElement(JsonObjectSchema.builder()
+                                                    .addStringProperty("name")
+                                                    .addProperty("favouriteColors", JsonArraySchema.builder()
+                                                            .items(new JsonStringSchema())
+                                                            .build())
+                                                    .required("name", "favouriteColors")
+                                                    .build())
+                                            .build())
+                                    .build())
+                            .build();
+
+                    assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
+                    AiMessage aiMessage = chatLanguageModel.chat(chatRequest).aiMessage();
+                    assertThat(aiMessage.text()).contains("{\"name\":\"Julien\",\"favouriteColors\":[\"blue\",\"white\",\"red\"]}");
                     assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
                 });
     }
