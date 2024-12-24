@@ -6,7 +6,7 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-spring</artifactId>
-        <version>1.0.0-alpha1</version>
+        <version>1.0.0-alpha2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -52,20 +52,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-embeddings-all-minilm-l6-v2-q</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-spring-boot-tests</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.redis.testcontainers</groupId>
