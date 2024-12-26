@@ -13,11 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static dev.langchain4j.store.embedding.redis.spring.RedisEmbeddingStoreProperties.PREFIX;
+import static dev.langchain4j.store.embedding.redis.spring.RedisEmbeddingStoreProperties.CONFIG_PREFIX;
 
 @AutoConfiguration
 @EnableConfigurationProperties(RedisEmbeddingStoreProperties.class)
-@ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = CONFIG_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class RedisEmbeddingStoreAutoConfiguration {
 
     private static final String DEFAULT_HOST = "localhost";
@@ -30,6 +30,7 @@ public class RedisEmbeddingStoreAutoConfiguration {
                                                    @Nullable EmbeddingModel embeddingModel) {
         String host = Optional.ofNullable(properties.getHost()).orElse(DEFAULT_HOST);
         int port = Optional.ofNullable(properties.getPort()).orElse(DEFAULT_PORT);
+        String prefix = Optional.ofNullable(properties.getPrefix()).orElse(DEFAULT_INDEX_NAME + ":");
         String indexName = Optional.ofNullable(properties.getIndexName()).orElse(DEFAULT_INDEX_NAME);
         Integer dimension = Optional.ofNullable(properties.getDimension()).orElseGet(() -> embeddingModel == null ? null : embeddingModel.dimension());
         List<String> metadataKeys = Optional.ofNullable(properties.getMetadataKeys()).orElse(new ArrayList<>());
@@ -39,6 +40,7 @@ public class RedisEmbeddingStoreAutoConfiguration {
                 .port(port)
                 .user(properties.getUser())
                 .password(properties.getPassword())
+                .prefix(prefix)
                 .indexName(indexName)
                 .dimension(dimension)
                 .metadataKeys(metadataKeys)

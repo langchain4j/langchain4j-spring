@@ -2,9 +2,11 @@ package dev.langchain4j.store.embedding.spring;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.embedding.onnx.allminilml6v2q.AllMiniLmL6V2QuantizedEmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.embedding.onnx.allminilml6v2q.AllMiniLmL6V2QuantizedEmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
+import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
+import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -31,7 +33,10 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
      */
     protected abstract String dimensionPropertyKey();
 
-    ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+    /**
+     * Inherited IT can reuse this contextRunner for additional test.
+     */
+    protected ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(autoConfigurationClass()));
 
     @Test
@@ -89,6 +94,19 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
                     assertThat(relevant).hasSize(1);
 
                     EmbeddingMatch<TextSegment> match = relevant.get(0);
+                    assertThat(match.score()).isCloseTo(1, withPercentage(1));
+                    assertThat(match.embeddingId()).isEqualTo(id);
+                    assertThat(match.embedding()).isEqualTo(embedding);
+                    assertThat(match.embedded()).isEqualTo(segment);
+
+                    // New API
+                    EmbeddingSearchResult<TextSegment> searchResult = embeddingStore.search(EmbeddingSearchRequest.builder()
+                            .queryEmbedding(embedding)
+                            .maxResults(10)
+                            .build());
+
+                    assertThat(searchResult.matches()).hasSize(1);
+                    match = searchResult.matches().get(0);
                     assertThat(match.score()).isCloseTo(1, withPercentage(1));
                     assertThat(match.embeddingId()).isEqualTo(id);
                     assertThat(match.embedding()).isEqualTo(embedding);

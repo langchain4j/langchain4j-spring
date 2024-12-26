@@ -4,7 +4,6 @@ import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.elasticsearch.ElasticsearchEmbeddingStore;
 import dev.langchain4j.store.embedding.spring.EmbeddingStoreAutoConfigurationIT;
-import lombok.SneakyThrows;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.RestClient;
 import org.junit.jupiter.api.AfterAll;
@@ -65,9 +64,12 @@ class ElasticsearchEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoC
     }
 
     @Override
-    @SneakyThrows
     protected void awaitUntilPersisted(ApplicationContext context) {
-        RestClient restClient = context.getBean(RestClient.class);
-        restClient.performRequest(new Request("POST", "/" + indexName + "/_refresh"));
+        try {
+            RestClient restClient = context.getBean(RestClient.class);
+            restClient.performRequest(new Request("POST", "/" + indexName + "/_refresh"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
