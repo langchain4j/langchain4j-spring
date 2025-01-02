@@ -30,7 +30,6 @@ public class RedisEmbeddingStoreAutoConfiguration {
                                                    @Nullable EmbeddingModel embeddingModel) {
         String host = Optional.ofNullable(properties.getHost()).orElse(DEFAULT_HOST);
         int port = Optional.ofNullable(properties.getPort()).orElse(DEFAULT_PORT);
-        String prefix = Optional.ofNullable(properties.getPrefix()).orElse(DEFAULT_INDEX_NAME + ":");
         String indexName = Optional.ofNullable(properties.getIndexName()).orElse(DEFAULT_INDEX_NAME);
         Integer dimension = Optional.ofNullable(properties.getDimension()).orElseGet(() -> embeddingModel == null ? null : embeddingModel.dimension());
         List<String> metadataKeys = Optional.ofNullable(properties.getMetadataKeys()).orElse(new ArrayList<>());
@@ -40,7 +39,7 @@ public class RedisEmbeddingStoreAutoConfiguration {
                 .port(port)
                 .user(properties.getUser())
                 .password(properties.getPassword())
-                .prefix(prefix)
+                .prefix(properties.getPrefix())
                 .indexName(indexName)
                 .dimension(dimension)
                 .metadataKeys(metadataKeys)
