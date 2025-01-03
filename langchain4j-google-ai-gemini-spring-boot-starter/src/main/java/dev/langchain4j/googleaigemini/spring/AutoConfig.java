@@ -97,16 +97,15 @@ public class AutoConfig {
         return geminiFunctionCallingConfig.geminiMode();
     }
 
-    private Map<GeminiHarmCategory,GeminiHarmBlockThreshold> checkSafetySettingForNull(GeminiSafetySetting safetySetting) {
-        if(safetySetting==null){
+    private Map<GeminiHarmCategory,GeminiHarmBlockThreshold> checkSafetySettingForNull(Map<GeminiHarmCategory,GeminiHarmBlockThreshold> safetySetting) {
+        if(safetySetting==null || safetySetting.isEmpty()){
             Map<GeminiHarmCategory,GeminiHarmBlockThreshold> defaultMap= new HashMap<>();
             defaultMap.put(HARM_CATEGORY_CIVIC_INTEGRITY,HARM_BLOCK_THRESHOLD_UNSPECIFIED);
             return defaultMap;
         }
-        return Map.of(
-                safetySetting.geminiHarmCategory(),
-                safetySetting.geminiHarmBlockThreshold()
-        );
+        Map<GeminiHarmCategory,GeminiHarmBlockThreshold> userMap= new HashMap<>();
+        safetySetting.keySet().forEach(key-> userMap.put(key,safetySetting.get(key)));
+        return userMap;
     }
 
 }
