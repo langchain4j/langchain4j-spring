@@ -32,13 +32,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- should be listed before spring-boot-configuration-processor -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- needed to generate automatic metadata about available config properties -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -68,9 +61,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.redis.testcontainers</groupId>
+            <groupId>com.redis</groupId>
             <artifactId>testcontainers-redis</artifactId>
-            <version>1.6.4</version>
+            <version>2.2.2</version>
             <scope>test</scope>
         </dependency>
 

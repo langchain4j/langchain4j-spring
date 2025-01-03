@@ -52,13 +52,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- should be listed before spring-boot-configuration-processor -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- needed to generate automatic metadata about available config properties -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
