@@ -24,7 +24,7 @@ public class AutoConfig {
     })
     GoogleAiGeminiChatModel googleAiGeminiChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
-        return GoogleAiGeminiChatModel.builder()
+        GoogleAiGeminiChatModel.GoogleAiGeminiChatModelBuilder builder = GoogleAiGeminiChatModel.builder()
                 .apiKey(chatModelProperties.apiKey())
                 .modelName(chatModelProperties.modelName())
                 .temperature(chatModelProperties.temperature())
@@ -32,13 +32,23 @@ public class AutoConfig {
                 .topK(chatModelProperties.topK())
                 .maxOutputTokens(chatModelProperties.maxOutputTokens())
                 .responseFormat(chatModelProperties.responseFormat())
-                .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
-                .safetySettings(checkSafetySettingForNull(chatModelProperties.safetySetting()))
-                .toolConfig(
-                        checkGeminiModeForNull(chatModelProperties.functionCallingConfig()),
-                        checkFunctionNamesForNull(chatModelProperties.functionCallingConfig())
-                )
-                .build();
+                .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses());
+
+        if (chatModelProperties.safetySetting() != null && !chatModelProperties.safetySetting().isEmpty()) {
+            builder.safetySettings(chatModelProperties.safetySetting());
+        }
+
+        if (chatModelProperties.functionCallingConfig() != null) {
+            builder.toolConfig(chatModelProperties
+                            .functionCallingConfig()
+                            .geminiMode(),
+                    chatModelProperties
+                            .functionCallingConfig()
+                            .allowedFunctionNames()
+                            .toArray(new String[0]));
+        }
+
+        return builder.build();
     }
 
     @Bean
@@ -48,20 +58,31 @@ public class AutoConfig {
     })
     GoogleAiGeminiStreamingChatModel googleAiGeminiStreamingChatModel(Properties properties) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
-        return GoogleAiGeminiStreamingChatModel.builder()
+        GoogleAiGeminiStreamingChatModel.GoogleAiGeminiStreamingChatModelBuilder builder = GoogleAiGeminiStreamingChatModel.builder()
                 .apiKey(chatModelProperties.apiKey())
                 .modelName(chatModelProperties.modelName())
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
                 .topK(chatModelProperties.topK())
+                .maxOutputTokens(chatModelProperties.maxOutputTokens())
                 .responseFormat(chatModelProperties.responseFormat())
-                .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
-                .safetySettings(checkSafetySettingForNull(chatModelProperties.safetySetting()))
-                .toolConfig(
-                        checkGeminiModeForNull(chatModelProperties.functionCallingConfig()),
-                        checkFunctionNamesForNull(chatModelProperties.functionCallingConfig())
-                )
-                .build();
+                .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses());
+        if (chatModelProperties.safetySetting() != null && !chatModelProperties.safetySetting().isEmpty()) {
+            builder.safetySettings(chatModelProperties.safetySetting());
+        }
+
+        if (chatModelProperties
+                .functionCallingConfig() != null) {
+            builder.toolConfig(chatModelProperties
+                            .functionCallingConfig()
+                            .geminiMode(),
+                    chatModelProperties
+                            .functionCallingConfig()
+                            .allowedFunctionNames()
+                            .toArray(new String[0]));
+        }
+
+        return builder.build();
     }
 
     @Bean
@@ -82,30 +103,4 @@ public class AutoConfig {
                 .titleMetadataKey(embeddingModelProperties.titleMetadataKey())
                 .build();
     }
-
-    private String[] checkFunctionNamesForNull(GeminiFunctionCallingConfig geminiFunctionCallingConfig) {
-        if(geminiFunctionCallingConfig==null){
-            return new String[0];
-        }
-        return geminiFunctionCallingConfig.allowedFunctionNames().toArray(new String[0]);
-    }
-
-    private GeminiMode checkGeminiModeForNull(GeminiFunctionCallingConfig geminiFunctionCallingConfig) {
-        if(geminiFunctionCallingConfig==null){
-            return GeminiMode.NONE;
-        }
-        return geminiFunctionCallingConfig.geminiMode();
-    }
-
-    private Map<GeminiHarmCategory,GeminiHarmBlockThreshold> checkSafetySettingForNull(Map<GeminiHarmCategory,GeminiHarmBlockThreshold> safetySetting) {
-        if(safetySetting==null || safetySetting.isEmpty()){
-            Map<GeminiHarmCategory,GeminiHarmBlockThreshold> defaultMap= new HashMap<>();
-            defaultMap.put(HARM_CATEGORY_CIVIC_INTEGRITY,HARM_BLOCK_THRESHOLD_UNSPECIFIED);
-            return defaultMap;
-        }
-        Map<GeminiHarmCategory,GeminiHarmBlockThreshold> userMap= new HashMap<>();
-        safetySetting.keySet().forEach(key-> userMap.put(key,safetySetting.get(key)));
-        return userMap;
-    }
-
 }
