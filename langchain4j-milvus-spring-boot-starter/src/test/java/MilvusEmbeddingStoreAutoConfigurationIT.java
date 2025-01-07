@@ -1,5 +1,4 @@
 import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.embedding.onnx.allminilml6v2q.AllMiniLmL6V2QuantizedEmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.milvus.MilvusEmbeddingStore;
 import dev.langchain4j.store.embedding.milvus.spring.MilvusEmbeddingStoreAutoConfiguration;
@@ -7,14 +6,20 @@ import dev.langchain4j.store.embedding.spring.EmbeddingStoreAutoConfigurationIT;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.testcontainers.milvus.MilvusContainer;
+
+import static dev.langchain4j.internal.Utils.randomUUID;
 
 class MilvusEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoConfigurationIT {
 
     static MilvusContainer milvus = new MilvusContainer("milvusdb/milvus:v2.3.16");
-    static final String COLLECTION_NAME = "test_collection";
+
+    String collectionName;
+
+    @BeforeEach
+    void setCollectionName() {
+        collectionName = "langchain4j" + randomUUID().replace("-", "_");
+    }
 
     @BeforeAll
     static void beforeAll() {
@@ -24,20 +29,6 @@ class MilvusEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoConfigur
     @AfterAll
     static void afterAll() {
         milvus.stop();
-    }
-
-    @BeforeEach
-    void beforeEach() {
-        ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(autoConfigurationClass()));
-
-        contextRunner
-                .withBean(AllMiniLmL6V2QuantizedEmbeddingModel.class)
-                .withPropertyValues(properties())
-                .run(context -> {
-                    MilvusEmbeddingStore embeddingStore = context.getBean(MilvusEmbeddingStore.class);
-                    embeddingStore.dropCollection(COLLECTION_NAME);
-                });
     }
 
     @Override
@@ -55,7 +46,7 @@ class MilvusEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoConfigur
         return new String[]{
                 "langchain4j.milvus.host=" + milvus.getHost(),
                 "langchain4j.milvus.port=" + milvus.getMappedPort(19530),
-                "langchain4j.milvus.collectionName=" + COLLECTION_NAME,
+                "langchain4j.milvus.collectionName=" + collectionName,
                 "langchain4j.milvus.retrieveEmbeddingsOnSearch=true"
         };
     }
