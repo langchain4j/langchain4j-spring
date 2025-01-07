@@ -6,12 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static dev.langchain4j.googleaigemini.spring.Properties.PREFIX;
-import static dev.langchain4j.model.googleai.GeminiHarmBlockThreshold.HARM_BLOCK_THRESHOLD_UNSPECIFIED;
-import static dev.langchain4j.model.googleai.GeminiHarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY;
 
 @AutoConfiguration
 @EnableConfigurationProperties(Properties.class)
