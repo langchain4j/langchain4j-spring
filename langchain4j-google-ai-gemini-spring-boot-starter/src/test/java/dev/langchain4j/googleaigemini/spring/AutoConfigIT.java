@@ -55,7 +55,7 @@ class AutoConfigIT {
                         "langchain4j.google-ai-gemini.chatModel.topP=0.9",
                         "langchain4j.google-ai-gemini.chatModel.topK=40",
                         "langchain4j.google-ai-gemini.chatModel.maxOutputTokens=800",
-                        "langchain4j.google-ai-gemini.chat-model.safety-settings.HARM_CATEGORY_DANGEROUS_CONTENT=BLOCK_LOW_AND_ABOVE",
+                        "langchain4j.google-ai-gemini.chatModel.safetySetting.HARM_CATEGORY_DANGEROUS_CONTENT=BLOCK_LOW_AND_ABOVE",
                         "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.gemini-mode=ANY",
                         "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
                 )
