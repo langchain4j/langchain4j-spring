@@ -7,7 +7,7 @@ import dev.langchain4j.model.googleai.GeminiHarmCategory;
 import java.time.Duration;
 import java.util.Map;
 
-public record ChatModelProperties(
+record ChatModelProperties(
         String apiKey,
         String modelName,
         Double temperature,
@@ -18,7 +18,7 @@ public record ChatModelProperties(
         Boolean logRequestsAndResponses,
         Integer maxRetries,
         Duration timeout,
-        Map<GeminiHarmCategory,GeminiHarmBlockThreshold> safetySetting,
+        Map<String,String> safetySetting,
         GeminiFunctionCallingConfig functionCallingConfig
 ) {
 }

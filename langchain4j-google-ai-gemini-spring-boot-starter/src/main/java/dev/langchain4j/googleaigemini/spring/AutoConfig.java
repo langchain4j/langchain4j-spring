@@ -6,6 +6,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import static dev.langchain4j.googleaigemini.spring.Properties.PREFIX;
 
 @AutoConfiguration
@@ -30,7 +33,7 @@ public class AutoConfig {
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses());
 
         if (chatModelProperties.safetySetting() != null && !chatModelProperties.safetySetting().isEmpty()) {
-            builder.safetySettings(chatModelProperties.safetySetting());
+            builder.safetySettings(convertSafetySettings(chatModelProperties.safetySetting()));
         }
 
         if (chatModelProperties.functionCallingConfig() != null) {
@@ -63,7 +66,7 @@ public class AutoConfig {
                 .responseFormat(chatModelProperties.responseFormat())
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses());
         if (chatModelProperties.safetySetting() != null && !chatModelProperties.safetySetting().isEmpty()) {
-            builder.safetySettings(chatModelProperties.safetySetting());
+            builder.safetySettings(convertSafetySettings(chatModelProperties.safetySetting()));
         }
 
         if (chatModelProperties
@@ -97,5 +100,13 @@ public class AutoConfig {
                 .timeout(embeddingModelProperties.timeout())
                 .titleMetadataKey(embeddingModelProperties.titleMetadataKey())
                 .build();
+    }
+
+    private Map<GeminiHarmCategory, GeminiHarmBlockThreshold> convertSafetySettings(Map<String, String> map) {
+        return map.entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> GeminiHarmCategory.valueOf(e.getKey()),
+                        e -> GeminiHarmBlockThreshold.valueOf(e.getValue())
+                ));
     }
 }
