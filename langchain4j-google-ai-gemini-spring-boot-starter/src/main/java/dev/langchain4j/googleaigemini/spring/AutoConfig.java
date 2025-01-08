@@ -13,7 +13,7 @@ import static dev.langchain4j.googleaigemini.spring.Properties.PREFIX;
 
 @AutoConfiguration
 @EnableConfigurationProperties(Properties.class)
-public class AutoConfig {
+class AutoConfig {
 
     @Bean
     @ConditionalOnProperty({

@@ -4,7 +4,7 @@ import dev.langchain4j.model.googleai.GeminiMode;
 
 import java.util.List;
 
-public record GeminiFunctionCallingConfig(
+record GeminiFunctionCallingConfig(
         GeminiMode geminiMode,
         List<String> allowedFunctionNames
 ) {

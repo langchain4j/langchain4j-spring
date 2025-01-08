@@ -1,8 +1,6 @@
 package dev.langchain4j.googleaigemini.spring;
 
 import dev.langchain4j.model.chat.request.ResponseFormat;
-import dev.langchain4j.model.googleai.GeminiHarmBlockThreshold;
-import dev.langchain4j.model.googleai.GeminiHarmCategory;
 
 import java.time.Duration;
 import java.util.Map;
