@@ -13,11 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static dev.langchain4j.store.embedding.redis.spring.RedisEmbeddingStoreProperties.PREFIX;
+import static dev.langchain4j.store.embedding.redis.spring.RedisEmbeddingStoreProperties.CONFIG_PREFIX;
 
 @AutoConfiguration
 @EnableConfigurationProperties(RedisEmbeddingStoreProperties.class)
-@ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = CONFIG_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 public class RedisEmbeddingStoreAutoConfiguration {
 
     private static final String DEFAULT_HOST = "localhost";
@@ -39,6 +39,7 @@ public class RedisEmbeddingStoreAutoConfiguration {
                 .port(port)
                 .user(properties.getUser())
                 .password(properties.getPassword())
+                .prefix(properties.getPrefix())
                 .indexName(indexName)
                 .dimension(dimension)
                 .metadataKeys(metadataKeys)
