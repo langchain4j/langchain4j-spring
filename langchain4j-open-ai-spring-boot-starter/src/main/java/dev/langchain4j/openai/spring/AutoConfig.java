@@ -1,6 +1,8 @@
 package dev.langchain4j.openai.spring;
 
+import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.openai.*;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,7 +17,7 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
-    OpenAiChatModel openAiChatModel(Properties properties) {
+    OpenAiChatModel openAiChatModel(Properties properties, ObjectProvider<ChatModelListener> listeners) {
         ChatModelProperties chatModelProperties = properties.chatModel();
         return OpenAiChatModel.builder()
                 .baseUrl(chatModelProperties.baseUrl())
@@ -42,12 +44,14 @@ public class AutoConfig {
                 .logRequests(chatModelProperties.logRequests())
                 .logResponses(chatModelProperties.logResponses())
                 .customHeaders(chatModelProperties.customHeaders())
+                .listeners(listeners.orderedStream().toList())
                 .build();
     }
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
-    OpenAiStreamingChatModel openAiStreamingChatModel(Properties properties) {
+    OpenAiStreamingChatModel openAiStreamingChatModel(Properties properties,
+                                                      ObjectProvider<ChatModelListener> listeners) {
         ChatModelProperties chatModelProperties = properties.streamingChatModel();
         return OpenAiStreamingChatModel.builder()
                 .baseUrl(chatModelProperties.baseUrl())
@@ -72,6 +76,7 @@ public class AutoConfig {
                 .logRequests(chatModelProperties.logRequests())
                 .logResponses(chatModelProperties.logResponses())
                 .customHeaders(chatModelProperties.customHeaders())
+                .listeners(listeners.orderedStream().toList())
                 .build();
     }
 

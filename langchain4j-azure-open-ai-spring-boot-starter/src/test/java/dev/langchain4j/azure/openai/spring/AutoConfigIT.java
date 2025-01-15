@@ -200,7 +200,7 @@ class AutoConfigIT {
 
                     ImageModel imageModel = context.getBean(ImageModel.class);
                     assertThat(imageModel).isInstanceOf(AzureOpenAiImageModel.class);
-                    assertThat(imageModel.generate("banana").content().url()).isNotNull();
+                    assertThat(imageModel.generate("coffee").content().url()).isNotNull();
 
                     assertThat(context.getBean(AzureOpenAiImageModel.class)).isSameAs(imageModel);
                 });
