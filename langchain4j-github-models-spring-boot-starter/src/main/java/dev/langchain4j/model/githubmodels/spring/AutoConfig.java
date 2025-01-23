@@ -2,9 +2,11 @@ package dev.langchain4j.model.githubmodels.spring;
 
 import com.azure.core.http.ProxyOptions;
 import com.azure.core.util.Configuration;
+import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.github.GitHubModelsChatModel;
 import dev.langchain4j.model.github.GitHubModelsEmbeddingModel;
 import dev.langchain4j.model.github.GitHubModelsStreamingChatModel;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,7 +18,7 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(Properties.PREFIX + ".chat-model.github-token")
-    GitHubModelsChatModel gitHubModelsChatModel(Properties properties) {
+    GitHubModelsChatModel gitHubModelsChatModel(Properties properties, ObjectProvider<ChatModelListener> listeners) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         GitHubModelsChatModel.Builder builder = GitHubModelsChatModel.builder()
                 .endpoint(chatModelProperties.getEndpoint())
@@ -30,14 +32,16 @@ public class AutoConfig {
                 .timeout(chatModelProperties.getTimeout())
                 .maxRetries(chatModelProperties.getMaxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
-                .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses());
+                .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses())
+                .listeners(listeners.orderedStream().toList());
 
         return builder.build();
     }
 
     @Bean
     @ConditionalOnProperty(Properties.PREFIX + ".streaming-chat-model.github-token")
-    GitHubModelsStreamingChatModel gitHubModelsStreamingChatModel(Properties properties) {
+    GitHubModelsStreamingChatModel gitHubModelsStreamingChatModel(Properties properties,
+                                                                  ObjectProvider<ChatModelListener> listeners) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         GitHubModelsStreamingChatModel.Builder builder = GitHubModelsStreamingChatModel.builder()
                 .endpoint(chatModelProperties.getEndpoint())
@@ -51,7 +55,8 @@ public class AutoConfig {
                 .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
                 .timeout(chatModelProperties.getTimeout())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
-                .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses());
+                .logRequestsAndResponses(chatModelProperties.getLogRequestsAndResponses() != null && chatModelProperties.getLogRequestsAndResponses())
+                .listeners(listeners.orderedStream().toList());
 
         return builder.build();
     }
