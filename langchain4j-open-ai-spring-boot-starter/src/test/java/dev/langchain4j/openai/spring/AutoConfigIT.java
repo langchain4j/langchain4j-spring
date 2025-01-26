@@ -40,6 +40,7 @@ class AutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.chat-model.max-tokens=20"
                 )
                 .run(context -> {
@@ -57,6 +58,7 @@ class AutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.chat-model.max-tokens=20"
                 )
                 .withUserConfiguration(ListenerConfig.class)
@@ -84,6 +86,7 @@ class AutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.streaming-chat-model.max-tokens=20"
                 )
                 .run(context -> {
@@ -118,6 +121,7 @@ class AutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.streaming-chat-model.max-tokens=20"
                 )
                 .withUserConfiguration(ListenerConfig.class)
