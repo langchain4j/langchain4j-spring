@@ -26,6 +26,10 @@ record ChatModelProperties(
     String user,
     Boolean strictTools,
     Boolean parallelToolCalls,
+    Boolean store,
+    Map<String, String> metadata,
+    String serviceTier,
+    String reasoningEffort,
     Duration timeout,
     Integer maxRetries,
     @NestedConfigurationProperty
