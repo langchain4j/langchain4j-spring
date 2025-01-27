@@ -29,6 +29,7 @@
         <module>langchain4j-elasticsearch-spring-boot-starter</module>
         <module>langchain4j-redis-spring-boot-starter</module>
         <module>langchain4j-milvus-spring-boot-starter</module>
+        <module>langchain4j-pgvector-spring-boot-starter</module>
 
         <module>langchain4j-reactor</module>
     </modules>
