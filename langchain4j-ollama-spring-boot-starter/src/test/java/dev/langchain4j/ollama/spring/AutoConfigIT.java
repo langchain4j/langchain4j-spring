@@ -4,40 +4,67 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.language.LanguageModel;
 import dev.langchain4j.model.language.StreamingLanguageModel;
 import dev.langchain4j.model.ollama.*;
 import dev.langchain4j.model.output.Response;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.concurrent.CompletableFuture;
 
+import static dev.langchain4j.internal.Utils.isNullOrEmpty;
 import static dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@Testcontainers
 class AutoConfigIT {
 
+    private static final String OLLAMA_BASE_URL = System.getenv("OLLAMA_BASE_URL");
     private static final String MODEL_NAME = "phi";
 
-    @Container
-    static GenericContainer<?> ollama = new GenericContainer<>("langchain4j/ollama-" + MODEL_NAME)
-            .withExposedPorts(11434);
+    static GenericContainer<?> ollama;
+
+    @BeforeAll
+    static void beforeAll() {
+        if (isNullOrEmpty(OLLAMA_BASE_URL)) {
+            ollama = new GenericContainer<>("langchain4j/ollama-" + MODEL_NAME).withExposedPorts(11434);
+            ollama.start();
+        }
+    }
+
+    @AfterAll
+    static void afterAll() {
+        if (ollama != null) {
+            ollama.stop();
+        }
+    }
+
+    private static String baseUrl() {
+        if (isNullOrEmpty(OLLAMA_BASE_URL)) {
+            return format("http://%s:%s", ollama.getHost(), ollama.getFirstMappedPort());
+        } else {
+            return OLLAMA_BASE_URL;
+        }
+    }
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
-
-    private static String baseUrl() {
-        return format("http://%s:%s", ollama.getHost(), ollama.getFirstMappedPort());
-    }
 
     @Test
     void should_provide_chat_model() {
@@ -59,6 +86,35 @@ class AutoConfigIT {
     }
 
     @Test
+    void should_provide_chat_model_with_listeners() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.ollama.chat-model.base-url=" + baseUrl(),
+                        "langchain4j.ollama.chat-model.model-name=" + MODEL_NAME,
+                        "langchain4j.ollama.chat-model.max-tokens=20",
+                        "langchain4j.ollama.chat-model.temperature=0.0"
+                )
+                .withUserConfiguration(ListenerConfig.class)
+                .run(context -> {
+
+                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
+                    assertThat(chatLanguageModel).isInstanceOf(OllamaChatModel.class);
+                    assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+
+                    assertThat(context.getBean(OllamaChatModel.class)).isSameAs(chatLanguageModel);
+
+                    ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
+                    ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);
+                    InOrder inOrder = Mockito.inOrder(listener1, listener2);
+                    inOrder.verify(listener2).onRequest(any());
+                    inOrder.verify(listener1).onRequest(any());
+                    inOrder.verify(listener2).onResponse(any());
+                    inOrder.verify(listener1).onResponse(any());
+                    inOrder.verifyNoMoreInteractions();
+                });
+    }
+
+    @Test
     void should_provide_chat_model_with_supported_capabilities() {
         contextRunner
                 .withPropertyValues(
@@ -76,6 +132,20 @@ class AutoConfigIT {
                 });
     }
 
+    @Test
+    void should_create_chat_model() {
+        contextRunner.run(context -> {
+
+            OllamaChatModel model = OllamaChatModel.builder()
+                    .baseUrl(OLLAMA_BASE_URL)
+                    .modelName(MODEL_NAME)
+                    .temperature(0.0)
+                    .numPredict(20)
+                    .build();
+
+            assertThat(model.generate("What is the capital of Germany?")).contains("Berlin");
+        });
+    }
 
     @Test
     void should_provide_streaming_chat_model() {
@@ -111,6 +181,123 @@ class AutoConfigIT {
 
                     assertThat(context.getBean(OllamaStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
                 });
+    }
+
+    @Test
+    void should_provide_streaming_chat_model_with_custom_task_executor() {
+
+        ThreadPoolTaskExecutor customExecutor = spy(new ThreadPoolTaskExecutor());
+
+        contextRunner
+                .withBean("ollamaStreamingChatModelTaskExecutor", ThreadPoolTaskExecutor.class, () -> customExecutor)
+                .withPropertyValues(
+                        "langchain4j.ollama.streaming-chat-model.base-url=" + baseUrl(),
+                        "langchain4j.ollama.streaming-chat-model.model-name=" + MODEL_NAME,
+                        "langchain4j.ollama.streaming-chat-model.max-tokens=20",
+                        "langchain4j.ollama.streaming-chat-model.temperature=0.0"
+                )
+                .run(context -> {
+
+                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
+                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
+                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+
+                        @Override
+                        public void onNext(String token) {
+                        }
+
+                        @Override
+                        public void onComplete(Response<AiMessage> response) {
+                            future.complete(response);
+                        }
+
+                        @Override
+                        public void onError(Throwable error) {
+                        }
+                    });
+                    Response<AiMessage> response = future.get(60, SECONDS);
+                    assertThat(response.content().text()).contains("Berlin");
+
+                    verify(customExecutor).execute(any());
+                });
+    }
+
+    @Test
+    void should_provide_streaming_chat_model_with_listeners() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.ollama.streaming-chat-model.base-url=" + baseUrl(),
+                        "langchain4j.ollama.streaming-chat-model.model-name=" + MODEL_NAME,
+                        "langchain4j.ollama.streaming-chat-model.max-tokens=20",
+                        "langchain4j.ollama.streaming-chat-model.temperature=0.0"
+                )
+                .withUserConfiguration(ListenerConfig.class)
+                .run(context -> {
+
+                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
+                    assertThat(streamingChatLanguageModel).isInstanceOf(OllamaStreamingChatModel.class);
+                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
+                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+
+                        @Override
+                        public void onNext(String token) {
+                        }
+
+                        @Override
+                        public void onComplete(Response<AiMessage> response) {
+                            future.complete(response);
+                        }
+
+                        @Override
+                        public void onError(Throwable error) {
+                        }
+                    });
+                    Response<AiMessage> response = future.get(60, SECONDS);
+                    assertThat(response.content().text()).contains("Berlin");
+
+                    assertThat(context.getBean(OllamaStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+
+                    ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
+                    ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);
+                    InOrder inOrder = Mockito.inOrder(listener1, listener2);
+                    inOrder.verify(listener2).onRequest(any());
+                    inOrder.verify(listener1).onRequest(any());
+                    inOrder.verify(listener2).onResponse(any());
+                    inOrder.verify(listener1).onResponse(any());
+                    inOrder.verifyNoMoreInteractions();
+                });
+    }
+
+    @Test
+    void should_create_streaming_chat_model() {
+        contextRunner.run(context -> {
+
+            OllamaStreamingChatModel model = OllamaStreamingChatModel.builder()
+                    .baseUrl(OLLAMA_BASE_URL)
+                    .modelName(MODEL_NAME)
+                    .temperature(0.0)
+                    .numPredict(20)
+                    .build();
+
+            CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
+            model.generate("What is the capital of Germany?", new StreamingResponseHandler<>() {
+
+                @Override
+                public void onNext(String token) {
+                }
+
+                @Override
+                public void onComplete(Response<AiMessage> response) {
+                    future.complete(response);
+                }
+
+                @Override
+                public void onError(Throwable error) {
+                }
+            });
+            Response<AiMessage> response = future.get(60, SECONDS);
+            assertThat(response.content().text()).contains("Berlin");
+        });
     }
 
     @Test
@@ -183,5 +370,34 @@ class AutoConfigIT {
 
                     assertThat(context.getBean(OllamaEmbeddingModel.class)).isSameAs(embeddingModel);
                 });
+    }
+
+    @Test
+    void should_create_embedding_model() {
+        contextRunner.run(context -> {
+
+            OllamaEmbeddingModel model = OllamaEmbeddingModel.builder()
+                    .baseUrl(OLLAMA_BASE_URL)
+                    .modelName(MODEL_NAME)
+                    .build();
+
+            assertThat(model.embed("hi").content().dimension()).isEqualTo(2560);
+        });
+    }
+
+    @Configuration
+    static class ListenerConfig {
+
+        @Bean
+        @Order(2)
+        ChatModelListener listener1() {
+            return mock(ChatModelListener.class);
+        }
+
+        @Bean
+        @Order(1)
+        ChatModelListener listener2() {
+            return mock(ChatModelListener.class);
+        }
     }
 }
