@@ -16,6 +16,7 @@
     <modules>
         <module>langchain4j-spring-boot-starter</module>
         <module>langchain4j-spring-boot-tests</module>
+        <module>langchain4j-http-client-spring-restclient</module>
 
         <module>langchain4j-anthropic-spring-boot-starter</module>
         <module>langchain4j-ollama-spring-boot-starter</module>
@@ -39,6 +40,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <tinylog.version>2.6.2</tinylog.version>
         <spring.boot.version>3.2.6</spring.boot.version>
+        <spring.web.version>6.1.8</spring.web.version>
         <testcontainers.version>1.20.3</testcontainers.version>
         <tinylog.version>2.7.0</tinylog.version>
     </properties>
@@ -52,6 +54,12 @@
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot</artifactId>
+                <version>${spring.boot.version}</version>
             </dependency>
 
             <dependency>
@@ -82,6 +90,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-test</artifactId>
                 <version>${spring.boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.web.version}</version>
             </dependency>
 
             <dependency>
