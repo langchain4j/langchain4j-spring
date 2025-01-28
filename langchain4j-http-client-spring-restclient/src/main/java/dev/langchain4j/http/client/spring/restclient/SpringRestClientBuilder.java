@@ -23,41 +23,19 @@ public class SpringRestClientBuilder implements HttpClientBuilder {
         return this;
     }
 
-    /**
-     * TODO
-     *
-     * @return
-     */
     public AsyncTaskExecutor streamingRequestExecutor() {
         return streamingRequestExecutor;
     }
 
-    /**
-     * TODO
-     *
-     * @param streamingRequestExecutor
-     * @return
-     */
     public SpringRestClientBuilder streamingRequestExecutor(AsyncTaskExecutor streamingRequestExecutor) {
         this.streamingRequestExecutor = streamingRequestExecutor;
         return this;
     }
 
-    /**
-     * TODO
-     *
-     * @return
-     */
     public Boolean createDefaultStreamingRequestExecutor() {
         return createDefaultStreamingRequestExecutor;
     }
 
-    /**
-     * TODO
-     *
-     * @param createDefaultStreamingRequestExecutor
-     * @return
-     */
     public SpringRestClientBuilder createDefaultStreamingRequestExecutor(Boolean createDefaultStreamingRequestExecutor) {
         this.createDefaultStreamingRequestExecutor = createDefaultStreamingRequestExecutor;
         return this;

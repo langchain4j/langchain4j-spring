@@ -133,7 +133,7 @@ class AutoConfigIT {
     }
 
     @Test
-    void should_create_chat_model() {
+    void should_create_chat_model_with_default_http_client() {
         contextRunner.run(context -> {
 
             OllamaChatModel model = OllamaChatModel.builder()
@@ -269,7 +269,7 @@ class AutoConfigIT {
     }
 
     @Test
-    void should_create_streaming_chat_model() {
+    void should_create_streaming_chat_model_with_default_http_client() {
         contextRunner.run(context -> {
 
             OllamaStreamingChatModel model = OllamaStreamingChatModel.builder()
@@ -373,7 +373,7 @@ class AutoConfigIT {
     }
 
     @Test
-    void should_create_embedding_model() {
+    void should_create_embedding_model_with_default_http_client() {
         contextRunner.run(context -> {
 
             OllamaEmbeddingModel model = OllamaEmbeddingModel.builder()
