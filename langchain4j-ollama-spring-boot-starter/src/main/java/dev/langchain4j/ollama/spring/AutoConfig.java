@@ -1,6 +1,8 @@
 package dev.langchain4j.ollama.spring;
 
+import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.ollama.*;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -14,7 +16,7 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".chat-model.base-url")
-    OllamaChatModel ollamaChatModel(Properties properties) {
+    OllamaChatModel ollamaChatModel(Properties properties, ObjectProvider<ChatModelListener> listeners) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         return OllamaChatModel.builder()
                 .baseUrl(chatModelProperties.getBaseUrl())
@@ -33,12 +35,14 @@ public class AutoConfig {
                 .customHeaders(chatModelProperties.getCustomHeaders())
                 .logRequests(chatModelProperties.getLogRequests())
                 .logResponses(chatModelProperties.getLogResponses())
+                .listeners(listeners.orderedStream().toList())
                 .build();
     }
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.base-url")
-    OllamaStreamingChatModel ollamaStreamingChatModel(Properties properties) {
+    OllamaStreamingChatModel ollamaStreamingChatModel(Properties properties,
+                                                      ObjectProvider<ChatModelListener> listeners) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         return OllamaStreamingChatModel.builder()
                 .baseUrl(chatModelProperties.getBaseUrl())
@@ -56,6 +60,7 @@ public class AutoConfig {
                 .customHeaders(chatModelProperties.getCustomHeaders())
                 .logRequests(chatModelProperties.getLogRequests())
                 .logResponses(chatModelProperties.getLogResponses())
+                .listeners(listeners.orderedStream().toList())
                 .build();
     }
 

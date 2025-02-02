@@ -8,6 +8,7 @@ import dev.langchain4j.model.azure.AzureOpenAiImageModel;
 import dev.langchain4j.model.azure.AzureOpenAiStreamingChatModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.json.JsonArraySchema;
@@ -20,10 +21,14 @@ import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static dev.langchain4j.data.message.UserMessage.userMessage;
@@ -31,6 +36,8 @@ import static dev.langchain4j.model.chat.request.ResponseFormatType.JSON;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 
 class AutoConfigIT {
 
@@ -63,10 +70,32 @@ class AutoConfigIT {
                 });
     }
 
-    class Person {
+    @Test
+    void should_provide_chat_model_with_listeners() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.chat-model.api-key=" + AZURE_OPENAI_KEY,
+                        "langchain4j.azure-open-ai.chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
+                        "langchain4j.azure-open-ai.chat-model.deployment-name=gpt-4o-mini",
+                        "langchain4j.azure-open-ai.chat-model.max-tokens=20"
+                )
+                .withUserConfiguration(ListenerConfig.class)
+                .run(context -> {
 
-        String name;
-        List<String> favouriteColors;
+                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
+                    assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
+                    assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+                    assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
+
+                    ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
+                    ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);
+                    InOrder inOrder = Mockito.inOrder(listener1, listener2);
+                    inOrder.verify(listener2).onRequest(any());
+                    inOrder.verify(listener1).onRequest(any());
+                    inOrder.verify(listener2).onResponse(any());
+                    inOrder.verify(listener1).onResponse(any());
+                    inOrder.verifyNoMoreInteractions();
+                });
     }
 
     @ParameterizedTest(name = "Deployment name: {0}")
@@ -173,6 +202,53 @@ class AutoConfigIT {
     }
 
     @Test
+    void should_provide_streaming_chat_model_with_listeners() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.streaming-chat-model.api-key=" + AZURE_OPENAI_KEY,
+                        "langchain4j.azure-open-ai.streaming-chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
+                        "langchain4j.azure-open-ai.streaming-chat-model.deployment-name=gpt-4o-mini",
+                        "langchain4j.azure-open-ai.streaming-chat-model.max-tokens=20",
+                        "langchain4j.azure-open-ai.streaming-chat-model.timeout=60"
+                )
+                .withUserConfiguration(ListenerConfig.class)
+                .run(context -> {
+
+                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
+                    assertThat(streamingChatLanguageModel).isInstanceOf(AzureOpenAiStreamingChatModel.class);
+                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
+                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+
+                        @Override
+                        public void onNext(String token) {
+                        }
+
+                        @Override
+                        public void onComplete(Response<AiMessage> response) {
+                            future.complete(response);
+                        }
+
+                        @Override
+                        public void onError(Throwable error) {
+                        }
+                    });
+                    Response<AiMessage> response = future.get(60, SECONDS);
+                    assertThat(response.content().text()).contains("Berlin");
+
+                    assertThat(context.getBean(AzureOpenAiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+
+                    ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
+                    ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);
+                    InOrder inOrder = Mockito.inOrder(listener1, listener2);
+                    inOrder.verify(listener2).onRequest(any());
+                    inOrder.verify(listener1).onRequest(any());
+                    inOrder.verify(listener2).onResponse(any());
+                    inOrder.verify(listener1).onResponse(any());
+                    inOrder.verifyNoMoreInteractions();
+                });
+    }
+
+    @Test
     void should_provide_embedding_model() {
         contextRunner
                 .withPropertyValues("langchain4j.azure-open-ai.embedding-model.api-key=" + AZURE_OPENAI_KEY,
@@ -200,9 +276,25 @@ class AutoConfigIT {
 
                     ImageModel imageModel = context.getBean(ImageModel.class);
                     assertThat(imageModel).isInstanceOf(AzureOpenAiImageModel.class);
-                    assertThat(imageModel.generate("banana").content().url()).isNotNull();
+                    assertThat(imageModel.generate("coffee").content().url()).isNotNull();
 
                     assertThat(context.getBean(AzureOpenAiImageModel.class)).isSameAs(imageModel);
                 });
+    }
+
+    @Configuration
+    static class ListenerConfig {
+
+        @Bean
+        @Order(2)
+        ChatModelListener listener1() {
+            return mock(ChatModelListener.class);
+        }
+
+        @Bean
+        @Order(1)
+        ChatModelListener listener2() {
+            return mock(ChatModelListener.class);
+        }
     }
 }
