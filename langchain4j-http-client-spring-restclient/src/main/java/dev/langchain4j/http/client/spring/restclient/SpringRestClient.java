@@ -75,38 +75,31 @@ public class SpringRestClient implements HttpClient {
 
     @Override
     public void execute(HttpRequest request, ServerSentEventParser parser, ServerSentEventListener listener) {
-        streamingRequestExecutor.execute(() -> {
-            try {
-                toSpringRestClientRequest(request)
-                        .exchange((springRequest, springResponse) -> {
+        streamingRequestExecutor.execute(() ->
 
-                            int statusCode = springResponse.getStatusCode().value();
+                toSpringRestClientRequest(request).exchange((springRequest, springResponse) -> {
 
-                            if (!springResponse.getStatusCode().is2xxSuccessful()) {
-                                String body = springResponse.bodyTo(String.class);
-                                listener.onError(new HttpException(statusCode, body));
-                                return null;
-                            }
+                    int statusCode = springResponse.getStatusCode().value();
 
-                            SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
-                                    .statusCode(statusCode)
-                                    .headers(springResponse.getHeaders())
-                                    .build();
-                            listener.onOpen(response);
+                    if (!springResponse.getStatusCode().is2xxSuccessful()) {
+                        String body = springResponse.bodyTo(String.class);
+                        listener.onError(new HttpException(statusCode, body));
+                        return null;
+                    }
 
-                            try (InputStream inputStream = springResponse.getBody()) {
-                                parser.parse(inputStream, listener);
-                                listener.onClose();
-                            } catch (Exception e) {
-                                listener.onError(e);
-                            }
+                    SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
+                            .statusCode(statusCode)
+                            .headers(springResponse.getHeaders())
+                            .build();
+                    listener.onOpen(response);
 
-                            return null;
-                        });
-            } catch (Exception e) {
-                listener.onError(e);
-            }
-        });
+                    try (InputStream inputStream = springResponse.getBody()) {
+                        parser.parse(inputStream, listener);
+                        listener.onClose();
+                    }
+
+                    return null;
+                }));
     }
 
     private RestClient.RequestBodySpec toSpringRestClientRequest(HttpRequest request) {
