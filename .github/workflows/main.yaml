@@ -34,6 +34,7 @@ jobs:
           AZURE_SEARCH_ENDPOINT: ${{ secrets.AZURE_SEARCH_ENDPOINT }}
           AZURE_SEARCH_KEY: ${{ secrets.AZURE_SEARCH_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOOGLE_AI_GEMINI_API_KEY: ${{secrets.GOOGLE_AI_GEMINI_API_KEY}}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
