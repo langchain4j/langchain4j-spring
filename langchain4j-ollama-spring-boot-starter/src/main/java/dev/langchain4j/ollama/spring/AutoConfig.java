@@ -25,6 +25,8 @@ import static dev.langchain4j.ollama.spring.Properties.PREFIX;
 @EnableConfigurationProperties(Properties.class)
 public class AutoConfig {
 
+    private static final String TASK_EXECUTOR_THREAD_NAME_PREFIX = "LangChain4j-Ollama-";
+
     private static final String OLLAMA_CHAT_MODEL_HTTP_CLIENT_BUILDER = "ollamaChatModelHttpClientBuilder";
 
     private static final String OLLAMA_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER = "ollamaStreamingChatModelHttpClientBuilder";
@@ -40,9 +42,10 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".chat-model.base-url")
     OllamaChatModel ollamaChatModel(
+            @Qualifier(OLLAMA_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties,
-            ObjectProvider<ChatModelListener> listeners,
-            @Qualifier(OLLAMA_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder) {
+            ObjectProvider<ChatModelListener> listeners
+    ) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         return OllamaChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -79,9 +82,9 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.base-url")
     OllamaStreamingChatModel ollamaStreamingChatModel(
+            @Qualifier(OLLAMA_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties,
-            ObjectProvider<ChatModelListener> listeners,
-            @Qualifier(OLLAMA_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder
+            ObjectProvider<ChatModelListener> listeners
     ) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         return OllamaStreamingChatModel.builder()
@@ -122,6 +125,7 @@ public class AutoConfig {
     @ConditionalOnClass(name = "io.micrometer.context.ContextSnapshotFactory")
     AsyncTaskExecutor ollamaStreamingChatModelTaskExecutorWithContextPropagation() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setThreadNamePrefix(TASK_EXECUTOR_THREAD_NAME_PREFIX);
         taskExecutor.setTaskDecorator(new ContextPropagatingTaskDecorator());
         return taskExecutor;
     }
@@ -130,15 +134,18 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.base-url")
     @ConditionalOnMissingBean(name = OLLAMA_STREAMING_CHAT_MODEL_TASK_EXECUTOR)
     @ConditionalOnMissingClass("io.micrometer.context.ContextSnapshotFactory")
-    AsyncTaskExecutor ollamaStreamingChatModelTaskExecutorWithoutContextPropagation() {
-        return new ThreadPoolTaskExecutor();
+    AsyncTaskExecutor ollamaStreamingChatModelTaskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setThreadNamePrefix(TASK_EXECUTOR_THREAD_NAME_PREFIX);
+        return taskExecutor;
     }
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".language-model.base-url")
     OllamaLanguageModel ollamaLanguageModel(
-            Properties properties,
-            @Qualifier(OLLAMA_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder) {
+            @Qualifier(OLLAMA_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            Properties properties
+    ) {
         LanguageModelProperties languageModelProperties = properties.getLanguageModel();
         return OllamaLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -173,8 +180,8 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.base-url")
     OllamaStreamingLanguageModel ollamaStreamingLanguageModel(
-            Properties properties,
-            @Qualifier(OLLAMA_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder
+            @Qualifier(OLLAMA_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            Properties properties
     ) {
         LanguageModelProperties languageModelProperties = properties.getStreamingLanguageModel();
         return OllamaStreamingLanguageModel.builder()
@@ -200,8 +207,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.base-url")
     @ConditionalOnMissingBean(name = OLLAMA_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder ollamaStreamingLanguageModelHttpClientBuilder(
-            ObjectProvider<RestClient.Builder> restClientBuilder,
-            @Qualifier(OLLAMA_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
+            @Qualifier(OLLAMA_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor,
+            ObjectProvider<RestClient.Builder> restClientBuilder
+    ) {
         return new SpringRestClientBuilder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
                 .streamingRequestExecutor(executor);
@@ -213,6 +221,7 @@ public class AutoConfig {
     @ConditionalOnClass(name = "io.micrometer.context.ContextSnapshotFactory")
     AsyncTaskExecutor ollamaStreamingLanguageModelTaskExecutorWithContextPropagation() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setThreadNamePrefix(TASK_EXECUTOR_THREAD_NAME_PREFIX);
         taskExecutor.setTaskDecorator(new ContextPropagatingTaskDecorator());
         return taskExecutor;
     }
@@ -221,15 +230,18 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.base-url")
     @ConditionalOnMissingBean(name = OLLAMA_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
     @ConditionalOnMissingClass("io.micrometer.context.ContextSnapshotFactory")
-    AsyncTaskExecutor ollamaStreamingLanguageModelTaskExecutorWithoutContextPropagation() {
-        return new ThreadPoolTaskExecutor();
+    AsyncTaskExecutor ollamaStreamingLanguageModelTaskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setThreadNamePrefix(TASK_EXECUTOR_THREAD_NAME_PREFIX);
+        return taskExecutor;
     }
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-model.base-url")
     OllamaEmbeddingModel ollamaEmbeddingModel(
-            Properties properties,
-            @Qualifier(OLLAMA_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder) {
+            @Qualifier(OLLAMA_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            Properties properties
+    ) {
         EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         return OllamaEmbeddingModel.builder()
                 .httpClientBuilder(httpClientBuilder)
