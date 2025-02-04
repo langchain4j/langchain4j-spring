@@ -183,15 +183,13 @@ class AutoConfigIT {
                 });
     }
 
-    // TODO test with custom http client builder
-
     @Test
     void should_provide_streaming_chat_model_with_custom_task_executor() {
 
         ThreadPoolTaskExecutor customExecutor = spy(new ThreadPoolTaskExecutor());
 
         contextRunner
-                .withBean("ollamaTaskExecutor", ThreadPoolTaskExecutor.class, () -> customExecutor)
+                .withBean("ollamaStreamingChatModelTaskExecutor", ThreadPoolTaskExecutor.class, () -> customExecutor)
                 .withPropertyValues(
                         "langchain4j.ollama.streaming-chat-model.base-url=" + baseUrl(),
                         "langchain4j.ollama.streaming-chat-model.model-name=" + MODEL_NAME,

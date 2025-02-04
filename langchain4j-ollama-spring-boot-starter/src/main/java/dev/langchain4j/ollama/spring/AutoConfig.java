@@ -7,72 +7,42 @@ import dev.langchain4j.model.ollama.*;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnThreading;
-import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
-import org.springframework.boot.task.ThreadPoolTaskExecutorBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.support.ContextPropagatingTaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 
 import static dev.langchain4j.ollama.spring.Properties.PREFIX;
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
-import static org.springframework.boot.autoconfigure.thread.Threading.PLATFORM;
-import static org.springframework.boot.autoconfigure.thread.Threading.VIRTUAL;
 
-@AutoConfiguration(after = {RestClientAutoConfiguration.class, TaskExecutionAutoConfiguration.class}) // TODO correct?
+@AutoConfiguration(after = RestClientAutoConfiguration.class)
 @EnableConfigurationProperties(Properties.class)
 public class AutoConfig {
 
-    private static final String OLLAMA_HTTP_CLIENT_BUILDER = "ollamaHttpClientBuilder";
-    private static final String OLLAMA_TASK_EXECUTOR = "ollamaTaskExecutor"; // TODO name: add "streaming"?
+    private static final String OLLAMA_CHAT_MODEL_HTTP_CLIENT_BUILDER = "ollamaChatModelHttpClientBuilder";
 
-    @Lazy
-    @Bean(OLLAMA_HTTP_CLIENT_BUILDER)
-    @Scope(SCOPE_PROTOTYPE)
-    @ConditionalOnMissingBean(name = OLLAMA_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder ollamaHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
-        return new SpringRestClientBuilder().restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder));
-    }
+    private static final String OLLAMA_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER = "ollamaStreamingChatModelHttpClientBuilder";
+    private static final String OLLAMA_STREAMING_CHAT_MODEL_TASK_EXECUTOR = "ollamaStreamingChatModelTaskExecutor";
 
-    @Lazy
-    @Bean(OLLAMA_TASK_EXECUTOR)
-    @ConditionalOnThreading(VIRTUAL)
-    @ConditionalOnMissingBean(name = OLLAMA_TASK_EXECUTOR)
-    SimpleAsyncTaskExecutor ollamaTaskExecutorVirtualThreads(ObjectProvider<SimpleAsyncTaskExecutorBuilder> builder) {
-        return builder.getIfAvailable(SimpleAsyncTaskExecutorBuilder::new)
-                .threadNamePrefix("LangChain4j-Ollama-")
-                .build();
-    }
+    private static final String OLLAMA_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER = "ollamaLanguageModelHttpClientBuilder";
 
-    @Lazy
-    @Bean(OLLAMA_TASK_EXECUTOR)
-    @ConditionalOnThreading(PLATFORM)
-    @ConditionalOnMissingBean(name = OLLAMA_TASK_EXECUTOR)
-    ThreadPoolTaskExecutor ollamaTaskExecutor(ObjectProvider<ThreadPoolTaskExecutorBuilder> builder) {
-        return builder.getIfAvailable(ThreadPoolTaskExecutorBuilder::new)
-                .threadNamePrefix("LangChain4j-Ollama-")
-                .build();
-    }
+    private static final String OLLAMA_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER = "ollamaStreamingLanguageModelHttpClientBuilder";
+    private static final String OLLAMA_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR = "ollamaStreamingLanguageModelTaskExecutor";
+
+    private static final String OLLAMA_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER = "ollamaEmbeddingModelHttpClientBuilder";
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".chat-model.base-url")
     OllamaChatModel ollamaChatModel(
-            @Qualifier(OLLAMA_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties,
-            ObjectProvider<ChatModelListener> listeners
-    ) {
-        if (httpClientBuilder instanceof SpringRestClientBuilder springRestClientBuilder) {
-            springRestClientBuilder.createDefaultStreamingRequestExecutor(false);
-        }
+            ObjectProvider<ChatModelListener> listeners,
+            @Qualifier(OLLAMA_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         return OllamaChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -96,17 +66,23 @@ public class AutoConfig {
                 .build();
     }
 
+    @Bean(OLLAMA_CHAT_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnProperty(PREFIX + ".chat-model.base-url")
+    @ConditionalOnMissingBean(name = OLLAMA_CHAT_MODEL_HTTP_CLIENT_BUILDER)
+    HttpClientBuilder ollamaChatModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
+        return new SpringRestClientBuilder()
+                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                // executor is not needed for no-streaming OllamaChatModel
+                .createDefaultStreamingRequestExecutor(false);
+    }
+
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.base-url")
     OllamaStreamingChatModel ollamaStreamingChatModel(
-            @Qualifier(OLLAMA_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            @Qualifier(OLLAMA_TASK_EXECUTOR) AsyncTaskExecutor streamingRequestExecutor,
             Properties properties,
-            ObjectProvider<ChatModelListener> listeners
+            ObjectProvider<ChatModelListener> listeners,
+            @Qualifier(OLLAMA_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder
     ) {
-        if (httpClientBuilder instanceof SpringRestClientBuilder springRestClientBuilder) {
-            springRestClientBuilder.streamingRequestExecutor(streamingRequestExecutor);
-        }
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         return OllamaStreamingChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -129,15 +105,40 @@ public class AutoConfig {
                 .build();
     }
 
+    @Bean(OLLAMA_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnProperty(PREFIX + ".streaming-chat-model.base-url")
+    @ConditionalOnMissingBean(name = OLLAMA_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER)
+    HttpClientBuilder ollamaStreamingChatModelHttpClientBuilder(
+            ObjectProvider<RestClient.Builder> restClientBuilder,
+            @Qualifier(OLLAMA_STREAMING_CHAT_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
+        return new SpringRestClientBuilder()
+                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                .streamingRequestExecutor(executor);
+    }
+
+    @Bean(OLLAMA_STREAMING_CHAT_MODEL_TASK_EXECUTOR)
+    @ConditionalOnProperty(PREFIX + ".streaming-chat-model.base-url")
+    @ConditionalOnMissingBean(name = OLLAMA_STREAMING_CHAT_MODEL_TASK_EXECUTOR)
+    @ConditionalOnClass(name = "io.micrometer.context.ContextSnapshotFactory")
+    AsyncTaskExecutor ollamaStreamingChatModelTaskExecutorWithContextPropagation() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setTaskDecorator(new ContextPropagatingTaskDecorator());
+        return taskExecutor;
+    }
+
+    @Bean(OLLAMA_STREAMING_CHAT_MODEL_TASK_EXECUTOR)
+    @ConditionalOnProperty(PREFIX + ".streaming-chat-model.base-url")
+    @ConditionalOnMissingBean(name = OLLAMA_STREAMING_CHAT_MODEL_TASK_EXECUTOR)
+    @ConditionalOnMissingClass("io.micrometer.context.ContextSnapshotFactory")
+    AsyncTaskExecutor ollamaStreamingChatModelTaskExecutorWithoutContextPropagation() {
+        return new ThreadPoolTaskExecutor();
+    }
+
     @Bean
     @ConditionalOnProperty(PREFIX + ".language-model.base-url")
     OllamaLanguageModel ollamaLanguageModel(
-            @Qualifier(OLLAMA_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties
-    ) {
-        if (httpClientBuilder instanceof SpringRestClientBuilder springRestClientBuilder) {
-            springRestClientBuilder.createDefaultStreamingRequestExecutor(false);
-        }
+            Properties properties,
+            @Qualifier(OLLAMA_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder) {
         LanguageModelProperties languageModelProperties = properties.getLanguageModel();
         return OllamaLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -159,16 +160,22 @@ public class AutoConfig {
                 .build();
     }
 
+    @Bean(OLLAMA_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnProperty(PREFIX + ".language-model.base-url")
+    @ConditionalOnMissingBean(name = OLLAMA_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
+    HttpClientBuilder ollamaLanguageModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
+        return new SpringRestClientBuilder()
+                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                // executor is not needed for no-streaming OllamaChatModel
+                .createDefaultStreamingRequestExecutor(false);
+    }
+
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.base-url")
     OllamaStreamingLanguageModel ollamaStreamingLanguageModel(
-            @Qualifier(OLLAMA_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            @Qualifier(OLLAMA_TASK_EXECUTOR) AsyncTaskExecutor streamingRequestExecutor,
-            Properties properties
+            Properties properties,
+            @Qualifier(OLLAMA_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder
     ) {
-        if (httpClientBuilder instanceof SpringRestClientBuilder springRestClientBuilder) {
-            springRestClientBuilder.streamingRequestExecutor(streamingRequestExecutor);
-        }
         LanguageModelProperties languageModelProperties = properties.getStreamingLanguageModel();
         return OllamaStreamingLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -189,15 +196,40 @@ public class AutoConfig {
                 .build();
     }
 
+    @Bean(OLLAMA_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnProperty(PREFIX + ".streaming-language-model.base-url")
+    @ConditionalOnMissingBean(name = OLLAMA_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
+    HttpClientBuilder ollamaStreamingLanguageModelHttpClientBuilder(
+            ObjectProvider<RestClient.Builder> restClientBuilder,
+            @Qualifier(OLLAMA_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
+        return new SpringRestClientBuilder()
+                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                .streamingRequestExecutor(executor);
+    }
+
+    @Bean(OLLAMA_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
+    @ConditionalOnProperty(PREFIX + ".streaming-language-model.base-url")
+    @ConditionalOnMissingBean(name = OLLAMA_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
+    @ConditionalOnClass(name = "io.micrometer.context.ContextSnapshotFactory")
+    AsyncTaskExecutor ollamaStreamingLanguageModelTaskExecutorWithContextPropagation() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setTaskDecorator(new ContextPropagatingTaskDecorator());
+        return taskExecutor;
+    }
+
+    @Bean(OLLAMA_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
+    @ConditionalOnProperty(PREFIX + ".streaming-language-model.base-url")
+    @ConditionalOnMissingBean(name = OLLAMA_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
+    @ConditionalOnMissingClass("io.micrometer.context.ContextSnapshotFactory")
+    AsyncTaskExecutor ollamaStreamingLanguageModelTaskExecutorWithoutContextPropagation() {
+        return new ThreadPoolTaskExecutor();
+    }
+
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-model.base-url")
     OllamaEmbeddingModel ollamaEmbeddingModel(
-            @Qualifier(OLLAMA_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties
-    ) {
-        if (httpClientBuilder instanceof SpringRestClientBuilder springRestClientBuilder) {
-            springRestClientBuilder.createDefaultStreamingRequestExecutor(false);
-        }
+            Properties properties,
+            @Qualifier(OLLAMA_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder) {
         EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         return OllamaEmbeddingModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -209,5 +241,15 @@ public class AutoConfig {
                 .logRequests(embeddingModelProperties.getLogRequests())
                 .logResponses(embeddingModelProperties.getLogResponses())
                 .build();
+    }
+
+    @Bean(OLLAMA_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnProperty(PREFIX + ".embedding-model.base-url")
+    @ConditionalOnMissingBean(name = OLLAMA_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
+    HttpClientBuilder ollamaEmbeddingModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
+        return new SpringRestClientBuilder()
+                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                // executor is not needed for no-streaming OllamaChatModel
+                .createDefaultStreamingRequestExecutor(false);
     }
 }
