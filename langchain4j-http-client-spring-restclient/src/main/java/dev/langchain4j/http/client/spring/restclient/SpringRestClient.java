@@ -16,6 +16,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
 
@@ -97,14 +98,14 @@ public class SpringRestClient implements HttpClient {
                             try (InputStream inputStream = springResponse.getBody()) {
                                 parser.parse(inputStream, listener);
                                 listener.onClose();
-                            } catch (Exception e) {
-                                listener.onError(e);
                             }
 
                             return null;
                         });
             } catch (Exception e) {
-                listener.onError(e);
+                if (e.getCause() instanceof SocketTimeoutException) {
+                    listener.onError(e);
+                }
             }
         });
     }

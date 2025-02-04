@@ -39,7 +39,7 @@ class SpringRestClientTimeoutIT extends HttpClientTimeoutIT {
 
     @Override
     protected Class<? extends Exception> expectedReadTimeoutExceptionTypeSync() {
-        return ResourceAccessException.class;
+        return ResourceAccessException.class; // TODO unwrap?
     }
 
     @Override
@@ -49,7 +49,7 @@ class SpringRestClientTimeoutIT extends HttpClientTimeoutIT {
 
     @Override
     protected Class<? extends Exception> expectedReadTimeoutExceptionTypeAsync() {
-        return ResourceAccessException.class;
+        return ResourceAccessException.class; // TODO unwrap?
     }
 
     @Override
