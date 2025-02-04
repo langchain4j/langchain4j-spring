@@ -37,7 +37,6 @@ class DifferentPackageAiServiceIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.chat-model.max-tokens=20",
                         "langchain4j.open-ai.chat-model.temperature=0.0"
                 )
@@ -62,7 +61,6 @@ class DifferentPackageAiServiceIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.chat-model.max-tokens=20",
                         "langchain4j.open-ai.chat-model.temperature=0.0"
                 )
@@ -87,7 +85,6 @@ class DifferentPackageAiServiceIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.chat-model.max-tokens=20",
                         "langchain4j.open-ai.chat-model.temperature=0.0"
                 )
@@ -112,7 +109,6 @@ class DifferentPackageAiServiceIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.chat-model.max-tokens=20",
                         "langchain4j.open-ai.chat-model.temperature=0.0",
                         "test.basePackages=dev.langchain4j.service.spring.mode.automatic.differentPackage.package2"

@@ -18,7 +18,6 @@ class InnerClassAiServiceIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + System.getenv("OPENAI_API_KEY"),
-                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.chat-model.max-tokens=20",
                         "langchain4j.open-ai.chat-model.temperature=0.0"
                 )

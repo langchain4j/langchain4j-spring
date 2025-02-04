@@ -17,10 +17,7 @@ class AiServiceWithMissingAnnotationIT {
     @Test
     void should_fail_to_create_AI_service_with_missing_annotation() {
         contextRunner
-                .withPropertyValues(
-                        "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini"
-                )
+                .withPropertyValues("langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY)
                 .withUserConfiguration(AiServiceWithMissingAnnotationApplication.class)
                 .run(context -> {
 

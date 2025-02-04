@@ -21,7 +21,6 @@ class StreamingAiServiceIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.streaming-chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.streaming-chat-model.max-tokens=20",
                         "langchain4j.open-ai.streaming-chat-model.temperature=0.0"
                 )

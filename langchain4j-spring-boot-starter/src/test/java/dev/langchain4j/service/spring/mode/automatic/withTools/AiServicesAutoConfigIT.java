@@ -34,7 +34,6 @@ class AiServicesAutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.chat-model.temperature=0.0",
                         "langchain4j.open-ai.chat-model.log-requests=true",
                         "langchain4j.open-ai.chat-model.log-responses=true"
@@ -58,7 +57,6 @@ class AiServicesAutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.chat-model.temperature=0.0",
                         "langchain4j.open-ai.chat-model.log-requests=true",
                         "langchain4j.open-ai.chat-model.log-responses=true"
@@ -108,7 +106,6 @@ class AiServicesAutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.chat-model.api-key=" + OPENAI_API_KEY,
-                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.chat-model.temperature=0.0",
                         "langchain4j.open-ai.chat-model.log-requests=true",
                         "langchain4j.open-ai.chat-model.log-responses=true"
