@@ -6,17 +6,25 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import static dev.langchain4j.model.openai.OpenAiChatModelName.GPT_4_O_MINI;
+
 @SpringBootApplication
 class AiServiceWithConflictingChatModelsApplication {
 
     @Bean
     ChatLanguageModel chatLanguageModel() {
-        return OpenAiChatModel.withApiKey(System.getenv("OPENAI_API_KEY"));
+        return OpenAiChatModel.builder()
+                .apiKey(System.getenv("OPENAI_API_KEY"))
+                .modelName(GPT_4_O_MINI)
+                .build();
     }
 
     @Bean
     ChatLanguageModel chatLanguageModel2() {
-        return OpenAiChatModel.withApiKey(System.getenv("OPENAI_API_KEY"));
+        return OpenAiChatModel.builder()
+                .apiKey(System.getenv("OPENAI_API_KEY"))
+                .modelName(GPT_4_O_MINI)
+                .build();
     }
 
     public static void main(String[] args) {
