@@ -12,7 +12,6 @@ record ChatModelProperties(
         Double topP,
         Integer topK,
         Integer maxOutputTokens,
-        ResponseFormat responseFormat,
         Boolean logRequestsAndResponses,
         Integer maxRetries,
         Duration timeout,
