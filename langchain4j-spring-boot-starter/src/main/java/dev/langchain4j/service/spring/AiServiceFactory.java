@@ -144,12 +144,14 @@ class AiServiceFactory implements FactoryBean<Object> {
         for (Method originalToolMethod : originalToolClass.getDeclaredMethods()) {
             if (originalToolMethod.isAnnotationPresent(Tool.class)) {
                 Arrays.stream(enhancedTool.getClass().getDeclaredMethods())
-                      .filter(m -> m.getName().equals(originalToolMethod.getName()))
-                      .findFirst()
-                      .ifPresent(enhancedMethod -> {
-                          ToolSpecification toolSpecification = toolSpecificationFrom(originalToolMethod);
-                          toolExecutors.put(toolSpecification, new DefaultToolExecutor(enhancedTool, enhancedMethod));
-                      });
+                        // TODO match by complete method signature, not only by name (there can be multiple methods with the same name)
+                        .filter(m -> m.getName().equals(originalToolMethod.getName()))
+                        .findFirst()
+                        .ifPresent(enhancedToolMethod -> {
+                            ToolSpecification toolSpecification = toolSpecificationFrom(originalToolMethod);
+                            ToolExecutor executor = new DefaultToolExecutor(enhancedTool, originalToolMethod, enhancedToolMethod);
+                            toolExecutors.put(toolSpecification, executor);
+                        });
             }
         }
         return toolExecutors;
