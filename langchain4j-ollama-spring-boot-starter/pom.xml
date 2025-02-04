@@ -24,6 +24,18 @@
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-ollama</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j-http-client-jdk</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-http-client-spring-restclient</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -50,6 +62,8 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- test dependencies -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
