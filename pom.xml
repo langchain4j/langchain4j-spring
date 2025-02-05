@@ -39,7 +39,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <tinylog.version>2.6.2</tinylog.version>
         <spring.boot.version>3.2.6</spring.boot.version>
-        <spring.web.version>6.1.8</spring.web.version>
+        <spring.web.version>6.1.12</spring.web.version>
         <testcontainers.version>1.20.3</testcontainers.version>
         <tinylog.version>2.7.0</tinylog.version>
     </properties>
