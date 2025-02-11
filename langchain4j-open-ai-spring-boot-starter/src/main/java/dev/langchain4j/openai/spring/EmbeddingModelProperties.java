@@ -7,6 +7,7 @@ record EmbeddingModelProperties(
         String baseUrl,
         String apiKey,
         String organizationId,
+        String projectId,
         String modelName,
         Integer dimensions,
         Integer maxSegmentsPerBatch,

@@ -7,6 +7,7 @@ record LanguageModelProperties(
         String baseUrl,
         String apiKey,
         String organizationId,
+        String projectId,
         String modelName,
         Double temperature,
         Duration timeout,

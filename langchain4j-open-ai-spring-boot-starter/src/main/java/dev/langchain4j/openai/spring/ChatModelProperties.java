@@ -8,6 +8,7 @@ record ChatModelProperties(
         String baseUrl,
         String apiKey,
         String organizationId,
+        String projectId,
         String modelName,
         Double temperature,
         Double topP,

@@ -7,6 +7,7 @@ record ImageModelProperties(
         String baseUrl,
         String apiKey,
         String organizationId,
+        String projectId,
         String modelName,
         String size,
         String quality,

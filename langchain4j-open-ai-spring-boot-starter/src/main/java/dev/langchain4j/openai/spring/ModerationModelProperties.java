@@ -7,6 +7,7 @@ record ModerationModelProperties(
         String baseUrl,
         String apiKey,
         String organizationId,
+        String projectId,
         String modelName,
         Duration timeout,
         Integer maxRetries,
