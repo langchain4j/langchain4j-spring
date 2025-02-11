@@ -19,7 +19,6 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-http-client</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -46,20 +45,19 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.4.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.projectreactor.netty</groupId>
             <artifactId>reactor-netty</artifactId>
-            <version>1.2.2</version>
             <scope>test</scope>
         </dependency>
 
+        <!-- Why "wiremock-jetty12" and not "wiremock": https://github.com/wiremock/wiremock/issues/2922 -->
         <dependency>
             <groupId>org.wiremock</groupId>
-            <artifactId>wiremock</artifactId>
+            <artifactId>wiremock-jetty12</artifactId>
             <version>3.10.0</version>
             <scope>test</scope>
         </dependency>

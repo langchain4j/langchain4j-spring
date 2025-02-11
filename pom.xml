@@ -37,10 +37,8 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tinylog.version>2.6.2</tinylog.version>
-        <spring.boot.version>3.2.6</spring.boot.version>
-        <spring.web.version>6.1.8</spring.web.version>
-        <testcontainers.version>1.20.3</testcontainers.version>
+        <spring.boot.version>3.3.8</spring.boot.version>
+        <testcontainers.version>1.20.4</testcontainers.version>
         <tinylog.version>2.7.0</tinylog.version>
     </properties>
 
@@ -55,72 +53,22 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- BOM for Spring Boot dependencies, including Framework, Reactor, Testcontainers, and Test -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot</artifactId>
+                <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-webflux</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-autoconfigure-processor</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-configuration-processor</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.web.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.18.34</version>
-            </dependency>
-
+            <!-- BOM for Testcontainers dependencies, overriding the version from the Spring Boot BOM -->
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
                 <version>${testcontainers.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.tinylog</groupId>
-                <artifactId>tinylog-impl</artifactId>
-                <version>${tinylog.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.tinylog</groupId>
-                <artifactId>slf4j-tinylog</artifactId>
-                <version>${tinylog.version}</version>
             </dependency>
 
         </dependencies>
