@@ -19,6 +19,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InOrder;
@@ -53,6 +54,7 @@ class AutoConfigIT {
             "gpt-4o-mini",
             "gpt-4o"
     })
+    @EnabledIfEnvironmentVariable(named = "AZURE_OPENAI_KEY", matches = ".+")
     void should_provide_chat_model(String deploymentName) {
         contextRunner
                 .withPropertyValues(
@@ -71,6 +73,7 @@ class AutoConfigIT {
     }
 
     @Test
+    @EnabledIfEnvironmentVariable(named = "AZURE_OPENAI_KEY", matches = ".+")
     void should_provide_chat_model_with_listeners() {
         contextRunner
                 .withPropertyValues(
@@ -102,6 +105,7 @@ class AutoConfigIT {
     @CsvSource({
             "gpt-4o-mini"
     })
+    @EnabledIfEnvironmentVariable(named = "AZURE_OPENAI_KEY", matches = ".+")
     void should_provide_chat_model_with_json_schema(String deploymentName) {
         contextRunner
                 .withPropertyValues(
@@ -142,6 +146,7 @@ class AutoConfigIT {
     @CsvSource({
             "gpt-3.5-turbo"
     })
+    @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
     void should_provide_chat_model_no_azure(String deploymentName) {
         contextRunner
                 .withPropertyValues(
@@ -165,6 +170,7 @@ class AutoConfigIT {
             "gpt-4o-mini",
             "gpt-4o"
     })
+    @EnabledIfEnvironmentVariable(named = "AZURE_OPENAI_KEY", matches = ".+")
     void should_provide_streaming_chat_model(String deploymentName) {
         contextRunner
                 .withPropertyValues(
@@ -202,6 +208,7 @@ class AutoConfigIT {
     }
 
     @Test
+    @EnabledIfEnvironmentVariable(named = "AZURE_OPENAI_KEY", matches = ".+")
     void should_provide_streaming_chat_model_with_listeners() {
         contextRunner
                 .withPropertyValues(
@@ -249,6 +256,7 @@ class AutoConfigIT {
     }
 
     @Test
+    @EnabledIfEnvironmentVariable(named = "AZURE_OPENAI_KEY", matches = ".+")
     void should_provide_embedding_model() {
         contextRunner
                 .withPropertyValues("langchain4j.azure-open-ai.embedding-model.api-key=" + AZURE_OPENAI_KEY,
@@ -265,6 +273,7 @@ class AutoConfigIT {
     }
 
     @Test
+    @EnabledIfEnvironmentVariable(named = "AZURE_OPENAI_KEY", matches = ".+")
     void should_provide_image_model() {
         contextRunner
                 .withPropertyValues(

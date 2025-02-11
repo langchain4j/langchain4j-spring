@@ -137,7 +137,7 @@ class AutoConfigIT {
         contextRunner.run(context -> {
 
             OllamaChatModel model = OllamaChatModel.builder()
-                    .baseUrl(OLLAMA_BASE_URL)
+                    .baseUrl(baseUrl())
                     .modelName(MODEL_NAME)
                     .temperature(0.0)
                     .numPredict(20)
@@ -273,7 +273,7 @@ class AutoConfigIT {
         contextRunner.run(context -> {
 
             OllamaStreamingChatModel model = OllamaStreamingChatModel.builder()
-                    .baseUrl(OLLAMA_BASE_URL)
+                    .baseUrl(baseUrl())
                     .modelName(MODEL_NAME)
                     .temperature(0.0)
                     .numPredict(20)
@@ -377,7 +377,7 @@ class AutoConfigIT {
         contextRunner.run(context -> {
 
             OllamaEmbeddingModel model = OllamaEmbeddingModel.builder()
-                    .baseUrl(OLLAMA_BASE_URL)
+                    .baseUrl(baseUrl())
                     .modelName(MODEL_NAME)
                     .build();
 

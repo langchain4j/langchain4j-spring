@@ -20,7 +20,6 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-azure-ai-search</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -57,7 +56,6 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-embeddings-all-minilm-l6-v2</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
