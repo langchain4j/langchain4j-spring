@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import static dev.langchain4j.service.spring.mode.ApiKeys.OPENAI_API_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AiServiceWithChatMemoryProviderIT {
+class AiServiceWithChatMemoryIT {
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class));
