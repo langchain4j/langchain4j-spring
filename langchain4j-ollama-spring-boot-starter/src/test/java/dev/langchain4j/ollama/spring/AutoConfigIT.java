@@ -137,7 +137,7 @@ class AutoConfigIT {
     void should_create_chat_model_with_default_http_client() {
 
         OllamaChatModel model = OllamaChatModel.builder()
-                .baseUrl(OLLAMA_BASE_URL)
+                .baseUrl(baseUrl())
                 .modelName(MODEL_NAME)
                 .temperature(0.0)
                 .numPredict(20)
@@ -275,7 +275,7 @@ class AutoConfigIT {
     void should_create_streaming_chat_model_with_default_http_client() throws Exception {
 
         OllamaStreamingChatModel model = OllamaStreamingChatModel.builder()
-                .baseUrl(OLLAMA_BASE_URL)
+                .baseUrl(baseUrl())
                 .modelName(MODEL_NAME)
                 .temperature(0.0)
                 .numPredict(20)
@@ -378,7 +378,7 @@ class AutoConfigIT {
     void should_create_embedding_model_with_default_http_client() {
 
         OllamaEmbeddingModel model = OllamaEmbeddingModel.builder()
-                .baseUrl(OLLAMA_BASE_URL)
+                .baseUrl(baseUrl())
                 .modelName(MODEL_NAME)
                 .build();
 

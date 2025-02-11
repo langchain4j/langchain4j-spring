@@ -30,6 +30,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@EnabledIfEnvironmentVariable(named = "AZURE_SEARCH_KEY", matches = ".+")
 class AutoConfigIT {
 
     private static final Logger log = LoggerFactory.getLogger(AutoConfigIT.class);
