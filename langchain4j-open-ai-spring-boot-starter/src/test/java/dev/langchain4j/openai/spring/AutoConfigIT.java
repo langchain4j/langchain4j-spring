@@ -1,10 +1,11 @@
 package dev.langchain4j.openai.spring;
 
-import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
 import dev.langchain4j.model.language.LanguageModel;
@@ -45,11 +46,11 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(OpenAiChatModel.class);
-                    assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+                    ChatLanguageModel model = context.getBean(ChatLanguageModel.class);
+                    assertThat(model).isInstanceOf(OpenAiChatModel.class);
+                    assertThat(context.getBean(OpenAiChatModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OpenAiChatModel.class)).isSameAs(chatLanguageModel);
+                    assertThat(model.chat("What is the capital of Germany?")).contains("Berlin");
                 });
     }
 
@@ -64,11 +65,11 @@ class AutoConfigIT {
                 .withUserConfiguration(ListenerConfig.class)
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(OpenAiChatModel.class);
-                    assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+                    ChatLanguageModel model = context.getBean(ChatLanguageModel.class);
+                    assertThat(model).isInstanceOf(OpenAiChatModel.class);
+                    assertThat(context.getBean(OpenAiChatModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OpenAiChatModel.class)).isSameAs(chatLanguageModel);
+                    assertThat(model.chat("What is the capital of Germany?")).contains("Berlin");
 
                     ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
                     ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);
@@ -91,28 +92,29 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(OpenAiStreamingChatModel.class);
-                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+                    StreamingChatLanguageModel model = context.getBean(StreamingChatLanguageModel.class);
+                    assertThat(model).isInstanceOf(OpenAiStreamingChatModel.class);
+                    assertThat(context.getBean(OpenAiStreamingChatModel.class)).isSameAs(model);
+
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    model.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
-                        public void onNext(String token) {
+                        public void onPartialResponse(String partialResponse) {
                         }
 
                         @Override
-                        public void onComplete(Response<AiMessage> response) {
-                            future.complete(response);
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
                         }
 
                         @Override
                         public void onError(Throwable error) {
+                            future.completeExceptionally(error);
                         }
                     });
-                    Response<AiMessage> response = future.get(60, SECONDS);
-                    assertThat(response.content().text()).contains("Berlin");
-
-                    assertThat(context.getBean(OpenAiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    ChatResponse chatResponse = future.get(60, SECONDS);
+                    assertThat(chatResponse.aiMessage().text()).contains("Berlin");
                 });
     }
 
@@ -127,28 +129,29 @@ class AutoConfigIT {
                 .withUserConfiguration(ListenerConfig.class)
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(OpenAiStreamingChatModel.class);
-                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+                    StreamingChatLanguageModel model = context.getBean(StreamingChatLanguageModel.class);
+                    assertThat(model).isInstanceOf(OpenAiStreamingChatModel.class);
+                    assertThat(context.getBean(OpenAiStreamingChatModel.class)).isSameAs(model);
+
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    model.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
-                        public void onNext(String token) {
+                        public void onPartialResponse(String partialResponse) {
                         }
 
                         @Override
-                        public void onComplete(Response<AiMessage> response) {
-                            future.complete(response);
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
                         }
 
                         @Override
                         public void onError(Throwable error) {
+                            future.completeExceptionally(error);
                         }
                     });
-                    Response<AiMessage> response = future.get(60, SECONDS);
-                    assertThat(response.content().text()).contains("Berlin");
-
-                    assertThat(context.getBean(OpenAiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    ChatResponse chatResponse = future.get(15, SECONDS);
+                    assertThat(chatResponse.aiMessage().text()).contains("Berlin");
 
                     ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
                     ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);
@@ -166,15 +169,16 @@ class AutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.language-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.language-model.model-name=gpt-3.5-turbo-instruct",
                         "langchain4j.open-ai.language-model.max-tokens=20"
                 )
                 .run(context -> {
 
-                    LanguageModel languageModel = context.getBean(LanguageModel.class);
-                    assertThat(languageModel).isInstanceOf(OpenAiLanguageModel.class);
-                    assertThat(languageModel.generate("What is the capital of Germany?").content()).contains("Berlin");
+                    LanguageModel model = context.getBean(LanguageModel.class);
+                    assertThat(model).isInstanceOf(OpenAiLanguageModel.class);
+                    assertThat(context.getBean(OpenAiLanguageModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OpenAiLanguageModel.class)).isSameAs(languageModel);
+                    assertThat(model.generate("What is the capital of Germany?").content()).contains("Berlin");
                 });
     }
 
@@ -183,14 +187,17 @@ class AutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.streaming-language-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.streaming-language-model.model-name=gpt-3.5-turbo-instruct",
                         "langchain4j.open-ai.streaming-language-model.max-tokens=20"
                 )
                 .run(context -> {
 
-                    StreamingLanguageModel streamingLanguageModel = context.getBean(StreamingLanguageModel.class);
-                    assertThat(streamingLanguageModel).isInstanceOf(OpenAiStreamingLanguageModel.class);
+                    StreamingLanguageModel model = context.getBean(StreamingLanguageModel.class);
+                    assertThat(model).isInstanceOf(OpenAiStreamingLanguageModel.class);
+                    assertThat(context.getBean(OpenAiStreamingLanguageModel.class)).isSameAs(model);
+
                     CompletableFuture<Response<String>> future = new CompletableFuture<>();
-                    streamingLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<String>() {
+                    model.generate("What is the capital of Germany?", new StreamingResponseHandler<>() {
 
                         @Override
                         public void onNext(String token) {
@@ -203,26 +210,28 @@ class AutoConfigIT {
 
                         @Override
                         public void onError(Throwable error) {
+                            future.completeExceptionally(error);
                         }
                     });
-                    Response<String> response = future.get(60, SECONDS);
+                    Response<String> response = future.get(15, SECONDS);
                     assertThat(response.content()).contains("Berlin");
-
-                    assertThat(context.getBean(OpenAiStreamingLanguageModel.class)).isSameAs(streamingLanguageModel);
                 });
     }
 
     @Test
     void should_provide_embedding_model() {
         contextRunner
-                .withPropertyValues("langchain4j.open-ai.embedding-model.api-key=" + API_KEY)
+                .withPropertyValues(
+                        "langchain4j.open-ai.embedding-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.embedding-model.model-name=text-embedding-3-small"
+                )
                 .run(context -> {
 
-                    EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
-                    assertThat(embeddingModel).isInstanceOf(OpenAiEmbeddingModel.class);
-                    assertThat(embeddingModel.embed("hi").content().dimension()).isEqualTo(1536);
+                    EmbeddingModel model = context.getBean(EmbeddingModel.class);
+                    assertThat(model).isInstanceOf(OpenAiEmbeddingModel.class);
+                    assertThat(context.getBean(OpenAiEmbeddingModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OpenAiEmbeddingModel.class)).isSameAs(embeddingModel);
+                    assertThat(model.embed("hi").content().dimension()).isEqualTo(1536);
                 });
     }
 
@@ -232,11 +241,11 @@ class AutoConfigIT {
                 .withPropertyValues("langchain4j.open-ai.moderation-model.api-key=" + API_KEY)
                 .run(context -> {
 
-                    ModerationModel moderationModel = context.getBean(ModerationModel.class);
-                    assertThat(moderationModel).isInstanceOf(OpenAiModerationModel.class);
-                    assertThat(moderationModel.moderate("He wants to kill them.").content().flagged()).isTrue();
+                    ModerationModel model = context.getBean(ModerationModel.class);
+                    assertThat(model).isInstanceOf(OpenAiModerationModel.class);
+                    assertThat(context.getBean(OpenAiModerationModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OpenAiModerationModel.class)).isSameAs(moderationModel);
+                    assertThat(model.moderate("He wants to kill them.").content().flagged()).isTrue();
                 });
     }
 
@@ -250,11 +259,11 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ImageModel imageModel = context.getBean(ImageModel.class);
-                    assertThat(imageModel).isInstanceOf(OpenAiImageModel.class);
-                    assertThat(imageModel.generate("banana").content().url()).isNotNull();
+                    ImageModel model = context.getBean(ImageModel.class);
+                    assertThat(model).isInstanceOf(OpenAiImageModel.class);
+                    assertThat(context.getBean(OpenAiImageModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OpenAiImageModel.class)).isSameAs(imageModel);
+                    assertThat(model.generate("banana").content().url()).isNotNull();
                 });
     }
 
