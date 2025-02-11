@@ -173,7 +173,7 @@ public class AutoConfig {
     HttpClientBuilder ollamaLanguageModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
         return new SpringRestClientBuilder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
-                // executor is not needed for no-streaming OllamaChatModel
+                // executor is not needed for no-streaming OllamaLanguageModel
                 .createDefaultStreamingRequestExecutor(false);
     }
 
@@ -261,7 +261,7 @@ public class AutoConfig {
     HttpClientBuilder ollamaEmbeddingModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
         return new SpringRestClientBuilder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
-                // executor is not needed for no-streaming OllamaChatModel
+                // executor is not needed for no-streaming OllamaEmbeddingModel
                 .createDefaultStreamingRequestExecutor(false);
     }
 }

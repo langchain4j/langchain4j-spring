@@ -1,10 +1,11 @@
 package dev.langchain4j.ollama.spring;
 
-import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.language.LanguageModel;
 import dev.langchain4j.model.language.StreamingLanguageModel;
@@ -72,16 +73,16 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.ollama.chat-model.base-url=" + baseUrl(),
                         "langchain4j.ollama.chat-model.model-name=" + MODEL_NAME,
-                        "langchain4j.ollama.chat-model.max-tokens=20",
-                        "langchain4j.ollama.chat-model.temperature=0.0"
+                        "langchain4j.ollama.chat-model.temperature=0.0",
+                        "langchain4j.ollama.chat-model.num-predict=20"
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(OllamaChatModel.class);
-                    assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+                    ChatLanguageModel model = context.getBean(ChatLanguageModel.class);
+                    assertThat(model).isInstanceOf(OllamaChatModel.class);
+                    assertThat(context.getBean(OllamaChatModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OllamaChatModel.class)).isSameAs(chatLanguageModel);
+                    assertThat(model.chat("What is the capital of Germany?")).contains("Berlin");
                 });
     }
 
@@ -91,17 +92,17 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.ollama.chat-model.base-url=" + baseUrl(),
                         "langchain4j.ollama.chat-model.model-name=" + MODEL_NAME,
-                        "langchain4j.ollama.chat-model.max-tokens=20",
-                        "langchain4j.ollama.chat-model.temperature=0.0"
+                        "langchain4j.ollama.chat-model.temperature=0.0",
+                        "langchain4j.ollama.chat-model.num-predict=20"
                 )
                 .withUserConfiguration(ListenerConfig.class)
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(OllamaChatModel.class);
-                    assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+                    ChatLanguageModel model = context.getBean(ChatLanguageModel.class);
+                    assertThat(model).isInstanceOf(OllamaChatModel.class);
+                    assertThat(context.getBean(OllamaChatModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OllamaChatModel.class)).isSameAs(chatLanguageModel);
+                    assertThat(model.chat("What is the capital of Germany?")).contains("Berlin");
 
                     ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
                     ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);
@@ -124,27 +125,25 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(OllamaChatModel.class);
-                    assertThat(chatLanguageModel.supportedCapabilities()).contains(RESPONSE_FORMAT_JSON_SCHEMA);
+                    ChatLanguageModel model = context.getBean(ChatLanguageModel.class);
+                    assertThat(model).isInstanceOf(OllamaChatModel.class);
+                    assertThat(context.getBean(OllamaChatModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OllamaChatModel.class)).isSameAs(chatLanguageModel);
+                    assertThat(model.supportedCapabilities()).contains(RESPONSE_FORMAT_JSON_SCHEMA);
                 });
     }
 
     @Test
     void should_create_chat_model_with_default_http_client() {
-        contextRunner.run(context -> {
 
-            OllamaChatModel model = OllamaChatModel.builder()
-                    .baseUrl(baseUrl())
-                    .modelName(MODEL_NAME)
-                    .temperature(0.0)
-                    .numPredict(20)
-                    .build();
+        OllamaChatModel model = OllamaChatModel.builder()
+                .baseUrl(baseUrl())
+                .modelName(MODEL_NAME)
+                .temperature(0.0)
+                .numPredict(20)
+                .build();
 
-            assertThat(model.generate("What is the capital of Germany?")).contains("Berlin");
-        });
+        assertThat(model.chat("What is the capital of Germany?")).contains("Berlin");
     }
 
     @Test
@@ -153,33 +152,34 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.ollama.streaming-chat-model.base-url=" + baseUrl(),
                         "langchain4j.ollama.streaming-chat-model.model-name=" + MODEL_NAME,
-                        "langchain4j.ollama.streaming-chat-model.max-tokens=20",
-                        "langchain4j.ollama.streaming-chat-model.temperature=0.0"
+                        "langchain4j.ollama.streaming-chat-model.temperature=0.0",
+                        "langchain4j.ollama.streaming-chat-model.num-predict=20"
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(OllamaStreamingChatModel.class);
-                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+                    StreamingChatLanguageModel model = context.getBean(StreamingChatLanguageModel.class);
+                    assertThat(model).isInstanceOf(OllamaStreamingChatModel.class);
+                    assertThat(context.getBean(OllamaStreamingChatModel.class)).isSameAs(model);
+
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    model.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
-                        public void onNext(String token) {
+                        public void onPartialResponse(String partialResponse) {
                         }
 
                         @Override
-                        public void onComplete(Response<AiMessage> response) {
-                            future.complete(response);
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
                         }
 
                         @Override
                         public void onError(Throwable error) {
+                            future.completeExceptionally(error);
                         }
                     });
-                    Response<AiMessage> response = future.get(60, SECONDS);
-                    assertThat(response.content().text()).contains("Berlin");
-
-                    assertThat(context.getBean(OllamaStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    ChatResponse chatResponse = future.get(30, SECONDS);
+                    assertThat(chatResponse.aiMessage().text()).contains("Berlin");
                 });
     }
 
@@ -193,30 +193,32 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.ollama.streaming-chat-model.base-url=" + baseUrl(),
                         "langchain4j.ollama.streaming-chat-model.model-name=" + MODEL_NAME,
-                        "langchain4j.ollama.streaming-chat-model.max-tokens=20",
-                        "langchain4j.ollama.streaming-chat-model.temperature=0.0"
+                        "langchain4j.ollama.streaming-chat-model.temperature=0.0",
+                        "langchain4j.ollama.streaming-chat-model.num-predict=20"
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+                    StreamingChatLanguageModel model = context.getBean(StreamingChatLanguageModel.class);
+
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    model.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
-                        public void onNext(String token) {
+                        public void onPartialResponse(String partialResponse) {
                         }
 
                         @Override
-                        public void onComplete(Response<AiMessage> response) {
-                            future.complete(response);
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
                         }
 
                         @Override
                         public void onError(Throwable error) {
+                            future.completeExceptionally(error);
                         }
                     });
-                    Response<AiMessage> response = future.get(60, SECONDS);
-                    assertThat(response.content().text()).contains("Berlin");
+                    ChatResponse chatResponse = future.get(30, SECONDS);
+                    assertThat(chatResponse.aiMessage().text()).contains("Berlin");
 
                     verify(customExecutor).execute(any());
                 });
@@ -228,34 +230,35 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.ollama.streaming-chat-model.base-url=" + baseUrl(),
                         "langchain4j.ollama.streaming-chat-model.model-name=" + MODEL_NAME,
-                        "langchain4j.ollama.streaming-chat-model.max-tokens=20",
-                        "langchain4j.ollama.streaming-chat-model.temperature=0.0"
+                        "langchain4j.ollama.streaming-chat-model.temperature=0.0",
+                        "langchain4j.ollama.streaming-chat-model.num-predict=20"
                 )
                 .withUserConfiguration(ListenerConfig.class)
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(OllamaStreamingChatModel.class);
-                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+                    StreamingChatLanguageModel model = context.getBean(StreamingChatLanguageModel.class);
+                    assertThat(model).isInstanceOf(OllamaStreamingChatModel.class);
+                    assertThat(context.getBean(OllamaStreamingChatModel.class)).isSameAs(model);
+
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    model.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
-                        public void onNext(String token) {
+                        public void onPartialResponse(String partialResponse) {
                         }
 
                         @Override
-                        public void onComplete(Response<AiMessage> response) {
-                            future.complete(response);
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
                         }
 
                         @Override
                         public void onError(Throwable error) {
+                            future.completeExceptionally(error);
                         }
                     });
-                    Response<AiMessage> response = future.get(60, SECONDS);
-                    assertThat(response.content().text()).contains("Berlin");
-
-                    assertThat(context.getBean(OllamaStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    ChatResponse chatResponse = future.get(30, SECONDS);
+                    assertThat(chatResponse.aiMessage().text()).contains("Berlin");
 
                     ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
                     ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);
@@ -269,35 +272,34 @@ class AutoConfigIT {
     }
 
     @Test
-    void should_create_streaming_chat_model_with_default_http_client() {
-        contextRunner.run(context -> {
+    void should_create_streaming_chat_model_with_default_http_client() throws Exception {
 
-            OllamaStreamingChatModel model = OllamaStreamingChatModel.builder()
-                    .baseUrl(baseUrl())
-                    .modelName(MODEL_NAME)
-                    .temperature(0.0)
-                    .numPredict(20)
-                    .build();
+        OllamaStreamingChatModel model = OllamaStreamingChatModel.builder()
+                .baseUrl(baseUrl())
+                .modelName(MODEL_NAME)
+                .temperature(0.0)
+                .numPredict(20)
+                .build();
 
-            CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
-            model.generate("What is the capital of Germany?", new StreamingResponseHandler<>() {
+        CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+        model.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
-                @Override
-                public void onNext(String token) {
-                }
+            @Override
+            public void onPartialResponse(String partialResponse) {
+            }
 
-                @Override
-                public void onComplete(Response<AiMessage> response) {
-                    future.complete(response);
-                }
+            @Override
+            public void onCompleteResponse(ChatResponse completeResponse) {
+                future.complete(completeResponse);
+            }
 
-                @Override
-                public void onError(Throwable error) {
-                }
-            });
-            Response<AiMessage> response = future.get(60, SECONDS);
-            assertThat(response.content().text()).contains("Berlin");
+            @Override
+            public void onError(Throwable error) {
+                future.completeExceptionally(error);
+            }
         });
+        ChatResponse chatResponse = future.get(30, SECONDS);
+        assertThat(chatResponse.aiMessage().text()).contains("Berlin");
     }
 
     @Test
@@ -306,16 +308,16 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.ollama.language-model.base-url=" + baseUrl(),
                         "langchain4j.ollama.language-model.model-name=" + MODEL_NAME,
-                        "langchain4j.ollama.language-model.max-tokens=20",
-                        "langchain4j.ollama.language-model.temperature=0.0"
+                        "langchain4j.ollama.language-model.temperature=0.0",
+                        "langchain4j.ollama.language-model.num-predict=20"
                 )
                 .run(context -> {
 
-                    LanguageModel languageModel = context.getBean(LanguageModel.class);
-                    assertThat(languageModel).isInstanceOf(OllamaLanguageModel.class);
-                    assertThat(languageModel.generate("What is the capital of Germany?").content()).contains("Berlin");
+                    LanguageModel model = context.getBean(LanguageModel.class);
+                    assertThat(model).isInstanceOf(OllamaLanguageModel.class);
+                    assertThat(context.getBean(OllamaLanguageModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OllamaLanguageModel.class)).isSameAs(languageModel);
+                    assertThat(model.generate("What is the capital of Germany?").content()).contains("Berlin");
                 });
     }
 
@@ -325,15 +327,17 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.ollama.streaming-language-model.base-url=" + baseUrl(),
                         "langchain4j.ollama.streaming-language-model.model-name=" + MODEL_NAME,
-                        "langchain4j.ollama.streaming-language-model.max-tokens=20",
-                        "langchain4j.ollama.streaming-language-model.temperature=0.0"
+                        "langchain4j.ollama.streaming-language-model.temperature=0.0",
+                        "langchain4j.ollama.streaming-language-model.num-predict=20"
                 )
                 .run(context -> {
 
-                    StreamingLanguageModel streamingLanguageModel = context.getBean(StreamingLanguageModel.class);
-                    assertThat(streamingLanguageModel).isInstanceOf(OllamaStreamingLanguageModel.class);
+                    StreamingLanguageModel model = context.getBean(StreamingLanguageModel.class);
+                    assertThat(model).isInstanceOf(OllamaStreamingLanguageModel.class);
+                    assertThat(context.getBean(OllamaStreamingLanguageModel.class)).isSameAs(model);
+
                     CompletableFuture<Response<String>> future = new CompletableFuture<>();
-                    streamingLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<String>() {
+                    model.generate("What is the capital of Germany?", new StreamingResponseHandler<>() {
 
                         @Override
                         public void onNext(String token) {
@@ -348,10 +352,8 @@ class AutoConfigIT {
                         public void onError(Throwable error) {
                         }
                     });
-                    Response<String> response = future.get(60, SECONDS);
+                    Response<String> response = future.get(30, SECONDS);
                     assertThat(response.content()).contains("Berlin");
-
-                    assertThat(context.getBean(OllamaStreamingLanguageModel.class)).isSameAs(streamingLanguageModel);
                 });
     }
 
@@ -364,25 +366,23 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
-                    assertThat(embeddingModel).isInstanceOf(OllamaEmbeddingModel.class);
-                    assertThat(embeddingModel.embed("hi").content().dimension()).isEqualTo(2560);
+                    EmbeddingModel model = context.getBean(EmbeddingModel.class);
+                    assertThat(model).isInstanceOf(OllamaEmbeddingModel.class);
+                    assertThat(context.getBean(OllamaEmbeddingModel.class)).isSameAs(model);
 
-                    assertThat(context.getBean(OllamaEmbeddingModel.class)).isSameAs(embeddingModel);
+                    assertThat(model.embed("hi").content().dimension()).isEqualTo(2560);
                 });
     }
 
     @Test
     void should_create_embedding_model_with_default_http_client() {
-        contextRunner.run(context -> {
 
-            OllamaEmbeddingModel model = OllamaEmbeddingModel.builder()
-                    .baseUrl(baseUrl())
-                    .modelName(MODEL_NAME)
-                    .build();
+        OllamaEmbeddingModel model = OllamaEmbeddingModel.builder()
+                .baseUrl(baseUrl())
+                .modelName(MODEL_NAME)
+                .build();
 
-            assertThat(model.embed("hi").content().dimension()).isEqualTo(2560);
-        });
+        assertThat(model.embed("hi").content().dimension()).isEqualTo(2560);
     }
 
     @Configuration
