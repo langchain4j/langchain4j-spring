@@ -18,19 +18,19 @@ class SpringRestClientTimeoutIT extends HttpClientTimeoutIT {
     @Override
     protected List<HttpClient> clients(Duration readTimeout) {
         return List.of(
-                new SpringRestClientBuilder()
+                SpringRestClient.builder()
                         .restClientBuilder(RestClient.builder().requestFactory(new JdkClientHttpRequestFactory()))
                         .readTimeout(readTimeout)
                         .build(),
-                new SpringRestClientBuilder()
+                SpringRestClient.builder()
                         .restClientBuilder(RestClient.builder().requestFactory(new HttpComponentsClientHttpRequestFactory()))
                         .readTimeout(readTimeout)
                         .build(),
-                new SpringRestClientBuilder()
+                SpringRestClient.builder()
                         .restClientBuilder(RestClient.builder().requestFactory(new ReactorNettyClientRequestFactory()))
                         .readTimeout(readTimeout)
                         .build(),
-                new SpringRestClientBuilder()
+                SpringRestClient.builder()
                         .restClientBuilder(RestClient.builder().requestFactory(new SimpleClientHttpRequestFactory()))
                         .readTimeout(readTimeout)
                         .build()

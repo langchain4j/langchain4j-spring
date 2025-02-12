@@ -6,6 +6,6 @@ public class SpringRestClientBuilderFactory implements HttpClientBuilderFactory 
 
     @Override
     public SpringRestClientBuilder create() {
-        return new SpringRestClientBuilder();
+        return SpringRestClient.builder();
     }
 }

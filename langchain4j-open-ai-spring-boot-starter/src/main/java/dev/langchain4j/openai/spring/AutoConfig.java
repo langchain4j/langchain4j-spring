@@ -1,7 +1,7 @@
 package dev.langchain4j.openai.spring;
 
 import dev.langchain4j.http.client.HttpClientBuilder;
-import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilder;
+import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.openai.*;
 import org.springframework.beans.factory.ObjectProvider;
@@ -91,7 +91,7 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
     @ConditionalOnMissingBean(name = OPEN_AI_CHAT_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiChatModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
-        return new SpringRestClientBuilder()
+        return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
                 // executor is not needed for no-streaming OpenAiChatModel
                 .createDefaultStreamingRequestExecutor(false);
@@ -145,7 +145,7 @@ public class AutoConfig {
     HttpClientBuilder openAiStreamingChatModelHttpClientBuilder(
             ObjectProvider<RestClient.Builder> restClientBuilder,
             @Qualifier(OPEN_AI_STREAMING_CHAT_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
-        return new SpringRestClientBuilder()
+        return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
                 .streamingRequestExecutor(executor);
     }
@@ -198,7 +198,7 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".language-model.api-key")
     @ConditionalOnMissingBean(name = OPEN_AI_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiLanguageModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
-        return new SpringRestClientBuilder()
+        return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
                 // executor is not needed for no-streaming OpenAiLanguageModel
                 .createDefaultStreamingRequestExecutor(false);
@@ -233,7 +233,7 @@ public class AutoConfig {
             @Qualifier(OPEN_AI_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor,
             ObjectProvider<RestClient.Builder> restClientBuilder
     ) {
-        return new SpringRestClientBuilder()
+        return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
                 .streamingRequestExecutor(executor);
     }
@@ -288,7 +288,7 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")
     @ConditionalOnMissingBean(name = OPEN_AI_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiEmbeddingModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
-        return new SpringRestClientBuilder()
+        return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
                 // executor is not needed for no-streaming OpenAiEmbeddingModel
                 .createDefaultStreamingRequestExecutor(false);
@@ -320,7 +320,7 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".moderation-model.api-key")
     @ConditionalOnMissingBean(name = OPEN_AI_MODERATION_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiModerationModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
-        return new SpringRestClientBuilder()
+        return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
                 // executor is not needed for no-streaming OpenAiModerationModel
                 .createDefaultStreamingRequestExecutor(false);
@@ -357,7 +357,7 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".image-model.api-key")
     @ConditionalOnMissingBean(name = OPEN_AI_IMAGE_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiImageModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
-        return new SpringRestClientBuilder()
+        return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
                 // executor is not needed for no-streaming OpenAiImageModel
                 .createDefaultStreamingRequestExecutor(false);
