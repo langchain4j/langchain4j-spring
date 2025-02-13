@@ -27,26 +27,26 @@ public class AutoConfig {
 
     private static final String TASK_EXECUTOR_THREAD_NAME_PREFIX = "LangChain4j-OpenAI-";
 
-    private static final String OPEN_AI_CHAT_MODEL_HTTP_CLIENT_BUILDER = "openAiChatModelHttpClientBuilder";
+    private static final String CHAT_MODEL_HTTP_CLIENT_BUILDER = "openAiChatModelHttpClientBuilder";
 
-    private static final String OPEN_AI_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER = "openAiStreamingChatModelHttpClientBuilder";
-    private static final String OPEN_AI_STREAMING_CHAT_MODEL_TASK_EXECUTOR = "openAiStreamingChatModelTaskExecutor";
+    private static final String STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER = "openAiStreamingChatModelHttpClientBuilder";
+    private static final String STREAMING_CHAT_MODEL_TASK_EXECUTOR = "openAiStreamingChatModelTaskExecutor";
 
-    private static final String OPEN_AI_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER = "openAiLanguageModelHttpClientBuilder";
+    private static final String LANGUAGE_MODEL_HTTP_CLIENT_BUILDER = "openAiLanguageModelHttpClientBuilder";
 
-    private static final String OPEN_AI_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER = "openAiStreamingLanguageModelHttpClientBuilder";
-    private static final String OPEN_AI_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR = "openAiStreamingLanguageModelTaskExecutor";
+    private static final String STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER = "openAiStreamingLanguageModelHttpClientBuilder";
+    private static final String STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR = "openAiStreamingLanguageModelTaskExecutor";
 
-    private static final String OPEN_AI_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER = "openAiEmbeddingModelHttpClientBuilder";
+    private static final String EMBEDDING_MODEL_HTTP_CLIENT_BUILDER = "openAiEmbeddingModelHttpClientBuilder";
 
-    private static final String OPEN_AI_MODERATION_MODEL_HTTP_CLIENT_BUILDER = "openAiModerationModelHttpClientBuilder";
+    private static final String MODERATION_MODEL_HTTP_CLIENT_BUILDER = "openAiModerationModelHttpClientBuilder";
 
-    private static final String OPEN_AI_IMAGE_MODEL_HTTP_CLIENT_BUILDER = "openAiImageModelHttpClientBuilder";
+    private static final String IMAGE_MODEL_HTTP_CLIENT_BUILDER = "openAiImageModelHttpClientBuilder";
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
     OpenAiChatModel openAiChatModel(
-            @Qualifier(OPEN_AI_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            @Qualifier(CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties,
             ObjectProvider<ChatModelListener> listeners
     ) {
@@ -87,9 +87,9 @@ public class AutoConfig {
                 .build();
     }
 
-    @Bean(OPEN_AI_CHAT_MODEL_HTTP_CLIENT_BUILDER)
+    @Bean(CHAT_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_CHAT_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnMissingBean(name = CHAT_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiChatModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
@@ -100,7 +100,7 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
     OpenAiStreamingChatModel openAiStreamingChatModel(
-            @Qualifier(OPEN_AI_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            @Qualifier(STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties,
             ObjectProvider<ChatModelListener> listeners
     ) {
@@ -139,20 +139,20 @@ public class AutoConfig {
                 .build();
     }
 
-    @Bean(OPEN_AI_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER)
+    @Bean(STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnMissingBean(name = STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiStreamingChatModelHttpClientBuilder(
             ObjectProvider<RestClient.Builder> restClientBuilder,
-            @Qualifier(OPEN_AI_STREAMING_CHAT_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
+            @Qualifier(STREAMING_CHAT_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
                 .streamingRequestExecutor(executor);
     }
 
-    @Bean(OPEN_AI_STREAMING_CHAT_MODEL_TASK_EXECUTOR)
+    @Bean(STREAMING_CHAT_MODEL_TASK_EXECUTOR)
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_STREAMING_CHAT_MODEL_TASK_EXECUTOR)
+    @ConditionalOnMissingBean(name = STREAMING_CHAT_MODEL_TASK_EXECUTOR)
     @ConditionalOnClass(name = "io.micrometer.context.ContextSnapshotFactory")
     AsyncTaskExecutor openAiStreamingChatModelTaskExecutorWithContextPropagation() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
@@ -161,9 +161,9 @@ public class AutoConfig {
         return taskExecutor;
     }
 
-    @Bean(OPEN_AI_STREAMING_CHAT_MODEL_TASK_EXECUTOR)
+    @Bean(STREAMING_CHAT_MODEL_TASK_EXECUTOR)
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_STREAMING_CHAT_MODEL_TASK_EXECUTOR)
+    @ConditionalOnMissingBean(name = STREAMING_CHAT_MODEL_TASK_EXECUTOR)
     @ConditionalOnMissingClass("io.micrometer.context.ContextSnapshotFactory")
     AsyncTaskExecutor openAiStreamingChatModelTaskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
@@ -174,7 +174,7 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".language-model.api-key")
     OpenAiLanguageModel openAiLanguageModel(
-            @Qualifier(OPEN_AI_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            @Qualifier(LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties
     ) {
         LanguageModelProperties languageModelProperties = properties.languageModel();
@@ -194,9 +194,9 @@ public class AutoConfig {
                 .build();
     }
 
-    @Bean(OPEN_AI_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
+    @Bean(LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".language-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnMissingBean(name = LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiLanguageModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
@@ -207,7 +207,7 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.api-key")
     OpenAiStreamingLanguageModel openAiStreamingLanguageModel(
-            @Qualifier(OPEN_AI_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            @Qualifier(STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties
     ) {
         LanguageModelProperties languageModelProperties = properties.streamingLanguageModel();
@@ -226,11 +226,11 @@ public class AutoConfig {
                 .build();
     }
 
-    @Bean(OPEN_AI_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
+    @Bean(STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnMissingBean(name = STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiStreamingLanguageModelHttpClientBuilder(
-            @Qualifier(OPEN_AI_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor,
+            @Qualifier(STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor,
             ObjectProvider<RestClient.Builder> restClientBuilder
     ) {
         return SpringRestClient.builder()
@@ -238,9 +238,9 @@ public class AutoConfig {
                 .streamingRequestExecutor(executor);
     }
 
-    @Bean(OPEN_AI_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
+    @Bean(STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
+    @ConditionalOnMissingBean(name = STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
     @ConditionalOnClass(name = "io.micrometer.context.ContextSnapshotFactory")
     AsyncTaskExecutor openAiStreamingLanguageModelTaskExecutorWithContextPropagation() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
@@ -249,9 +249,9 @@ public class AutoConfig {
         return taskExecutor;
     }
 
-    @Bean(OPEN_AI_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
+    @Bean(STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
+    @ConditionalOnMissingBean(name = STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR)
     @ConditionalOnMissingClass("io.micrometer.context.ContextSnapshotFactory")
     AsyncTaskExecutor openAiStreamingLanguageModelTaskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
@@ -262,7 +262,7 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")
     OpenAiEmbeddingModel openAiEmbeddingModel(
-            @Qualifier(OPEN_AI_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            @Qualifier(EMBEDDING_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties
     ) {
         EmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
@@ -284,9 +284,9 @@ public class AutoConfig {
                 .build();
     }
 
-    @Bean(OPEN_AI_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
+    @Bean(EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnMissingBean(name = EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiEmbeddingModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
@@ -297,7 +297,7 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".moderation-model.api-key")
     OpenAiModerationModel openAiModerationModel(
-            @Qualifier(OPEN_AI_MODERATION_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            @Qualifier(MODERATION_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties
     ) {
         ModerationModelProperties moderationModelProperties = properties.moderationModel();
@@ -316,9 +316,9 @@ public class AutoConfig {
                 .build();
     }
 
-    @Bean(OPEN_AI_MODERATION_MODEL_HTTP_CLIENT_BUILDER)
+    @Bean(MODERATION_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".moderation-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_MODERATION_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnMissingBean(name = MODERATION_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiModerationModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
@@ -329,7 +329,7 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".image-model.api-key")
     OpenAiImageModel openAiImageModel(
-            @Qualifier(OPEN_AI_IMAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            @Qualifier(IMAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties
     ) {
         ImageModelProperties imageModelProperties = properties.imageModel();
@@ -353,9 +353,9 @@ public class AutoConfig {
                 .build();
     }
 
-    @Bean(OPEN_AI_IMAGE_MODEL_HTTP_CLIENT_BUILDER)
+    @Bean(IMAGE_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".image-model.api-key")
-    @ConditionalOnMissingBean(name = OPEN_AI_IMAGE_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnMissingBean(name = IMAGE_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiImageModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
