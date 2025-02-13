@@ -15,16 +15,16 @@ class SpringRestClientIT extends HttpClientIT {
     @Override
     protected List<HttpClient> clients() {
         return List.of(
-                new SpringRestClientBuilder()
+                SpringRestClient.builder()
                         .restClientBuilder(RestClient.builder().requestFactory(new JdkClientHttpRequestFactory()))
                         .build(),
-                new SpringRestClientBuilder()
+                SpringRestClient.builder()
                         .restClientBuilder(RestClient.builder().requestFactory(new HttpComponentsClientHttpRequestFactory()))
                         .build(),
-                new SpringRestClientBuilder()
+                SpringRestClient.builder()
                         .restClientBuilder(RestClient.builder().requestFactory(new ReactorNettyClientRequestFactory()))
                         .build(),
-                new SpringRestClientBuilder()
+                SpringRestClient.builder()
                         .restClientBuilder(RestClient.builder().requestFactory(new SimpleClientHttpRequestFactory()))
                         .build()
         );

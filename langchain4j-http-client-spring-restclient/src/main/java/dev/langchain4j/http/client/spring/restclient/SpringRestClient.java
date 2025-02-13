@@ -57,6 +57,10 @@ public class SpringRestClient implements HttpClient {
         return taskExecutor;
     }
 
+    public static SpringRestClientBuilder builder() {
+        return new SpringRestClientBuilder();
+    }
+
     @Override
     public SuccessfulHttpResponse execute(HttpRequest request) throws HttpException {
         try {
