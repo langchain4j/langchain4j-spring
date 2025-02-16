@@ -1,5 +1,6 @@
 package dev.langchain4j.ollama.spring;
 
+import dev.langchain4j.autoconfigure.http.HttpClientAutoConfiguration;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
@@ -65,7 +66,7 @@ class AutoConfigIT {
     }
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(HttpClientAutoConfiguration.class, AutoConfig.class));
 
     @Test
     void should_provide_chat_model() {
@@ -189,7 +190,7 @@ class AutoConfigIT {
         ThreadPoolTaskExecutor customExecutor = spy(new ThreadPoolTaskExecutor());
 
         contextRunner
-                .withBean("ollamaStreamingChatModelTaskExecutor", ThreadPoolTaskExecutor.class, () -> customExecutor)
+                .withBean("httpClientTaskExecutor", ThreadPoolTaskExecutor.class, () -> customExecutor)
                 .withPropertyValues(
                         "langchain4j.ollama.streaming-chat-model.base-url=" + baseUrl(),
                         "langchain4j.ollama.streaming-chat-model.model-name=" + MODEL_NAME,
