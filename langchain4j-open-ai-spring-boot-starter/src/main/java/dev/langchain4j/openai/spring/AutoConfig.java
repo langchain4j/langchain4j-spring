@@ -67,6 +67,7 @@ public class AutoConfig {
                 .frequencyPenalty(chatModelProperties.frequencyPenalty())
                 .logitBias(chatModelProperties.logitBias())
                 .responseFormat(chatModelProperties.responseFormat())
+                .supportedCapabilities(chatModelProperties.supportedCapabilities())
                 .strictJsonSchema(chatModelProperties.strictJsonSchema())
                 .seed(chatModelProperties.seed())
                 .user(chatModelProperties.user())

@@ -1,8 +1,11 @@
 package dev.langchain4j.openai.spring;
 
+import dev.langchain4j.model.chat.Capability;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 record ChatModelProperties(
         String baseUrl,
@@ -19,6 +22,7 @@ record ChatModelProperties(
         Double frequencyPenalty,
         Map<String, Integer> logitBias,
         String responseFormat,
+        Set<Capability> supportedCapabilities,
         Boolean strictJsonSchema,
         Integer seed,
         String user,
