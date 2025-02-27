@@ -1,7 +1,6 @@
 package dev.langchain4j.azure.openai.spring;
 
 import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.azure.AzureOpenAiChatModel;
 import dev.langchain4j.model.azure.AzureOpenAiEmbeddingModel;
 import dev.langchain4j.model.azure.AzureOpenAiImageModel;
@@ -15,9 +14,10 @@ import dev.langchain4j.model.chat.request.json.JsonArraySchema;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.request.json.JsonStringSchema;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
-import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -67,7 +67,7 @@ class AutoConfigIT {
 
                     ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
                     assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
-                    assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+                    assertThat(chatLanguageModel.chat("What is the capital of Germany?")).contains("Berlin");
                     assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
                 });
     }
@@ -87,7 +87,7 @@ class AutoConfigIT {
 
                     ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
                     assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
-                    assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+                    assertThat(chatLanguageModel.chat("What is the capital of Germany?")).contains("Berlin");
                     assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
 
                     ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
@@ -159,7 +159,7 @@ class AutoConfigIT {
 
                     ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
                     assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
-                    assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+                    assertThat(chatLanguageModel.chat("What is the capital of Germany?")).contains("Berlin");
 
                     assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
                 });
@@ -184,24 +184,24 @@ class AutoConfigIT {
 
                     StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
                     assertThat(streamingChatLanguageModel).isInstanceOf(AzureOpenAiStreamingChatModel.class);
-                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    streamingChatLanguageModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
-                        public void onNext(String token) {
+                        public void onPartialResponse(String partialResponse) {
                         }
 
                         @Override
-                        public void onComplete(Response<AiMessage> response) {
-                            future.complete(response);
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
                         }
 
                         @Override
                         public void onError(Throwable error) {
                         }
                     });
-                    Response<AiMessage> response = future.get(60, SECONDS);
-                    assertThat(response.content().text()).contains("Berlin");
+                    ChatResponse response = future.get(60, SECONDS);
+                    assertThat(response.aiMessage().text()).contains("Berlin");
 
                     assertThat(context.getBean(AzureOpenAiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
                 });
@@ -223,24 +223,24 @@ class AutoConfigIT {
 
                     StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
                     assertThat(streamingChatLanguageModel).isInstanceOf(AzureOpenAiStreamingChatModel.class);
-                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    streamingChatLanguageModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
-                        public void onNext(String token) {
+                        public void onPartialResponse(String partialResponse) {
                         }
 
                         @Override
-                        public void onComplete(Response<AiMessage> response) {
-                            future.complete(response);
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
                         }
 
                         @Override
                         public void onError(Throwable error) {
                         }
                     });
-                    Response<AiMessage> response = future.get(60, SECONDS);
-                    assertThat(response.content().text()).contains("Berlin");
+                    ChatResponse response = future.get(60, SECONDS);
+                    assertThat(response.aiMessage().text()).contains("Berlin");
 
                     assertThat(context.getBean(AzureOpenAiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
 

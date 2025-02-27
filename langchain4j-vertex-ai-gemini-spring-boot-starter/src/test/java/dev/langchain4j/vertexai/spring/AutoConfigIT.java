@@ -1,10 +1,9 @@
 package dev.langchain4j.vertexai.spring;
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.output.Response;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.vertexai.VertexAiGeminiStreamingChatModel;
 import org.junit.jupiter.api.Test;
@@ -43,7 +42,7 @@ class AutoConfigIT {
                     assertThat(chatLanguageModel).isInstanceOf(VertexAiGeminiChatModel.class);
 
                     // when
-                    String message = chatLanguageModel.generate("What is the capital of Germany?");
+                    String message = chatLanguageModel.chat("What is the capital of Germany?");
 
                     // then
                     assertThat(message).contains("Berlin");
@@ -65,27 +64,27 @@ class AutoConfigIT {
 
                     StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
                     assertThat(streamingChatLanguageModel).isInstanceOf(VertexAiGeminiStreamingChatModel.class);
-                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
                     // when
-                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<>() {
+                    streamingChatLanguageModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
-                        public void onNext(String token) {
+                        public void onPartialResponse(String partialResponse) {
                         }
 
                         @Override
-                        public void onComplete(Response<AiMessage> response) {
-                            future.complete(response);
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
                         }
 
                         @Override
                         public void onError(Throwable error) {
                         }
                     });
-                    Response<AiMessage> response = future.get(60, SECONDS);
+                    ChatResponse response = future.get(60, SECONDS);
 
                     // then
-                    assertThat(response.content().text()).contains("Berlin");
+                    assertThat(response.aiMessage().text()).contains("Berlin");
                     assertThat(context.getBean(VertexAiGeminiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
                 });
     }

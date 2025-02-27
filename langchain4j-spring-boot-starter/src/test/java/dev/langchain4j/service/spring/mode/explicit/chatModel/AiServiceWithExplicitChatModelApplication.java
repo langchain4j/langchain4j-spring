@@ -1,6 +1,8 @@
 package dev.langchain4j.service.spring.mode.explicit.chatModel;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,8 +25,12 @@ class AiServiceWithExplicitChatModelApplication {
 
     @Bean(CHAT_MODEL_BEAN_NAME + 2)
     ChatLanguageModel chatLanguageModel2() {
-        return messages -> {
-            throw new RuntimeException("should never be invoked");
+        return new ChatLanguageModel() {
+
+            @Override
+            public ChatResponse chat(ChatRequest chatRequest) {
+                throw new RuntimeException("should never be invoked");
+            }
         };
     }
 
