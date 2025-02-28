@@ -24,8 +24,8 @@ public class TokenStreamToFluxAdapter implements TokenStreamAdapter {
     @Override
     public Object adapt(TokenStream tokenStream) {
         Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
-        tokenStream.onNext(sink::tryEmitNext)
-                .onComplete(aiMessageResponse -> sink.tryEmitComplete())
+        tokenStream.onPartialResponse(sink::tryEmitNext)
+                .onCompleteResponse(ignored -> sink.tryEmitComplete())
                 .onError(sink::tryEmitError)
                 .start();
         return sink.asFlux();
