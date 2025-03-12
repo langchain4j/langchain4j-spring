@@ -35,6 +35,7 @@ class AutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.anthropic.chat-model.api-key=" + API_KEY,
+                        "langchain4j.anthropic.chat-model.model-name=claude-3-5-haiku-20241022",
                         "langchain4j.anthropic.chat-model.max-tokens=20"
                 )
                 .run(context -> {
@@ -52,6 +53,7 @@ class AutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.anthropic.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.anthropic.streaming-chat-model.model-name=claude-3-5-haiku-20241022",
                         "langchain4j.anthropic.streaming-chat-model.max-tokens=20"
                 )
                 .run(context -> {
