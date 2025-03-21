@@ -61,7 +61,11 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
 
                     awaitUntilPersisted(context);
 
-                    List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(embedding, 10);
+                    EmbeddingSearchRequest searchRequest = EmbeddingSearchRequest.builder()
+                            .queryEmbedding(embedding)
+                            .maxResults(10)
+                            .build();
+                    List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.search(searchRequest).matches();
                     assertThat(relevant).hasSize(1);
 
                     EmbeddingMatch<TextSegment> match = relevant.get(0);
@@ -90,23 +94,15 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
 
                     awaitUntilPersisted(context);
 
-                    List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(embedding, 10);
-                    assertThat(relevant).hasSize(1);
-
-                    EmbeddingMatch<TextSegment> match = relevant.get(0);
-                    assertThat(match.score()).isCloseTo(1, withPercentage(1));
-                    assertThat(match.embeddingId()).isEqualTo(id);
-                    assertThat(match.embedding()).isEqualTo(embedding);
-                    assertThat(match.embedded()).isEqualTo(segment);
-
-                    // New API
-                    EmbeddingSearchResult<TextSegment> searchResult = embeddingStore.search(EmbeddingSearchRequest.builder()
+                    EmbeddingSearchRequest searchRequest = EmbeddingSearchRequest.builder()
                             .queryEmbedding(embedding)
                             .maxResults(10)
-                            .build());
+                            .build();
 
-                    assertThat(searchResult.matches()).hasSize(1);
-                    match = searchResult.matches().get(0);
+                    List<EmbeddingMatch<TextSegment>> matches = embeddingStore.search(searchRequest).matches();
+                    assertThat(matches).hasSize(1);
+
+                    EmbeddingMatch<TextSegment> match = matches.get(0);
                     assertThat(match.score()).isCloseTo(1, withPercentage(1));
                     assertThat(match.embeddingId()).isEqualTo(id);
                     assertThat(match.embedding()).isEqualTo(embedding);
