@@ -363,10 +363,4 @@ public class AutoConfig {
                 // executor is not needed for no-streaming OpenAiImageModel
                 .createDefaultStreamingRequestExecutor(false);
     }
-
-    @Bean
-    @ConditionalOnMissingBean
-    OpenAiTokenizer openAiTokenizer() {
-        return new OpenAiTokenizer();
-    }
 }
