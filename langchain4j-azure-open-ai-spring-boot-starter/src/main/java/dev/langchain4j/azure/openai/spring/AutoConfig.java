@@ -2,7 +2,6 @@ package dev.langchain4j.azure.openai.spring;
 
 import com.azure.core.http.ProxyOptions;
 import com.azure.core.util.Configuration;
-import dev.langchain4j.model.Tokenizer;
 import dev.langchain4j.model.azure.*;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import org.springframework.beans.factory.ObjectProvider;
@@ -11,7 +10,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.lang.Nullable;
 
 import java.time.Duration;
 
@@ -40,7 +38,6 @@ public class AutoConfig {
                 .serviceVersion(chatModelProperties.serviceVersion())
                 .apiKey(chatModelProperties.apiKey())
                 .deploymentName(chatModelProperties.deploymentName())
-                // TODO inject tokenizer?
                 .maxTokens(chatModelProperties.maxTokens())
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
@@ -87,7 +84,6 @@ public class AutoConfig {
                 .serviceVersion(chatModelProperties.serviceVersion())
                 .apiKey(chatModelProperties.apiKey())
                 .deploymentName(chatModelProperties.deploymentName())
-                // TODO inject tokenizer?
                 .maxTokens(chatModelProperties.maxTokens())
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
@@ -112,24 +108,23 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty({Properties.PREFIX + ".embedding-model.api-key"})
-    AzureOpenAiEmbeddingModel openAiEmbeddingModelByApiKey(Properties properties, @Nullable Tokenizer tokenizer) {
-        return openAiEmbeddingModel(properties, tokenizer);
+    AzureOpenAiEmbeddingModel openAiEmbeddingModelByApiKey(Properties properties) {
+        return openAiEmbeddingModel(properties);
     }
 
     @Bean
     @ConditionalOnProperty({Properties.PREFIX + ".embedding-model.non-azure-api-key"})
-    AzureOpenAiEmbeddingModel openAiEmbeddingModelByNonAzureApiKey(Properties properties, @Nullable Tokenizer tokenizer) {
-        return openAiEmbeddingModel(properties, tokenizer);
+    AzureOpenAiEmbeddingModel openAiEmbeddingModelByNonAzureApiKey(Properties properties) {
+        return openAiEmbeddingModel(properties);
     }
 
-    AzureOpenAiEmbeddingModel openAiEmbeddingModel(Properties properties, Tokenizer tokenizer) {
+    AzureOpenAiEmbeddingModel openAiEmbeddingModel(Properties properties) {
         EmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
         AzureOpenAiEmbeddingModel.Builder builder = AzureOpenAiEmbeddingModel.builder()
                 .endpoint(embeddingModelProperties.endpoint())
                 .serviceVersion(embeddingModelProperties.serviceVersion())
                 .apiKey(embeddingModelProperties.apiKey())
                 .deploymentName(embeddingModelProperties.deploymentName())
-                .tokenizer(tokenizer)
                 .timeout(Duration.ofSeconds(embeddingModelProperties.timeout() == null ? 0 : embeddingModelProperties.timeout()))
                 .maxRetries(embeddingModelProperties.maxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
