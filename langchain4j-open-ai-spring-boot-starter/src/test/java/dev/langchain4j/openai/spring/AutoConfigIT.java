@@ -1,8 +1,8 @@
 package dev.langchain4j.openai.spring;
 
 import dev.langchain4j.model.StreamingResponseHandler;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
@@ -51,7 +51,7 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel model = context.getBean(ChatLanguageModel.class);
+                    ChatModel model = context.getBean(ChatModel.class);
                     assertThat(model).isInstanceOf(OpenAiChatModel.class);
                     assertThat(context.getBean(OpenAiChatModel.class)).isSameAs(model);
 
@@ -71,7 +71,7 @@ class AutoConfigIT {
                 .withUserConfiguration(ListenerConfig.class)
                 .run(context -> {
 
-                    ChatLanguageModel model = context.getBean(ChatLanguageModel.class);
+                    ChatModel model = context.getBean(ChatModel.class);
                     assertThat(model).isInstanceOf(OpenAiChatModel.class);
                     assertThat(context.getBean(OpenAiChatModel.class)).isSameAs(model);
 
@@ -113,7 +113,7 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel model = context.getBean(StreamingChatLanguageModel.class);
+                    StreamingChatModel model = context.getBean(StreamingChatModel.class);
                     assertThat(model).isInstanceOf(OpenAiStreamingChatModel.class);
                     assertThat(context.getBean(OpenAiStreamingChatModel.class)).isSameAs(model);
 
@@ -151,7 +151,7 @@ class AutoConfigIT {
                 .withUserConfiguration(ListenerConfig.class)
                 .run(context -> {
 
-                    StreamingChatLanguageModel model = context.getBean(StreamingChatLanguageModel.class);
+                    StreamingChatModel model = context.getBean(StreamingChatModel.class);
                     assertThat(model).isInstanceOf(OpenAiStreamingChatModel.class);
                     assertThat(context.getBean(OpenAiStreamingChatModel.class)).isSameAs(model);
 
@@ -202,7 +202,7 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel model = context.getBean(StreamingChatLanguageModel.class);
+                    StreamingChatModel model = context.getBean(StreamingChatModel.class);
 
                     CompletableFuture<ChatResponse> future = new CompletableFuture<>();
                     model.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {

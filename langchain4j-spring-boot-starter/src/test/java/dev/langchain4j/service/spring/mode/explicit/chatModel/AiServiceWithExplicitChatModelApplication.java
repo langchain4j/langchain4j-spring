@@ -1,6 +1,6 @@
 package dev.langchain4j.service.spring.mode.explicit.chatModel;
 
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.openai.OpenAiChatModel;
@@ -16,7 +16,7 @@ class AiServiceWithExplicitChatModelApplication {
     static final String CHAT_MODEL_BEAN_NAME = "myChatModel";
 
     @Bean(CHAT_MODEL_BEAN_NAME)
-    ChatLanguageModel chatLanguageModel() {
+    ChatModel chatModel() {
         return OpenAiChatModel.builder()
                 .apiKey(System.getenv("OPENAI_API_KEY"))
                 .modelName(GPT_4_O_MINI)
@@ -24,8 +24,8 @@ class AiServiceWithExplicitChatModelApplication {
     }
 
     @Bean(CHAT_MODEL_BEAN_NAME + 2)
-    ChatLanguageModel chatLanguageModel2() {
-        return new ChatLanguageModel() {
+    ChatModel chatModel2() {
+        return new ChatModel() {
 
             @Override
             public ChatResponse chat(ChatRequest chatRequest) {

@@ -5,8 +5,8 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.agent.tool.ToolSpecifications;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
@@ -51,8 +51,8 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
         return beanFactory -> {
 
             // all components available in the application context
-            String[] chatLanguageModels = beanFactory.getBeanNamesForType(ChatLanguageModel.class);
-            String[] streamingChatLanguageModels = beanFactory.getBeanNamesForType(StreamingChatLanguageModel.class);
+            String[] chatModels = beanFactory.getBeanNamesForType(ChatModel.class);
+            String[] streamingChatModels = beanFactory.getBeanNamesForType(StreamingChatModel.class);
             String[] chatMemories = beanFactory.getBeanNamesForType(ChatMemory.class);
             String[] chatMemoryProviders = beanFactory.getBeanNamesForType(ChatMemoryProvider.class);
             String[] contentRetrievers = beanFactory.getBeanNamesForType(ContentRetriever.class);
@@ -96,22 +96,22 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                 AiService aiServiceAnnotation = aiServiceClass.getAnnotation(AiService.class);
 
                 addBeanReference(
-                        ChatLanguageModel.class,
+                        ChatModel.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.chatModel(),
-                        chatLanguageModels,
+                        chatModels,
                         "chatModel",
-                        "chatLanguageModel",
+                        "chatModel",
                         propertyValues
                 );
 
                 addBeanReference(
-                        StreamingChatLanguageModel.class,
+                        StreamingChatModel.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.streamingChatModel(),
-                        streamingChatLanguageModels,
+                        streamingChatModels,
                         "streamingChatModel",
-                        "streamingChatLanguageModel",
+                        "streamingChatModel",
                         propertyValues
                 );
 

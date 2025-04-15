@@ -2,8 +2,8 @@ package dev.langchain4j.anthropic.spring;
 
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.anthropic.AnthropicStreamingChatModel;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import org.junit.jupiter.api.AfterEach;
@@ -40,11 +40,11 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(AnthropicChatModel.class);
-                    assertThat(chatLanguageModel.chat("What is the capital of Germany?")).contains("Berlin");
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(AnthropicChatModel.class);
+                    assertThat(chatModel.chat("What is the capital of Germany?")).contains("Berlin");
 
-                    assertThat(context.getBean(AnthropicChatModel.class)).isSameAs(chatLanguageModel);
+                    assertThat(context.getBean(AnthropicChatModel.class)).isSameAs(chatModel);
                 });
     }
 
@@ -58,10 +58,10 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(AnthropicStreamingChatModel.class);
+                    StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
+                    assertThat(streamingChatModel).isInstanceOf(AnthropicStreamingChatModel.class);
                     CompletableFuture<ChatResponse> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
+                    streamingChatModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
@@ -79,7 +79,7 @@ class AutoConfigIT {
                     ChatResponse response = future.get(60, SECONDS);
                     assertThat(response.aiMessage().text()).contains("Berlin");
 
-                    assertThat(context.getBean(AnthropicStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    assertThat(context.getBean(AnthropicStreamingChatModel.class)).isSameAs(streamingChatModel);
                 });
     }
 }

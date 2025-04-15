@@ -1,7 +1,7 @@
 package dev.langchain4j.model.githubmodels.spring;
 
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -36,10 +36,10 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(GitHubModelsChatModel.class);
-                    assertThat(chatLanguageModel.chat("What is the capital of France?")).contains("Paris");
-                    assertThat(context.getBean(GitHubModelsChatModel.class)).isSameAs(chatLanguageModel);
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(GitHubModelsChatModel.class);
+                    assertThat(chatModel.chat("What is the capital of France?")).contains("Paris");
+                    assertThat(context.getBean(GitHubModelsChatModel.class)).isSameAs(chatModel);
                 });
     }
 
@@ -53,10 +53,10 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(GitHubModelsStreamingChatModel.class);
+                    StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
+                    assertThat(streamingChatModel).isInstanceOf(GitHubModelsStreamingChatModel.class);
                     CompletableFuture<ChatResponse> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.chat("What is the capital of France?", new StreamingChatResponseHandler() {
+                    streamingChatModel.chat("What is the capital of France?", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
@@ -74,7 +74,7 @@ class AutoConfigIT {
                     ChatResponse response = future.get(60, SECONDS);
                     assertThat(response.aiMessage().text()).contains("Paris");
 
-                    assertThat(context.getBean(GitHubModelsStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    assertThat(context.getBean(GitHubModelsStreamingChatModel.class)).isSameAs(streamingChatModel);
                 });
     }
 

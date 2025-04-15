@@ -1,7 +1,7 @@
 package dev.langchain4j.vertexai.spring;
 
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
@@ -38,15 +38,15 @@ class AutoConfigIT {
                         "langchain4j.vertex-ai-gemini.chat-model.location=" + LOCATION
                 )
                 .run(context -> {
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(VertexAiGeminiChatModel.class);
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(VertexAiGeminiChatModel.class);
 
                     // when
-                    String message = chatLanguageModel.chat("What is the capital of Germany?");
+                    String message = chatModel.chat("What is the capital of Germany?");
 
                     // then
                     assertThat(message).contains("Berlin");
-                    assertThat(context.getBean(VertexAiGeminiChatModel.class)).isSameAs(chatLanguageModel);
+                    assertThat(context.getBean(VertexAiGeminiChatModel.class)).isSameAs(chatModel);
                 });
     }
 
@@ -62,11 +62,11 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(VertexAiGeminiStreamingChatModel.class);
+                    StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
+                    assertThat(streamingChatModel).isInstanceOf(VertexAiGeminiStreamingChatModel.class);
                     CompletableFuture<ChatResponse> future = new CompletableFuture<>();
                     // when
-                    streamingChatLanguageModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
+                    streamingChatModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
@@ -85,7 +85,7 @@ class AutoConfigIT {
 
                     // then
                     assertThat(response.aiMessage().text()).contains("Berlin");
-                    assertThat(context.getBean(VertexAiGeminiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    assertThat(context.getBean(VertexAiGeminiStreamingChatModel.class)).isSameAs(streamingChatModel);
                 });
     }
 }

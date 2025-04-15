@@ -5,8 +5,8 @@ import dev.langchain4j.model.azure.AzureOpenAiChatModel;
 import dev.langchain4j.model.azure.AzureOpenAiEmbeddingModel;
 import dev.langchain4j.model.azure.AzureOpenAiImageModel;
 import dev.langchain4j.model.azure.AzureOpenAiStreamingChatModel;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ResponseFormat;
@@ -65,10 +65,10 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
-                    assertThat(chatLanguageModel.chat("What is the capital of Germany?")).contains("Berlin");
-                    assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(AzureOpenAiChatModel.class);
+                    assertThat(chatModel.chat("What is the capital of Germany?")).contains("Berlin");
+                    assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatModel);
                 });
     }
 
@@ -85,10 +85,10 @@ class AutoConfigIT {
                 .withUserConfiguration(ListenerConfig.class)
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
-                    assertThat(chatLanguageModel.chat("What is the capital of Germany?")).contains("Berlin");
-                    assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(AzureOpenAiChatModel.class);
+                    assertThat(chatModel.chat("What is the capital of Germany?")).contains("Berlin");
+                    assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatModel);
 
                     ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
                     ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);
@@ -116,7 +116,7 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
+                    ChatModel chatModel = context.getBean(ChatModel.class);
 
                     ChatRequest chatRequest = ChatRequest.builder()
                             .messages(singletonList(userMessage("Julien likes blue, white and red")))
@@ -135,10 +135,10 @@ class AutoConfigIT {
                                     .build())
                             .build();
 
-                    assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
-                    AiMessage aiMessage = chatLanguageModel.chat(chatRequest).aiMessage();
+                    assertThat(chatModel).isInstanceOf(AzureOpenAiChatModel.class);
+                    AiMessage aiMessage = chatModel.chat(chatRequest).aiMessage();
                     assertThat(aiMessage.text()).contains("{\"name\":\"Julien\",\"favouriteColors\":[\"blue\",\"white\",\"red\"]}");
-                    assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
+                    assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatModel);
                 });
     }
 
@@ -157,11 +157,11 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(AzureOpenAiChatModel.class);
-                    assertThat(chatLanguageModel.chat("What is the capital of Germany?")).contains("Berlin");
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(AzureOpenAiChatModel.class);
+                    assertThat(chatModel.chat("What is the capital of Germany?")).contains("Berlin");
 
-                    assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatLanguageModel);
+                    assertThat(context.getBean(AzureOpenAiChatModel.class)).isSameAs(chatModel);
                 });
     }
 
@@ -182,10 +182,10 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(AzureOpenAiStreamingChatModel.class);
+                    StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
+                    assertThat(streamingChatModel).isInstanceOf(AzureOpenAiStreamingChatModel.class);
                     CompletableFuture<ChatResponse> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
+                    streamingChatModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
@@ -203,7 +203,7 @@ class AutoConfigIT {
                     ChatResponse response = future.get(60, SECONDS);
                     assertThat(response.aiMessage().text()).contains("Berlin");
 
-                    assertThat(context.getBean(AzureOpenAiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    assertThat(context.getBean(AzureOpenAiStreamingChatModel.class)).isSameAs(streamingChatModel);
                 });
     }
 
@@ -221,10 +221,10 @@ class AutoConfigIT {
                 .withUserConfiguration(ListenerConfig.class)
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(AzureOpenAiStreamingChatModel.class);
+                    StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
+                    assertThat(streamingChatModel).isInstanceOf(AzureOpenAiStreamingChatModel.class);
                     CompletableFuture<ChatResponse> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
+                    streamingChatModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
@@ -242,7 +242,7 @@ class AutoConfigIT {
                     ChatResponse response = future.get(60, SECONDS);
                     assertThat(response.aiMessage().text()).contains("Berlin");
 
-                    assertThat(context.getBean(AzureOpenAiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    assertThat(context.getBean(AzureOpenAiStreamingChatModel.class)).isSameAs(streamingChatModel);
 
                     ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
                     ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);

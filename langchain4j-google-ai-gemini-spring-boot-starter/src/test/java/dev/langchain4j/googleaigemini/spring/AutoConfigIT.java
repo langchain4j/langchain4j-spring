@@ -1,8 +1,8 @@
 package dev.langchain4j.googleaigemini.spring;
 
 import dev.langchain4j.data.embedding.Embedding;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -35,13 +35,13 @@ class AutoConfigIT {
                         "langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.0-flash-exp"
                 )
                 .run(context -> {
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(context.getBean(GoogleAiGeminiChatModel.class)).isSameAs(chatLanguageModel);
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(context.getBean(GoogleAiGeminiChatModel.class)).isSameAs(chatModel);
 
-                    String response = chatLanguageModel.chat("What is the capital of India");
+                    String response = chatModel.chat("What is the capital of India");
                     assertThat(response).contains("Delhi");
 
-                    String newResponse = chatLanguageModel.chat("Calculate the Fibonacci of 22 and give me the result as an integer value along with the code. ");
+                    String newResponse = chatModel.chat("Calculate the Fibonacci of 22 and give me the result as an integer value along with the code. ");
                     assertThat(newResponse).contains("17711");
                 });
     }
@@ -62,11 +62,11 @@ class AutoConfigIT {
                         "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
                 )
                 .run(context -> {
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(ChatLanguageModel.class);
-                    String response = chatLanguageModel.chat("What is the capital of India");
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(ChatModel.class);
+                    String response = chatModel.chat("What is the capital of India");
                     assertThat(response).contains("Delhi");
-                    String newResponse = chatLanguageModel.chat("Calculate the Fibonacci of 22 and give me the result as an integer value along with the code. ");
+                    String newResponse = chatModel.chat("Calculate the Fibonacci of 22 and give me the result as an integer value along with the code. ");
                     assertThat(newResponse).contains("17711");
                 });
     }
@@ -78,11 +78,11 @@ class AutoConfigIT {
                         "langchain4j.google-ai-gemini.streaming-chat-model.model-name=gemini-2.0-flash-exp"
                 )
                 .run(context -> {
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(context.getBean(GoogleAiGeminiStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
+                    assertThat(context.getBean(GoogleAiGeminiStreamingChatModel.class)).isSameAs(streamingChatModel);
 
                     CompletableFuture<ChatResponse> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.chat("What is the capital of India", new StreamingChatResponseHandler() {
+                    streamingChatModel.chat("What is the capital of India", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
@@ -120,10 +120,10 @@ class AutoConfigIT {
                         "langchain4j.google-ai-gemini.streamingChatModel.functionCallingConfig.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
                 )
                 .run(context -> {
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(StreamingChatLanguageModel.class);
+                    StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
+                    assertThat(streamingChatModel).isInstanceOf(StreamingChatModel.class);
                     CompletableFuture<ChatResponse> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.chat("What is the capital of India", new StreamingChatResponseHandler() {
+                    streamingChatModel.chat("What is the capital of India", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
