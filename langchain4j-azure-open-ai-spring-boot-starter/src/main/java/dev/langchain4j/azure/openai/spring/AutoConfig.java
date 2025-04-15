@@ -176,7 +176,7 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    AzureOpenAiTokenizer azureOpenAiTokenizer() {
-        return new AzureOpenAiTokenizer();
+    AzureOpenAiTokenCountEstimator azureOpenAiTokenCountEstimator() {
+        return new AzureOpenAiTokenCountEstimator();
     }
 }

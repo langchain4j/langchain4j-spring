@@ -5,9 +5,9 @@ import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
 import dev.langchain4j.data.document.splitter.DocumentSplitters;
 import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.Tokenizer;
+import dev.langchain4j.model.TokenCountEstimator;
 import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.model.embedding.onnx.HuggingFaceTokenizer;
+import dev.langchain4j.model.embedding.onnx.HuggingFaceTokenCountEstimator;
 import dev.langchain4j.model.embedding.onnx.bgesmallenv15q.BgeSmallEnV15QuantizedEmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
@@ -32,16 +32,16 @@ public class EasyRagAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnClass(HuggingFaceTokenizer.class)
-    Tokenizer tokenizer() { // TODO bean name, type
-        return new HuggingFaceTokenizer();
+    @ConditionalOnClass(HuggingFaceTokenCountEstimator.class)
+    TokenCountEstimator tokenCountEstimator() { // TODO bean name, type
+        return new HuggingFaceTokenCountEstimator();
     }
 
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnClass(DocumentSplitters.class)
-    DocumentSplitter documentSplitter(Tokenizer tokenizer) { // TODO bean name, type
-        return DocumentSplitters.recursive(300, 30, tokenizer);
+    DocumentSplitter documentSplitter(TokenCountEstimator tokenCountEstimator) { // TODO bean name, type
+        return DocumentSplitters.recursive(300, 30, tokenCountEstimator);
     }
 
     @Bean
