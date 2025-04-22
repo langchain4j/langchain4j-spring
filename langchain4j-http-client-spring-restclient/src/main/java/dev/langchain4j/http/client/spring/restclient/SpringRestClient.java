@@ -19,6 +19,7 @@ import org.springframework.web.client.RestClientResponseException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 
+import static dev.langchain4j.http.client.sse.ServerSentEventListenerUtils.ignoringExceptions;
 import static dev.langchain4j.internal.Utils.getOrDefault;
 
 public class SpringRestClient implements HttpClient {
@@ -96,7 +97,9 @@ public class SpringRestClient implements HttpClient {
 
                             if (!springResponse.getStatusCode().is2xxSuccessful()) {
                                 String body = springResponse.bodyTo(String.class);
-                                listener.onError(new HttpException(statusCode, body));
+
+                                HttpException exception = new HttpException(statusCode, body);
+                                ignoringExceptions(() -> listener.onError(exception));
                                 return null;
                             }
 
@@ -104,18 +107,20 @@ public class SpringRestClient implements HttpClient {
                                     .statusCode(statusCode)
                                     .headers(springResponse.getHeaders())
                                     .build();
-                            listener.onOpen(response);
+                            ignoringExceptions(() -> listener.onOpen(response));
 
                             try (InputStream inputStream = springResponse.getBody()) {
                                 parser.parse(inputStream, listener);
-                                listener.onClose();
+                                ignoringExceptions(listener::onClose);
                             }
 
                             return null;
                         });
             } catch (Exception e) {
                 if (e.getCause() instanceof SocketTimeoutException) {
-                    listener.onError(new TimeoutException(e));
+                    ignoringExceptions(() -> listener.onError(new TimeoutException(e)));
+                } else {
+                    ignoringExceptions(() -> listener.onError(e));
                 }
             }
         });
