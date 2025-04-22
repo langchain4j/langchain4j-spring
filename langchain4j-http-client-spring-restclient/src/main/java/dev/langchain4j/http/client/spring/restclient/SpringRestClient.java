@@ -1,6 +1,7 @@
 package dev.langchain4j.http.client.spring.restclient;
 
 import dev.langchain4j.exception.HttpException;
+import dev.langchain4j.exception.TimeoutException;
 import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
@@ -75,6 +76,12 @@ public class SpringRestClient implements HttpClient {
                     .build();
         } catch (RestClientResponseException e) {
             throw new HttpException(e.getStatusCode().value(), e.getMessage());
+        } catch (Exception e) {
+            if (e.getCause() instanceof SocketTimeoutException) {
+                throw new TimeoutException(e);
+            } else {
+                throw e;
+            }
         }
     }
 
@@ -108,7 +115,7 @@ public class SpringRestClient implements HttpClient {
                         });
             } catch (Exception e) {
                 if (e.getCause() instanceof SocketTimeoutException) {
-                    listener.onError(e);
+                    listener.onError(new TimeoutException(e));
                 }
             }
         });

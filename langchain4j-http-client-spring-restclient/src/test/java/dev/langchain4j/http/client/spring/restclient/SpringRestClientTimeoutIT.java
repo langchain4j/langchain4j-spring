@@ -6,7 +6,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.ReactorNettyClientRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import java.net.SocketTimeoutException;
@@ -38,22 +37,7 @@ class SpringRestClientTimeoutIT extends HttpClientTimeoutIT {
     }
 
     @Override
-    protected Class<? extends Exception> expectedReadTimeoutExceptionTypeSync() {
-        return ResourceAccessException.class; // TODO unwrap?
-    }
-
-    @Override
-    protected Class<? extends Exception> expectedReadTimeoutCauseExceptionTypeSync() {
-        return SocketTimeoutException.class;
-    }
-
-    @Override
-    protected Class<? extends Exception> expectedReadTimeoutExceptionTypeAsync() {
-        return ResourceAccessException.class; // TODO unwrap?
-    }
-
-    @Override
-    protected Class<? extends Exception> expectedReadTimeoutCauseExceptionTypeAsync() {
+    protected Class<? extends Exception> expectedReadTimeoutRootCauseExceptionType() {
         return SocketTimeoutException.class;
     }
 }
