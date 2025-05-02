@@ -7,7 +7,7 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-spring</artifactId>
-        <version>1.0.0-beta4-SNAPSHOT</version>
+        <version>1.0.0-beta4</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -19,6 +19,7 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j</artifactId>
+            <version>1.0.0-rc1</version>
         </dependency>
 
         <dependency>
@@ -49,13 +50,14 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai</artifactId>
+            <version>1.0.0-rc1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-core</artifactId>
-            <version>${project.version}</version>
+            <version>1.0.0-rc1</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
