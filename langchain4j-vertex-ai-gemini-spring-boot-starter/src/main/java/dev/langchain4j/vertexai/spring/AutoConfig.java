@@ -19,16 +19,16 @@ public class AutoConfig {
     @ConditionalOnProperty(name = PREFIX + ".chat-model.enabled", havingValue = "true")
     VertexAiGeminiChatModel vertexAiGeminiChatModel(Properties properties,
                                                     ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.getChatModel();
+        ChatModelProperties chatModelProperties = properties.chatModel();
         return VertexAiGeminiChatModel.builder()
-                .project(chatModelProperties.getProject())
-                .location(chatModelProperties.getLocation())
-                .modelName(chatModelProperties.getModelName())
-                .temperature(chatModelProperties.getTemperature())
-                .maxOutputTokens(chatModelProperties.getMaxOutputTokens())
-                .topK(chatModelProperties.getTopK())
-                .topP(chatModelProperties.getTopP())
-                .maxRetries(chatModelProperties.getMaxRetries())
+                .project(chatModelProperties.project())
+                .location(chatModelProperties.location())
+                .modelName(chatModelProperties.modelName())
+                .temperature(chatModelProperties.temperature())
+                .maxOutputTokens(chatModelProperties.maxOutputTokens())
+                .topK(chatModelProperties.topK())
+                .topP(chatModelProperties.topP())
+                .maxRetries(chatModelProperties.maxRetries())
                 .listeners(listeners.orderedStream().toList())
                 .build();
     }
@@ -37,15 +37,15 @@ public class AutoConfig {
     @ConditionalOnProperty(name = PREFIX + ".streaming-chat-model.enabled", havingValue = "true")
     VertexAiGeminiStreamingChatModel vertexAiGeminiStreamingChatModel(Properties properties,
                                                                       ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties streamingChatProperties = properties.getStreamingChatModel();
+        ChatModelProperties streamingChatProperties = properties.streamingChatModel();
         return VertexAiGeminiStreamingChatModel.builder()
-                .project(streamingChatProperties.getProject())
-                .location(streamingChatProperties.getLocation())
-                .modelName(streamingChatProperties.getModelName())
-                .temperature(streamingChatProperties.getTemperature())
-                .maxOutputTokens(streamingChatProperties.getMaxOutputTokens())
-                .topK(streamingChatProperties.getTopK())
-                .topP(streamingChatProperties.getTopP())
+                .project(streamingChatProperties.project())
+                .location(streamingChatProperties.location())
+                .modelName(streamingChatProperties.modelName())
+                .temperature(streamingChatProperties.temperature())
+                .maxOutputTokens(streamingChatProperties.maxOutputTokens())
+                .topK(streamingChatProperties.topK())
+                .topP(streamingChatProperties.topP())
                 .listeners(listeners.orderedStream().toList())
                 .build();
     }
