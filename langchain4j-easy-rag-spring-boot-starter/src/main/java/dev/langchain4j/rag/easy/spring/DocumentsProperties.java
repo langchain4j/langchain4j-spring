@@ -1,15 +1,11 @@
 package dev.langchain4j.rag.easy.spring;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.nio.file.Path;
 
-@Getter
-@Setter
-class DocumentsProperties {
+public record DocumentsProperties(
+    Path path,
+    String glob,
+    Boolean recursion
+    ) {
 
-    Path path;
-    String glob;
-    Boolean recursion;
 }

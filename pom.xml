@@ -30,6 +30,8 @@
         <module>langchain4j-elasticsearch-spring-boot-starter</module>
         <module>langchain4j-milvus-spring-boot-starter</module>
 
+        <module>langchain4j-easy-rag-spring-boot-starter</module>
+
         <module>langchain4j-reactor</module>
     </modules>
 

@@ -46,25 +46,25 @@ public class AutoConfig {
             Properties properties,
             ObjectProvider<ChatModelListener> listeners
     ) {
-        ChatModelProperties chatModelProperties = properties.getChatModel();
+        ChatModelProperties chatModelProperties = properties.chatModel();
         return OllamaChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(chatModelProperties.getBaseUrl())
-                .modelName(chatModelProperties.getModelName())
-                .temperature(chatModelProperties.getTemperature())
-                .topK(chatModelProperties.getTopK())
-                .topP(chatModelProperties.getTopP())
-                .repeatPenalty(chatModelProperties.getRepeatPenalty())
-                .seed(chatModelProperties.getSeed())
-                .numPredict(chatModelProperties.getNumPredict())
-                .stop(chatModelProperties.getStop())
-                .format(chatModelProperties.getFormat())
-                .supportedCapabilities(chatModelProperties.getSupportedCapabilities())
-                .timeout(chatModelProperties.getTimeout())
-                .maxRetries(chatModelProperties.getMaxRetries())
-                .customHeaders(chatModelProperties.getCustomHeaders())
-                .logRequests(chatModelProperties.getLogRequests())
-                .logResponses(chatModelProperties.getLogResponses())
+                .baseUrl(chatModelProperties.baseUrl())
+                .modelName(chatModelProperties.modelName())
+                .temperature(chatModelProperties.temperature())
+                .topK(chatModelProperties.topK())
+                .topP(chatModelProperties.topP())
+                .repeatPenalty(chatModelProperties.repeatPenalty())
+                .seed(chatModelProperties.seed())
+                .numPredict(chatModelProperties.numPredict())
+                .stop(chatModelProperties.stop())
+                .format(chatModelProperties.format())
+                .supportedCapabilities(chatModelProperties.supportedCapabilities())
+                .timeout(chatModelProperties.timeout())
+                .maxRetries(chatModelProperties.maxRetries())
+                .customHeaders(chatModelProperties.customHeaders())
+                .logRequests(chatModelProperties.logRequests())
+                .logResponses(chatModelProperties.logResponses())
                 .listeners(listeners.orderedStream().toList())
                 .build();
     }
@@ -86,24 +86,24 @@ public class AutoConfig {
             Properties properties,
             ObjectProvider<ChatModelListener> listeners
     ) {
-        ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
+        ChatModelProperties chatModelProperties = properties.streamingChatModel();
         return OllamaStreamingChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(chatModelProperties.getBaseUrl())
-                .modelName(chatModelProperties.getModelName())
-                .temperature(chatModelProperties.getTemperature())
-                .topK(chatModelProperties.getTopK())
-                .topP(chatModelProperties.getTopP())
-                .repeatPenalty(chatModelProperties.getRepeatPenalty())
-                .seed(chatModelProperties.getSeed())
-                .numPredict(chatModelProperties.getNumPredict())
-                .stop(chatModelProperties.getStop())
-                .format(chatModelProperties.getFormat())
-                .supportedCapabilities(chatModelProperties.getSupportedCapabilities())
-                .timeout(chatModelProperties.getTimeout())
-                .customHeaders(chatModelProperties.getCustomHeaders())
-                .logRequests(chatModelProperties.getLogRequests())
-                .logResponses(chatModelProperties.getLogResponses())
+                .baseUrl(chatModelProperties.baseUrl())
+                .modelName(chatModelProperties.modelName())
+                .temperature(chatModelProperties.temperature())
+                .topK(chatModelProperties.topK())
+                .topP(chatModelProperties.topP())
+                .repeatPenalty(chatModelProperties.repeatPenalty())
+                .seed(chatModelProperties.seed())
+                .numPredict(chatModelProperties.numPredict())
+                .stop(chatModelProperties.stop())
+                .format(chatModelProperties.format())
+                .supportedCapabilities(chatModelProperties.supportedCapabilities())
+                .timeout(chatModelProperties.timeout())
+                .customHeaders(chatModelProperties.customHeaders())
+                .logRequests(chatModelProperties.logRequests())
+                .logResponses(chatModelProperties.logResponses())
                 .listeners(listeners.orderedStream().toList())
                 .build();
     }
@@ -146,24 +146,24 @@ public class AutoConfig {
             @Qualifier(LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties
     ) {
-        LanguageModelProperties languageModelProperties = properties.getLanguageModel();
+        LanguageModelProperties languageModelProperties = properties.languageModel();
         return OllamaLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(languageModelProperties.getBaseUrl())
-                .modelName(languageModelProperties.getModelName())
-                .temperature(languageModelProperties.getTemperature())
-                .topK(languageModelProperties.getTopK())
-                .topP(languageModelProperties.getTopP())
-                .repeatPenalty(languageModelProperties.getRepeatPenalty())
-                .seed(languageModelProperties.getSeed())
-                .numPredict(languageModelProperties.getNumPredict())
-                .stop(languageModelProperties.getStop())
-                .format(languageModelProperties.getFormat())
-                .timeout(languageModelProperties.getTimeout())
-                .maxRetries(languageModelProperties.getMaxRetries())
-                .customHeaders(languageModelProperties.getCustomHeaders())
-                .logRequests(languageModelProperties.getLogRequests())
-                .logResponses(languageModelProperties.getLogResponses())
+                .baseUrl(languageModelProperties.baseUrl())
+                .modelName(languageModelProperties.modelName())
+                .temperature(languageModelProperties.temperature())
+                .topK(languageModelProperties.topK())
+                .topP(languageModelProperties.topP())
+                .repeatPenalty(languageModelProperties.repeatPenalty())
+                .seed(languageModelProperties.seed())
+                .numPredict(languageModelProperties.numPredict())
+                .stop(languageModelProperties.stop())
+                .format(languageModelProperties.format())
+                .timeout(languageModelProperties.timeout())
+                .maxRetries(languageModelProperties.maxRetries())
+                .customHeaders(languageModelProperties.customHeaders())
+                .logRequests(languageModelProperties.logRequests())
+                .logResponses(languageModelProperties.logResponses())
                 .build();
     }
 
@@ -183,23 +183,23 @@ public class AutoConfig {
             @Qualifier(STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties
     ) {
-        LanguageModelProperties languageModelProperties = properties.getStreamingLanguageModel();
+        LanguageModelProperties languageModelProperties = properties.streamingLanguageModel();
         return OllamaStreamingLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(languageModelProperties.getBaseUrl())
-                .modelName(languageModelProperties.getModelName())
-                .temperature(languageModelProperties.getTemperature())
-                .topK(languageModelProperties.getTopK())
-                .topP(languageModelProperties.getTopP())
-                .repeatPenalty(languageModelProperties.getRepeatPenalty())
-                .seed(languageModelProperties.getSeed())
-                .numPredict(languageModelProperties.getNumPredict())
-                .stop(languageModelProperties.getStop())
-                .format(languageModelProperties.getFormat())
-                .timeout(languageModelProperties.getTimeout())
-                .customHeaders(languageModelProperties.getCustomHeaders())
-                .logRequests(languageModelProperties.getLogRequests())
-                .logResponses(languageModelProperties.getLogResponses())
+                .baseUrl(languageModelProperties.baseUrl())
+                .modelName(languageModelProperties.modelName())
+                .temperature(languageModelProperties.temperature())
+                .topK(languageModelProperties.topK())
+                .topP(languageModelProperties.topP())
+                .repeatPenalty(languageModelProperties.repeatPenalty())
+                .seed(languageModelProperties.seed())
+                .numPredict(languageModelProperties.numPredict())
+                .stop(languageModelProperties.stop())
+                .format(languageModelProperties.format())
+                .timeout(languageModelProperties.timeout())
+                .customHeaders(languageModelProperties.customHeaders())
+                .logRequests(languageModelProperties.logRequests())
+                .logResponses(languageModelProperties.logResponses())
                 .build();
     }
 
@@ -242,16 +242,16 @@ public class AutoConfig {
             @Qualifier(EMBEDDING_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
             Properties properties
     ) {
-        EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
+        EmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
         return OllamaEmbeddingModel.builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(embeddingModelProperties.getBaseUrl())
-                .modelName(embeddingModelProperties.getModelName())
-                .timeout(embeddingModelProperties.getTimeout())
-                .maxRetries(embeddingModelProperties.getMaxRetries())
-                .customHeaders(embeddingModelProperties.getCustomHeaders())
-                .logRequests(embeddingModelProperties.getLogRequests())
-                .logResponses(embeddingModelProperties.getLogResponses())
+                .baseUrl(embeddingModelProperties.baseUrl())
+                .modelName(embeddingModelProperties.modelName())
+                .timeout(embeddingModelProperties.timeout())
+                .maxRetries(embeddingModelProperties.maxRetries())
+                .customHeaders(embeddingModelProperties.customHeaders())
+                .logRequests(embeddingModelProperties.logRequests())
+                .logResponses(embeddingModelProperties.logResponses())
                 .build();
     }
 
