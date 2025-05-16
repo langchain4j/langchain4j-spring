@@ -11,7 +11,7 @@
 
     <name>langchain4j-spring parent POM</name>
     <description>Parent POM for langchain4j-spring submodules</description>
-    <url>https://github.com/langchain4j/langchain4j-spring</url>
+    <url>https://github.com/langchain4j/langchain4j-spring/tree/main</url>
 
     <modules>
         <module>langchain4j-spring-boot-starter</module>
@@ -186,32 +186,25 @@
 
     <licenses>
         <license>
-            <name>Apache-2.0</name>
+            <name>The Apache Software License, Version 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
 
     <developers>
         <developer>
-            <id>deep-learning-dynamo</id>
-            <name>deep-learning-dynamo</name>
-            <email>deeplearningdynamo@gmail.com</email>
-            <url>https://github.com/deep-learning-dynamo</url>
-        </developer>
-        <developer>
-            <id>kuraleta</id>
-            <name>kuraleta</name>
-            <email>digital.kuraleta@gmail.com</email>
-            <url>https://github.com/kuraleta</url>
+            <id>dliubarskyi</id>
+            <name>Dmytro Liubarskyi</name>
+            <email>info@langchain4j.dev</email>
+            <url>https://github.com/dliubarskyi</url>
         </developer>
     </developers>
 
     <scm>
-        <url>https://github.com/langchain4j/langchain4j-spring</url>
         <connection>scm:git:git://github.com/langchain4j/langchain4j-spring.git</connection>
         <developerConnection>scm:git:git@github.com:langchain4j/langchain4j-spring.git</developerConnection>
+        <url>https://github.com/langchain4j/langchain4j-spring/tree/main</url>
     </scm>
 
     <repositories>
@@ -228,7 +221,6 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
-            <name>Sonatype Central Snapshots</name>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
