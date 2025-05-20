@@ -1,11 +1,11 @@
-name: release2
+name: release
 
 on:
   workflow_dispatch:
 
 jobs:
 
-  release2:
+  release:
 
     runs-on: ubuntu-latest
 
@@ -24,7 +24,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
 
-      - name: release2
+      - name: release
         run: mvn -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
