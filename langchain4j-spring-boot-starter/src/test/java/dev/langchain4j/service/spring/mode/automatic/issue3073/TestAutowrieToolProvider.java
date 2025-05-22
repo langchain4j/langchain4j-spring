@@ -1,19 +1,15 @@
-package dev.langchain4j.service.spring.mode.automatic.issue3074;
+package dev.langchain4j.service.spring.mode.automatic.issue3073;
 
 import dev.langchain4j.service.AiServiceContext;
-import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import dev.langchain4j.service.tool.ToolProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 public class TestAutowrieToolProvider {

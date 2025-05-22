@@ -1,4 +1,4 @@
-package dev.langchain4j.service.spring.mode.automatic.issue3074;
+package dev.langchain4j.service.spring.mode.automatic.issue3073;
 
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
