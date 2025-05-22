@@ -1,15 +1,15 @@
-package dev.langchain4j.vertexai.spring;
+package dev.langchain4j.vertexai.gemini.spring;
 
 import dev.langchain4j.model.chat.listener.ChatModelListener;
-import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
-import dev.langchain4j.model.vertexai.VertexAiGeminiStreamingChatModel;
+import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiChatModel;
+import dev.langchain4j.model.vertexai.gemini.VertexAiGeminiStreamingChatModel;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import static dev.langchain4j.vertexai.spring.Properties.PREFIX;
+import static dev.langchain4j.vertexai.gemini.spring.Properties.PREFIX;
 
 @AutoConfiguration
 @EnableConfigurationProperties(Properties.class)

@@ -1,4 +1,4 @@
-package dev.langchain4j.vertexai.spring;
+package dev.langchain4j.vertexai.gemini.spring;
 
 import lombok.Getter;
 import lombok.Setter;
