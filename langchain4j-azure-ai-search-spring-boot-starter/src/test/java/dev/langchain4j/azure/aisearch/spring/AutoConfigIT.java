@@ -15,6 +15,7 @@ import dev.langchain4j.rag.content.retriever.azure.search.AzureAiSearchContentRe
 import dev.langchain4j.rag.content.retriever.azure.search.AzureAiSearchQueryType;
 import dev.langchain4j.rag.query.Query;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
+import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.azure.search.AzureAiSearchEmbeddingStore;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +31,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@EnabledIfEnvironmentVariable(named = "AZURE_SEARCH_KEY", matches = ".+")
 class AutoConfigIT {
 
     private static final Logger log = LoggerFactory.getLogger(AutoConfigIT.class);
@@ -236,8 +238,12 @@ class AutoConfigIT {
                         embeddingStore.add(embedding, textSegment);
                     }
 
-                    Embedding relevantEmbedding = embeddingModel.embed("fruit").content();
-                    List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.findRelevant(relevantEmbedding, 3);
+                    EmbeddingSearchRequest searchRequest = EmbeddingSearchRequest.builder()
+                            .queryEmbedding(embeddingModel.embed("fruit").content())
+                            .maxResults(3)
+                            .build();
+
+                    List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.search(searchRequest).matches();
                     assertThat(relevant).hasSize(3);
                     // TODO uncomment after https://github.com/langchain4j/langchain4j/issues/1617 is closed
                     // assertThat(relevant.get(0).embedding()).isNotNull();

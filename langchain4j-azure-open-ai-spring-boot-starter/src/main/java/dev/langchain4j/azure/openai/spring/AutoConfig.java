@@ -2,14 +2,14 @@ package dev.langchain4j.azure.openai.spring;
 
 import com.azure.core.http.ProxyOptions;
 import com.azure.core.util.Configuration;
-import dev.langchain4j.model.Tokenizer;
 import dev.langchain4j.model.azure.*;
+import dev.langchain4j.model.chat.listener.ChatModelListener;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.lang.Nullable;
 
 import java.time.Duration;
 
@@ -19,24 +19,25 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(Properties.PREFIX + ".chat-model.api-key")
-    AzureOpenAiChatModel openAiChatModelByAPIKey(Properties properties) {
-        return openAiChatModel(properties);
+    AzureOpenAiChatModel openAiChatModelByAPIKey(Properties properties,
+                                                 ObjectProvider<ChatModelListener> listeners) {
+        return openAiChatModel(properties, listeners);
     }
 
     @Bean
     @ConditionalOnProperty(Properties.PREFIX + ".chat-model.non-azure-api-key")
-    AzureOpenAiChatModel openAiChatModelByNonAzureApiKey(Properties properties) {
-        return openAiChatModel(properties);
+    AzureOpenAiChatModel openAiChatModelByNonAzureApiKey(Properties properties,
+                                                         ObjectProvider<ChatModelListener> listeners) {
+        return openAiChatModel(properties, listeners);
     }
 
-    AzureOpenAiChatModel openAiChatModel(Properties properties) {
+    AzureOpenAiChatModel openAiChatModel(Properties properties, ObjectProvider<ChatModelListener> listeners) {
         ChatModelProperties chatModelProperties = properties.chatModel();
         AzureOpenAiChatModel.Builder builder = AzureOpenAiChatModel.builder()
                 .endpoint(chatModelProperties.endpoint())
                 .serviceVersion(chatModelProperties.serviceVersion())
                 .apiKey(chatModelProperties.apiKey())
                 .deploymentName(chatModelProperties.deploymentName())
-                // TODO inject tokenizer?
                 .maxTokens(chatModelProperties.maxTokens())
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
@@ -53,7 +54,8 @@ public class AutoConfig {
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses() != null && chatModelProperties.logRequestsAndResponses())
                 .userAgentSuffix(chatModelProperties.userAgentSuffix())
                 .customHeaders(chatModelProperties.customHeaders())
-                .supportedCapabilities(chatModelProperties.supportedCapabilities());
+                .supportedCapabilities(chatModelProperties.supportedCapabilities())
+                .listeners(listeners.orderedStream().toList());
         if (chatModelProperties.nonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
         }
@@ -62,24 +64,26 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(Properties.PREFIX + ".streaming-chat-model.api-key")
-    AzureOpenAiStreamingChatModel openAiStreamingChatModelByApiKey(Properties properties) {
-        return openAiStreamingChatModel(properties);
+    AzureOpenAiStreamingChatModel openAiStreamingChatModelByApiKey(Properties properties,
+                                                                   ObjectProvider<ChatModelListener> listeners) {
+        return openAiStreamingChatModel(properties, listeners);
     }
 
     @Bean
     @ConditionalOnProperty(Properties.PREFIX + ".streaming-chat-model.non-azure-api-key")
-    AzureOpenAiStreamingChatModel openAiStreamingChatModelByNonAzureApiKey(Properties properties) {
-        return openAiStreamingChatModel(properties);
+    AzureOpenAiStreamingChatModel openAiStreamingChatModelByNonAzureApiKey(Properties properties,
+                                                                           ObjectProvider<ChatModelListener> listeners) {
+        return openAiStreamingChatModel(properties, listeners);
     }
 
-    AzureOpenAiStreamingChatModel openAiStreamingChatModel(Properties properties) {
+    AzureOpenAiStreamingChatModel openAiStreamingChatModel(Properties properties,
+                                                           ObjectProvider<ChatModelListener> listeners) {
         ChatModelProperties chatModelProperties = properties.streamingChatModel();
         AzureOpenAiStreamingChatModel.Builder builder = AzureOpenAiStreamingChatModel.builder()
                 .endpoint(chatModelProperties.endpoint())
                 .serviceVersion(chatModelProperties.serviceVersion())
                 .apiKey(chatModelProperties.apiKey())
                 .deploymentName(chatModelProperties.deploymentName())
-                // TODO inject tokenizer?
                 .maxTokens(chatModelProperties.maxTokens())
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
@@ -94,7 +98,8 @@ public class AutoConfig {
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses() != null && chatModelProperties.logRequestsAndResponses())
                 .userAgentSuffix(chatModelProperties.userAgentSuffix())
-                .customHeaders(chatModelProperties.customHeaders());
+                .customHeaders(chatModelProperties.customHeaders())
+                .listeners(listeners.orderedStream().toList());
         if (chatModelProperties.nonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
         }
@@ -103,24 +108,23 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty({Properties.PREFIX + ".embedding-model.api-key"})
-    AzureOpenAiEmbeddingModel openAiEmbeddingModelByApiKey(Properties properties, @Nullable Tokenizer tokenizer) {
-        return openAiEmbeddingModel(properties, tokenizer);
+    AzureOpenAiEmbeddingModel openAiEmbeddingModelByApiKey(Properties properties) {
+        return openAiEmbeddingModel(properties);
     }
 
     @Bean
     @ConditionalOnProperty({Properties.PREFIX + ".embedding-model.non-azure-api-key"})
-    AzureOpenAiEmbeddingModel openAiEmbeddingModelByNonAzureApiKey(Properties properties, @Nullable Tokenizer tokenizer) {
-        return openAiEmbeddingModel(properties, tokenizer);
+    AzureOpenAiEmbeddingModel openAiEmbeddingModelByNonAzureApiKey(Properties properties) {
+        return openAiEmbeddingModel(properties);
     }
 
-    AzureOpenAiEmbeddingModel openAiEmbeddingModel(Properties properties, Tokenizer tokenizer) {
+    AzureOpenAiEmbeddingModel openAiEmbeddingModel(Properties properties) {
         EmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
         AzureOpenAiEmbeddingModel.Builder builder = AzureOpenAiEmbeddingModel.builder()
                 .endpoint(embeddingModelProperties.endpoint())
                 .serviceVersion(embeddingModelProperties.serviceVersion())
                 .apiKey(embeddingModelProperties.apiKey())
                 .deploymentName(embeddingModelProperties.deploymentName())
-                .tokenizer(tokenizer)
                 .timeout(Duration.ofSeconds(embeddingModelProperties.timeout() == null ? 0 : embeddingModelProperties.timeout()))
                 .maxRetries(embeddingModelProperties.maxRetries())
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
@@ -172,7 +176,7 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    AzureOpenAiTokenizer azureOpenAiTokenizer() {
-        return new AzureOpenAiTokenizer();
+    AzureOpenAiTokenCountEstimator azureOpenAiTokenCountEstimator() {
+        return new AzureOpenAiTokenCountEstimator();
     }
 }

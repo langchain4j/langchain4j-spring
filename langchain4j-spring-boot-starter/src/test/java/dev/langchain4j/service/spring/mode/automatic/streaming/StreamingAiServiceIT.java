@@ -1,8 +1,7 @@
 package dev.langchain4j.service.spring.mode.automatic.streaming;
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.chat.TestStreamingResponseHandler;
-import dev.langchain4j.model.output.Response;
+import dev.langchain4j.model.chat.TestStreamingChatResponseHandler;
+import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -21,6 +20,7 @@ class StreamingAiServiceIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.open-ai.streaming-chat-model.api-key=" + OPENAI_API_KEY,
+                        "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini",
                         "langchain4j.open-ai.streaming-chat-model.max-tokens=20",
                         "langchain4j.open-ai.streaming-chat-model.temperature=0.0"
                 )
@@ -30,18 +30,18 @@ class StreamingAiServiceIT {
                     // given
                     StreamingAiService aiService = context.getBean(StreamingAiService.class);
 
-                    TestStreamingResponseHandler<AiMessage> handler = new TestStreamingResponseHandler<>();
+                    TestStreamingChatResponseHandler handler = new TestStreamingChatResponseHandler();
 
                     // when
                     aiService.chat("What is the capital of Germany?")
-                            .onNext(handler::onNext)
-                            .onComplete(handler::onComplete)
+                            .onPartialResponse(handler::onPartialResponse)
+                            .onCompleteResponse(handler::onCompleteResponse)
                             .onError(handler::onError)
                             .start();
-                    Response<AiMessage> response = handler.get();
+                    ChatResponse response = handler.get();
 
                     // then
-                    assertThat(response.content().text()).containsIgnoringCase("Berlin");
+                    assertThat(response.aiMessage().text()).containsIgnoringCase("Berlin");
                 });
     }
 }

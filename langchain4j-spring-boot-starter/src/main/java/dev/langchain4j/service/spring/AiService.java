@@ -3,8 +3,8 @@ package dev.langchain4j.service.spring;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
@@ -22,8 +22,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * An interface annotated with {@code @AiService} will be automatically registered as a bean
  * and wired with all the following components (beans) available in the context:
  * <pre>
- * - {@link ChatLanguageModel}
- * - {@link StreamingChatLanguageModel}
+ * - {@link ChatModel}
+ * - {@link StreamingChatModel}
  * - {@link ChatMemory}
  * - {@link ChatMemoryProvider}
  * - {@link ContentRetriever}
@@ -58,13 +58,13 @@ public @interface AiService {
 
     /**
      * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
-     * this attribute specifies the name of a {@link ChatLanguageModel} bean that should be used by this AI Service.
+     * this attribute specifies the name of a {@link ChatModel} bean that should be used by this AI Service.
      */
     String chatModel() default "";
 
     /**
      * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
-     * this attribute specifies the name of a {@link StreamingChatLanguageModel} bean that should be used by this AI Service.
+     * this attribute specifies the name of a {@link StreamingChatModel} bean that should be used by this AI Service.
      */
     String streamingChatModel() default "";
 

@@ -1,6 +1,6 @@
 package dev.langchain4j.service.spring.mode.automatic.conflictingChatModels;
 
-import dev.langchain4j.exception.IllegalConfigurationException;
+import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -23,8 +23,8 @@ class AiServiceWithConflictingChatMemoriesIT {
                             .isExactlyInstanceOf(IllegalStateException.class)
                             .hasCauseExactlyInstanceOf(IllegalConfigurationException.class)
                             .hasRootCauseMessage("Conflict: multiple beans of type " +
-                                    "dev.langchain4j.model.chat.ChatLanguageModel are found: " +
-                                    "[chatLanguageModel, chatLanguageModel2]. " +
+                                    "dev.langchain4j.model.chat.ChatModel are found: " +
+                                    "[chatModel, chatModel2]. " +
                                     "Please specify which one you wish to wire in the @AiService annotation like this: " +
                                     "@AiService(wiringMode = EXPLICIT, chatModel = \"<beanName>\").");
                 });

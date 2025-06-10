@@ -3,14 +3,14 @@ package dev.langchain4j.service.spring;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.agent.tool.ToolSpecifications;
-import dev.langchain4j.exception.IllegalConfigurationException;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
+import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +27,10 @@ import org.springframework.context.annotation.Bean;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static dev.langchain4j.exception.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
 import static dev.langchain4j.internal.Utils.isNotNullOrBlank;
 import static dev.langchain4j.internal.Utils.isNullOrBlank;
+import static dev.langchain4j.service.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.service.spring.AiServiceWiringMode.AUTOMATIC;
 import static dev.langchain4j.service.spring.AiServiceWiringMode.EXPLICIT;
 import static java.util.Arrays.asList;
@@ -51,8 +51,8 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
         return beanFactory -> {
 
             // all components available in the application context
-            String[] chatLanguageModels = beanFactory.getBeanNamesForType(ChatLanguageModel.class);
-            String[] streamingChatLanguageModels = beanFactory.getBeanNamesForType(StreamingChatLanguageModel.class);
+            String[] chatModels = beanFactory.getBeanNamesForType(ChatModel.class);
+            String[] streamingChatModels = beanFactory.getBeanNamesForType(StreamingChatModel.class);
             String[] chatMemories = beanFactory.getBeanNamesForType(ChatMemory.class);
             String[] chatMemoryProviders = beanFactory.getBeanNamesForType(ChatMemoryProvider.class);
             String[] contentRetrievers = beanFactory.getBeanNamesForType(ContentRetriever.class);
@@ -96,22 +96,22 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                 AiService aiServiceAnnotation = aiServiceClass.getAnnotation(AiService.class);
 
                 addBeanReference(
-                        ChatLanguageModel.class,
+                        ChatModel.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.chatModel(),
-                        chatLanguageModels,
+                        chatModels,
                         "chatModel",
-                        "chatLanguageModel",
+                        "chatModel",
                         propertyValues
                 );
 
                 addBeanReference(
-                        StreamingChatLanguageModel.class,
+                        StreamingChatModel.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.streamingChatModel(),
-                        streamingChatLanguageModels,
+                        streamingChatModels,
                         "streamingChatModel",
-                        "streamingChatLanguageModel",
+                        "streamingChatModel",
                         propertyValues
                 );
 

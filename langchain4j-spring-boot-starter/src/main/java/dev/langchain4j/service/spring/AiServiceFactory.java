@@ -4,8 +4,8 @@ import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
@@ -28,8 +28,8 @@ import static org.springframework.aop.support.AopUtils.isAopProxy;
 class AiServiceFactory implements FactoryBean<Object> {
 
     private final Class<Object> aiServiceClass;
-    private ChatLanguageModel chatLanguageModel;
-    private StreamingChatLanguageModel streamingChatLanguageModel;
+    private ChatModel chatModel;
+    private StreamingChatModel streamingChatModel;
     private ChatMemory chatMemory;
     private ChatMemoryProvider chatMemoryProvider;
     private ContentRetriever contentRetriever;
@@ -41,12 +41,12 @@ class AiServiceFactory implements FactoryBean<Object> {
         this.aiServiceClass = aiServiceClass;
     }
 
-    public void setChatLanguageModel(ChatLanguageModel chatLanguageModel) {
-        this.chatLanguageModel = chatLanguageModel;
+    public void setChatModel(ChatModel chatModel) {
+        this.chatModel = chatModel;
     }
 
-    public void setStreamingChatLanguageModel(StreamingChatLanguageModel streamingChatLanguageModel) {
-        this.streamingChatLanguageModel = streamingChatLanguageModel;
+    public void setStreamingChatModel(StreamingChatModel streamingChatModel) {
+        this.streamingChatModel = streamingChatModel;
     }
 
     public void setChatMemory(ChatMemory chatMemory) {
@@ -78,12 +78,12 @@ class AiServiceFactory implements FactoryBean<Object> {
 
         AiServices<Object> builder = AiServices.builder(aiServiceClass);
 
-        if (chatLanguageModel != null) {
-            builder = builder.chatLanguageModel(chatLanguageModel);
+        if (chatModel != null) {
+            builder = builder.chatModel(chatModel);
         }
 
-        if (streamingChatLanguageModel != null) {
-            builder = builder.streamingChatLanguageModel(streamingChatLanguageModel);
+        if (streamingChatModel != null) {
+            builder = builder.streamingChatModel(streamingChatModel);
         }
 
         if (chatMemory != null) {
@@ -144,12 +144,14 @@ class AiServiceFactory implements FactoryBean<Object> {
         for (Method originalToolMethod : originalToolClass.getDeclaredMethods()) {
             if (originalToolMethod.isAnnotationPresent(Tool.class)) {
                 Arrays.stream(enhancedTool.getClass().getDeclaredMethods())
-                      .filter(m -> m.getName().equals(originalToolMethod.getName()))
-                      .findFirst()
-                      .ifPresent(enhancedMethod -> {
-                          ToolSpecification toolSpecification = toolSpecificationFrom(originalToolMethod);
-                          toolExecutors.put(toolSpecification, new DefaultToolExecutor(enhancedTool, enhancedMethod));
-                      });
+                        // TODO match by complete method signature, not only by name (there can be multiple methods with the same name)
+                        .filter(m -> m.getName().equals(originalToolMethod.getName()))
+                        .findFirst()
+                        .ifPresent(enhancedToolMethod -> {
+                            ToolSpecification toolSpecification = toolSpecificationFrom(originalToolMethod);
+                            ToolExecutor executor = new DefaultToolExecutor(enhancedTool, originalToolMethod, enhancedToolMethod);
+                            toolExecutors.put(toolSpecification, executor);
+                        });
             }
         }
         return toolExecutors;
