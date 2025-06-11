@@ -6,7 +6,6 @@ import dev.langchain4j.model.azure.*;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -53,9 +52,9 @@ public class AutoConfig {
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses() != null && chatModelProperties.logRequestsAndResponses())
                 .userAgentSuffix(chatModelProperties.userAgentSuffix())
+                .listeners(listeners.orderedStream().toList())
                 .customHeaders(chatModelProperties.customHeaders())
-                .supportedCapabilities(chatModelProperties.supportedCapabilities())
-                .listeners(listeners.orderedStream().toList());
+                .supportedCapabilities(chatModelProperties.supportedCapabilities());
         if (chatModelProperties.nonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
         }
@@ -98,8 +97,9 @@ public class AutoConfig {
                 .proxyOptions(ProxyOptions.fromConfiguration(Configuration.getGlobalConfiguration()))
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses() != null && chatModelProperties.logRequestsAndResponses())
                 .userAgentSuffix(chatModelProperties.userAgentSuffix())
+                .listeners(listeners.orderedStream().toList())
                 .customHeaders(chatModelProperties.customHeaders())
-                .listeners(listeners.orderedStream().toList());
+                .supportedCapabilities(chatModelProperties.supportedCapabilities());
         if (chatModelProperties.nonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
         }
@@ -172,11 +172,5 @@ public class AutoConfig {
             builder.nonAzureApiKey(imageModelProperties.nonAzureApiKey());
         }
         return builder.build();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    AzureOpenAiTokenCountEstimator azureOpenAiTokenCountEstimator() {
-        return new AzureOpenAiTokenCountEstimator();
     }
 }
