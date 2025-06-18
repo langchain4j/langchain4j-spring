@@ -22,7 +22,6 @@ class ChatModelProperties {
     Integer seed;
     Integer numPredict;
     List<String> stop;
-    String format;
     Set<Capability> supportedCapabilities;
     Duration timeout;
     Integer maxRetries;
