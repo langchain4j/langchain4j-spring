@@ -59,7 +59,7 @@ public class EasyRagAutoConfig {
                                               EasyRagProperties easyRagProperties) { // TODO bean name, type
         return args -> {
 
-            List<Document> documents = loadDocuments(easyRagProperties.ingestion.documents);
+            List<Document> documents = loadDocuments(easyRagProperties.ingestion().documents());
 
             EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
                     // TODO documentTransformer
@@ -74,16 +74,16 @@ public class EasyRagAutoConfig {
     }
 
     private static List<Document> loadDocuments(DocumentsProperties documentsProperties) {
-        if (documentsProperties.recursion != null && documentsProperties.recursion) {
+        if (documentsProperties.recursion() != null && documentsProperties.recursion()) {
             throw new NotImplementedException(); // TODO
         } else {
-            if (isNotNullOrBlank(documentsProperties.glob)) {
+            if (isNotNullOrBlank(documentsProperties.glob())) {
                 throw new NotImplementedException();  // TODO
             } else {
-                if (documentsProperties.path.toFile().isDirectory()) {
-                    return FileSystemDocumentLoader.loadDocuments(documentsProperties.path);
+                if (documentsProperties.path().toFile().isDirectory()) {
+                    return FileSystemDocumentLoader.loadDocuments(documentsProperties.path());
                 } else {
-                    Document document = FileSystemDocumentLoader.loadDocument(documentsProperties.path);
+                    Document document = FileSystemDocumentLoader.loadDocument(documentsProperties.path());
                     return singletonList(document);
                 }
             }

@@ -18,29 +18,29 @@ public class AutoConfig {
     @Bean
     @ConditionalOnProperty(PREFIX + ".content-retriever.api-key")
     public AzureAiSearchContentRetriever azureAiSearchContentRetriever(Properties properties, @Nullable EmbeddingModel embeddingModel, @Nullable SearchIndex index) {
-        Properties.NestedProperties nestedProperties = properties.getContentRetriever();
+        Properties.NestedProperties nestedProperties = properties.contentRetriever();
         return AzureAiSearchContentRetriever.builder()
-                .endpoint(nestedProperties.getEndpoint())
-                .apiKey(nestedProperties.getApiKey())
-                .createOrUpdateIndex(nestedProperties.getCreateOrUpdateIndex())
+                .endpoint(nestedProperties.endpoint())
+                .apiKey(nestedProperties.apiKey())
+                .createOrUpdateIndex(nestedProperties.createOrUpdateIndex())
                 .embeddingModel(embeddingModel)
-                .dimensions(nestedProperties.getDimensions() == null ? 0 : nestedProperties.getDimensions())
+                .dimensions(nestedProperties.dimensions())
                 .index(index)
-                .maxResults(nestedProperties.getMaxResults())
-                .minScore(nestedProperties.getMinScore() == null ? 0.0 : nestedProperties.getMinScore())
-                .queryType(nestedProperties.getQueryType())
+                .maxResults(nestedProperties.maxResults())
+                .minScore(nestedProperties.minScore())
+                .queryType(nestedProperties.queryType())
                 .build();
     }
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-store.api-key")
     public AzureAiSearchEmbeddingStore azureAiSearchEmbeddingStore(Properties properties, @Nullable EmbeddingModel embeddingModel, @Nullable SearchIndex index) {
-        Properties.NestedProperties nestedProperties = properties.getEmbeddingStore();
+         Properties.NestedProperties nestedProperties = properties.embeddingStore();
         return AzureAiSearchEmbeddingStore.builder()
-                .endpoint(nestedProperties.getEndpoint())
-                .apiKey(nestedProperties.getApiKey())
-                .createOrUpdateIndex(nestedProperties.getCreateOrUpdateIndex())
-                .dimensions(nestedProperties.getDimensions())
+                .endpoint(nestedProperties.endpoint())
+                .apiKey(nestedProperties.apiKey())
+                .createOrUpdateIndex(nestedProperties.createOrUpdateIndex())
+                .dimensions(nestedProperties.dimensions())
                 .index(index)
                 .build();
     }
