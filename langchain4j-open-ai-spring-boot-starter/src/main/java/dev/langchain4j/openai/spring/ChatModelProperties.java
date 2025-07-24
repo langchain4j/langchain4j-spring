@@ -32,6 +32,7 @@ record ChatModelProperties(
         Map<String, String> metadata,
         String serviceTier,
         String reasoningEffort,
+        Boolean returnThinking,
         Duration timeout,
         Integer maxRetries,
         Boolean logRequests,
