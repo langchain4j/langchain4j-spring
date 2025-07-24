@@ -27,13 +27,20 @@ class AutoConfig {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         GoogleAiGeminiChatModel.GoogleAiGeminiChatModelBuilder builder = GoogleAiGeminiChatModel.builder()
                 .apiKey(chatModelProperties.apiKey())
+                .baseUrl(chatModelProperties.baseUrl())
                 .modelName(chatModelProperties.modelName())
                 .maxRetries(chatModelProperties.maxRetries())
                 .temperature(chatModelProperties.temperature())
                 .topK(chatModelProperties.topK())
+                .seed(chatModelProperties.seed())
                 .topP(chatModelProperties.topP())
+                .frequencyPenalty(chatModelProperties.frequencyPenalty())
+                .presencePenalty(chatModelProperties.presencePenalty())
                 .maxOutputTokens(chatModelProperties.maxOutputTokens())
                 .timeout(chatModelProperties.timeout())
+                .stopSequences(chatModelProperties.stopSequences())
+                .allowCodeExecution(chatModelProperties.allowCodeExecution())
+                .includeCodeExecutionOutput(chatModelProperties.includeCodeExecutionOutput())
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
                 .listeners(listeners.orderedStream().toList());
 
@@ -64,15 +71,22 @@ class AutoConfig {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         GoogleAiGeminiStreamingChatModel.GoogleAiGeminiStreamingChatModelBuilder builder = GoogleAiGeminiStreamingChatModel.builder()
                 .apiKey(chatModelProperties.apiKey())
+                .baseUrl(chatModelProperties.baseUrl())
                 .modelName(chatModelProperties.modelName())
                 .temperature(chatModelProperties.temperature())
                 .topK(chatModelProperties.topK())
+                .seed(chatModelProperties.seed())
                 .topP(chatModelProperties.topP())
+                .frequencyPenalty(chatModelProperties.frequencyPenalty())
+                .presencePenalty(chatModelProperties.presencePenalty())
                 .maxOutputTokens(chatModelProperties.maxOutputTokens())
                 .timeout(chatModelProperties.timeout())
+                .stopSequences(chatModelProperties.stopSequences())
+                .allowCodeExecution(chatModelProperties.allowCodeExecution())
+                .includeCodeExecutionOutput(chatModelProperties.includeCodeExecutionOutput())
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
-                .listeners(listeners.orderedStream().toList())
-                .maxRetries(chatModelProperties.maxRetries());
+                .listeners(listeners.orderedStream().toList());
+
 
         if (chatModelProperties.safetySetting() != null && !chatModelProperties.safetySetting().isEmpty()) {
             builder.safetySettings(convertSafetySettings(chatModelProperties.safetySetting()));

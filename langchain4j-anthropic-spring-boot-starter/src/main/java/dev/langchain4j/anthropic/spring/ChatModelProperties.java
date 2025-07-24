@@ -1,5 +1,6 @@
 package dev.langchain4j.anthropic.spring;
 
+import dev.langchain4j.model.chat.request.ToolChoice;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,10 +21,13 @@ class ChatModelProperties {
     Integer topK;
     Integer maxTokens;
     List<String> stopSequences;
+    ToolChoice toolChoice;
     Boolean cacheSystemMessages;
     Boolean cacheTools;
     String thinkingType;
     Integer thinkingBudgetTokens;
+    Boolean returnThinking;
+    Boolean sendThinking;
     Duration timeout;
     Integer maxRetries;
     Boolean logRequests;
