@@ -55,6 +55,7 @@ public class SpringRestClient implements HttpClient {
 
     private static AsyncTaskExecutor createDefaultStreamingRequestExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setQueueCapacity(0);
         taskExecutor.initialize();
         return taskExecutor;
     }

@@ -159,6 +159,7 @@ public class AutoConfig {
     @ConditionalOnClass(name = "io.micrometer.context.ContextSnapshotFactory")
     AsyncTaskExecutor openAiStreamingChatModelTaskExecutorWithContextPropagation() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setQueueCapacity(0);
         taskExecutor.setThreadNamePrefix(TASK_EXECUTOR_THREAD_NAME_PREFIX);
         taskExecutor.setTaskDecorator(new ContextPropagatingTaskDecorator());
         return taskExecutor;
@@ -170,6 +171,7 @@ public class AutoConfig {
     @ConditionalOnMissingClass("io.micrometer.context.ContextSnapshotFactory")
     AsyncTaskExecutor openAiStreamingChatModelTaskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setQueueCapacity(0);
         taskExecutor.setThreadNamePrefix(TASK_EXECUTOR_THREAD_NAME_PREFIX);
         return taskExecutor;
     }
@@ -247,6 +249,7 @@ public class AutoConfig {
     @ConditionalOnClass(name = "io.micrometer.context.ContextSnapshotFactory")
     AsyncTaskExecutor openAiStreamingLanguageModelTaskExecutorWithContextPropagation() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setQueueCapacity(0);
         taskExecutor.setThreadNamePrefix(TASK_EXECUTOR_THREAD_NAME_PREFIX);
         taskExecutor.setTaskDecorator(new ContextPropagatingTaskDecorator());
         return taskExecutor;
@@ -258,6 +261,7 @@ public class AutoConfig {
     @ConditionalOnMissingClass("io.micrometer.context.ContextSnapshotFactory")
     AsyncTaskExecutor openAiStreamingLanguageModelTaskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setQueueCapacity(0);
         taskExecutor.setThreadNamePrefix(TASK_EXECUTOR_THREAD_NAME_PREFIX);
         return taskExecutor;
     }

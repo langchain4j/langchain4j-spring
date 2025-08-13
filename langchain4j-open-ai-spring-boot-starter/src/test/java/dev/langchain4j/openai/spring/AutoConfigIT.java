@@ -24,7 +24,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,10 +108,10 @@ class AutoConfigIT {
     void should_provide_streaming_chat_model() {
         contextRunner
                 .withPropertyValues(
-                        "langchain4j.open-ai.streaming-chat-model.base-url=" + BASE_URL,
+                        // not setting base URL to use OpenAI API without caching proxy (proxy responds way faster)
                         "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
                         "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini",
-                        "langchain4j.open-ai.streaming-chat-model.max-tokens=20"
+                        "langchain4j.open-ai.streaming-chat-model.max-tokens=50"
                 )
                 .run(context -> {
 
@@ -117,25 +119,62 @@ class AutoConfigIT {
                     assertThat(model).isInstanceOf(OpenAiStreamingChatModel.class);
                     assertThat(context.getBean(OpenAiStreamingChatModel.class)).isSameAs(model);
 
-                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
-                    model.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
+                    CompletableFuture<ChatResponse> future1 = new CompletableFuture<>();
+                    AtomicReference<LocalDateTime> streamingStarted1 = new AtomicReference<>();
+                    AtomicReference<LocalDateTime> streamingFinished1 = new AtomicReference<>();
+                    model.chat("Tell me a story exactly 50 words long", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
+                            if (streamingStarted1.get() == null) {
+                                streamingStarted1.set(LocalDateTime.now());
+                            }
                         }
 
                         @Override
                         public void onCompleteResponse(ChatResponse completeResponse) {
-                            future.complete(completeResponse);
+                            streamingFinished1.set(LocalDateTime.now());
+                            future1.complete(completeResponse);
                         }
 
                         @Override
                         public void onError(Throwable error) {
-                            future.completeExceptionally(error);
+                            future1.completeExceptionally(error);
                         }
                     });
-                    ChatResponse chatResponse = future.get(15, SECONDS);
-                    assertThat(chatResponse.aiMessage().text()).contains("Berlin");
+
+                    CompletableFuture<ChatResponse> future2 = new CompletableFuture<>();
+                    AtomicReference<LocalDateTime> streamingStarted2 = new AtomicReference<>();
+                    AtomicReference<LocalDateTime> streamingFinished2 = new AtomicReference<>();
+                    model.chat("Tell me a story exactly 50 words long", new StreamingChatResponseHandler() {
+
+                        @Override
+                        public void onPartialResponse(String partialResponse) {
+                            if (streamingStarted2.get() == null) {
+                                streamingStarted2.set(LocalDateTime.now());
+                            }
+                        }
+
+                        @Override
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            streamingFinished2.set(LocalDateTime.now());
+                            future2.complete(completeResponse);
+                        }
+
+                        @Override
+                        public void onError(Throwable error) {
+                            future2.completeExceptionally(error);
+                        }
+                    });
+
+                    ChatResponse chatResponse1 = future1.get(15, SECONDS);
+                    assertThat(chatResponse1.aiMessage().text()).isNotBlank();
+
+                    ChatResponse chatResponse2 = future2.get(15, SECONDS);
+                    assertThat(chatResponse2.aiMessage().text()).isNotBlank();
+
+                    assertThat(streamingStarted1.get()).isBefore(streamingFinished2.get());
+                    assertThat(streamingStarted2.get()).isBefore(streamingFinished1.get());
                 });
     }
 
@@ -232,32 +271,69 @@ class AutoConfigIT {
     void should_create_streaming_chat_model_with_default_http_client() throws Exception {
 
         OpenAiStreamingChatModel model = OpenAiStreamingChatModel.builder()
-                .baseUrl(BASE_URL)
+                // not setting base URL to use OpenAI API without caching proxy (proxy responds way faster)
                 .apiKey(API_KEY)
                 .modelName("gpt-4o-mini")
                 .temperature(0.0)
-                .maxTokens(20)
+                .maxTokens(50)
                 .build();
 
-        CompletableFuture<ChatResponse> future = new CompletableFuture<>();
-        model.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
+        CompletableFuture<ChatResponse> future1 = new CompletableFuture<>();
+        AtomicReference<LocalDateTime> streamingStarted1 = new AtomicReference<>();
+        AtomicReference<LocalDateTime> streamingFinished1 = new AtomicReference<>();
+        model.chat("Tell me a story exactly 50 words long", new StreamingChatResponseHandler() {
 
             @Override
             public void onPartialResponse(String partialResponse) {
+                if (streamingStarted1.get() == null) {
+                    streamingStarted1.set(LocalDateTime.now());
+                }
             }
 
             @Override
             public void onCompleteResponse(ChatResponse completeResponse) {
-                future.complete(completeResponse);
+                streamingFinished1.set(LocalDateTime.now());
+                future1.complete(completeResponse);
             }
 
             @Override
             public void onError(Throwable error) {
-                future.completeExceptionally(error);
+                future1.completeExceptionally(error);
             }
         });
-        ChatResponse chatResponse = future.get(15, SECONDS);
-        assertThat(chatResponse.aiMessage().text()).contains("Berlin");
+
+        CompletableFuture<ChatResponse> future2 = new CompletableFuture<>();
+        AtomicReference<LocalDateTime> streamingStarted2 = new AtomicReference<>();
+        AtomicReference<LocalDateTime> streamingFinished2 = new AtomicReference<>();
+        model.chat("Tell me a story exactly 50 words long", new StreamingChatResponseHandler() {
+
+            @Override
+            public void onPartialResponse(String partialResponse) {
+                if (streamingStarted2.get() == null) {
+                    streamingStarted2.set(LocalDateTime.now());
+                }
+            }
+
+            @Override
+            public void onCompleteResponse(ChatResponse completeResponse) {
+                streamingFinished2.set(LocalDateTime.now());
+                future2.complete(completeResponse);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                future2.completeExceptionally(error);
+            }
+        });
+
+        ChatResponse chatResponse1 = future1.get(15, SECONDS);
+        assertThat(chatResponse1.aiMessage().text()).isNotBlank();
+
+        ChatResponse chatResponse2 = future2.get(15, SECONDS);
+        assertThat(chatResponse2.aiMessage().text()).isNotBlank();
+
+        assertThat(streamingStarted1.get()).isBefore(streamingFinished2.get());
+        assertThat(streamingStarted2.get()).isBefore(streamingFinished1.get());
     }
 
     @Test
