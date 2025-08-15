@@ -16,7 +16,7 @@
 
     <properties>
         <!-- For tests only -->
-        <elastic.version>8.14.3</elastic.version>
+        <elastic.version>8.19.2</elastic.version>
         <!-- You can run the tests using
         # Elasticsearch Cloud
         mvn verify -DELASTICSEARCH_URL=https://URL.elastic-cloud.com -DELASTICSEARCH_API_KEY=THE_KEY
