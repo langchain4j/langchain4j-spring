@@ -12,6 +12,7 @@ import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
 import dev.langchain4j.service.tool.ToolExecutor;
+import dev.langchain4j.service.tool.ToolProvider;
 import org.springframework.beans.factory.FactoryBean;
 
 import java.lang.reflect.Method;
@@ -36,6 +37,7 @@ class AiServiceFactory implements FactoryBean<Object> {
     private RetrievalAugmentor retrievalAugmentor;
     private ModerationModel moderationModel;
     private List<Object> tools;
+    private ToolProvider toolProvider;
 
     public AiServiceFactory(Class<Object> aiServiceClass) {
         this.aiServiceClass = aiServiceClass;
@@ -71,6 +73,10 @@ class AiServiceFactory implements FactoryBean<Object> {
 
     public void setTools(List<Object> tools) {
         this.tools = tools;
+    }
+
+    public void setToolProvider(ToolProvider toolProvider) {
+        this.toolProvider = toolProvider;
     }
 
     @Override
@@ -112,6 +118,9 @@ class AiServiceFactory implements FactoryBean<Object> {
                     builder = builder.tools(tool);
                 }
             }
+        }
+        if (toolProvider != null) {
+            builder = builder.toolProvider(toolProvider);
         }
 
         return builder.build();
