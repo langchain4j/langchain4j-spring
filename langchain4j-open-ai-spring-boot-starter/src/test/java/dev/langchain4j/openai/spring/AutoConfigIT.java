@@ -15,6 +15,7 @@ import dev.langchain4j.model.openai.*;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.junitpioneer.jupiter.RetryingTest;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -269,21 +270,20 @@ class AutoConfigIT {
                 });
     }
 
-    @Test
+    @RetryingTest(maxAttempts = 3, suspendForMs = 1_000)
     void should_create_streaming_chat_model_with_default_http_client() throws Exception {
 
         OpenAiStreamingChatModel model = OpenAiStreamingChatModel.builder()
                 // not setting base URL to use OpenAI API without caching proxy (proxy responds way faster)
                 .apiKey(API_KEY)
                 .modelName("gpt-4o-mini")
-                .temperature(0.0)
-                .maxTokens(50)
+                .maxTokens(100)
                 .build();
 
         CompletableFuture<ChatResponse> future1 = new CompletableFuture<>();
         AtomicReference<LocalDateTime> streamingStarted1 = new AtomicReference<>();
         AtomicReference<LocalDateTime> streamingFinished1 = new AtomicReference<>();
-        model.chat("Tell me a story exactly 50 words long", new StreamingChatResponseHandler() {
+        model.chat("Tell me a story exactly 100 words long", new StreamingChatResponseHandler() {
 
             @Override
             public void onPartialResponse(String partialResponse) {
@@ -307,7 +307,7 @@ class AutoConfigIT {
         CompletableFuture<ChatResponse> future2 = new CompletableFuture<>();
         AtomicReference<LocalDateTime> streamingStarted2 = new AtomicReference<>();
         AtomicReference<LocalDateTime> streamingFinished2 = new AtomicReference<>();
-        model.chat("Tell me a story exactly 50 words long", new StreamingChatResponseHandler() {
+        model.chat("Tell me a story exactly 100 words long", new StreamingChatResponseHandler() {
 
             @Override
             public void onPartialResponse(String partialResponse) {
@@ -328,10 +328,10 @@ class AutoConfigIT {
             }
         });
 
-        ChatResponse chatResponse1 = future1.get(15, SECONDS);
+        ChatResponse chatResponse1 = future1.get(60, SECONDS);
         assertThat(chatResponse1.aiMessage().text()).isNotBlank();
 
-        ChatResponse chatResponse2 = future2.get(15, SECONDS);
+        ChatResponse chatResponse2 = future2.get(60, SECONDS);
         assertThat(chatResponse2.aiMessage().text()).isNotBlank();
 
         assertThat(streamingStarted1.get()).isBefore(streamingFinished2.get());
