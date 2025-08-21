@@ -26,7 +26,7 @@ jobs:
           server-username: MAVEN_CENTRAL_USERNAME
           server-password: MAVEN_CENTRAL_PASSWORD
       - name: Build with JDK ${{ matrix.java_version }}
-        run: mvn -U -B -DskipOllamaITs deploy
+        run: mvn -U -B --fail-at-end -DskipOllamaITs clean deploy
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
@@ -49,5 +49,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'maven'
       - name: License Compliance
-        run: mvn -U -P compliance org.honton.chas:license-maven-plugin:compliance
+        run: mvn -U -B -P compliance org.honton.chas:license-maven-plugin:compliance
