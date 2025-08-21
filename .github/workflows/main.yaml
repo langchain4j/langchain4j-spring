@@ -50,5 +50,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
+          server-id: central
       - name: License Compliance
         run: mvn -U -P compliance org.honton.chas:license-maven-plugin:compliance
