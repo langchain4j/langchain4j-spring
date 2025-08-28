@@ -71,7 +71,7 @@ class AutoConfigIT {
                         public void onError(Throwable error) {
                         }
                     });
-                    ChatResponse response = future.get(60, SECONDS);
+                    ChatResponse response = future.get(120, SECONDS);
                     assertThat(response.aiMessage().text()).contains("Paris");
 
                     assertThat(context.getBean(GitHubModelsStreamingChatModel.class)).isSameAs(streamingChatModel);
