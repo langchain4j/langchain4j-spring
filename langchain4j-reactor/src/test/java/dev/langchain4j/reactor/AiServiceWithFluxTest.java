@@ -20,7 +20,7 @@ public class AiServiceWithFluxTest {
     void should_stream() {
 
         // given
-        List<String> tokens = List.of("The", " capital", " of", " Germany", " is", " Berlin", ".");
+        List<String> tokens = List.of("H", "e", "l", "l", "o");
 
         StreamingChatModel model = StreamingChatModelMock.thatAlwaysStreams(tokens);
 
@@ -29,7 +29,7 @@ public class AiServiceWithFluxTest {
                 .build();
 
         // when
-        Flux<String> flux = assistant.stream("What is the capital of Germany?");
+        Flux<String> flux = assistant.stream("Hi");
 
         // then
         StepVerifier.create(flux)
