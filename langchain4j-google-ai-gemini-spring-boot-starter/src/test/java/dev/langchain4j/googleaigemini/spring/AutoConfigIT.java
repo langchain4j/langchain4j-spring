@@ -50,15 +50,13 @@ class AutoConfigIT {
     void provide_chat_model_with_property_values() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.enabled=true",
-                        "langchain4j.google-ai-gemini.chatModel.enabled=true",
                         "langchain4j.google-ai-gemini.chatModel.modelName=gemini-2.0-flash-exp",
                         "langchain4j.google-ai-gemini.chatModel.temperature=0.7",
                         "langchain4j.google-ai-gemini.chatModel.topP=0.9",
                         "langchain4j.google-ai-gemini.chatModel.topK=40",
                         "langchain4j.google-ai-gemini.chatModel.maxOutputTokens=800",
                         "langchain4j.google-ai-gemini.chatModel.safetySetting.HARM_CATEGORY_DANGEROUS_CONTENT=BLOCK_LOW_AND_ABOVE",
-                        "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.gemini-mode=ANY",
+                        "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.gemini-mode=NONE",
                         "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
                 )
                 .run(context -> {
@@ -108,15 +106,13 @@ class AutoConfigIT {
     void provide_streaming_chat_model_with_property_values() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.streaming-chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.enabled=true",
-                        "langchain4j.google-ai-gemini.streamingChatModel.enabled=true",
                         "langchain4j.google-ai-gemini.streamingChatModel.modelName=gemini-2.0-flash-exp",
                         "langchain4j.google-ai-gemini.streamingChatModel.temperature=0.7",
                         "langchain4j.google-ai-gemini.streamingChatModel.topP=0.9",
                         "langchain4j.google-ai-gemini.streamingChatModel.topK=40",
                         "langchain4j.google-ai-gemini.streamingChatModel.maxOutputTokens=400",
                         "langchain4j.google-ai-gemini.streamingChatModel.safetySetting.HARM_CATEGORY_SEXUALLY_EXPLICIT=HARM_BLOCK_THRESHOLD_UNSPECIFIED",
-                        "langchain4j.google-ai-gemini.streamingChatModel.functionCallingConfig.gemini-mode=ANY",
+                        "langchain4j.google-ai-gemini.streamingChatModel.functionCallingConfig.gemini-mode=NONE",
                         "langchain4j.google-ai-gemini.streamingChatModel.functionCallingConfig.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
                 )
                 .run(context -> {
@@ -162,7 +158,6 @@ class AutoConfigIT {
     void provide_embedding_model_with_property_values() {
         contextRunner.withPropertyValues(
                 "langchain4j.google-ai-gemini.embedding-model.apiKey=" + API_KEY,
-                "langchain4j.google-ai-gemini.embeddingModel.enabled=true",
                 "langchain4j.google-ai-gemini.embeddingModel.titleMetadataKey=title-key",
                 "langchain4j.google-ai-gemini.embeddingModel.modelName=text-embedding-004",
                 "langchain4j.google-ai-gemini.embeddingModel.logRequestsAndResponses=true",
