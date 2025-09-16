@@ -1,12 +1,8 @@
 package dev.langchain4j.anthropic.spring;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@Getter
-@Setter
 @ConfigurationProperties(prefix = Properties.PREFIX)
 public class Properties {
 
@@ -17,4 +13,20 @@ public class Properties {
 
     @NestedConfigurationProperty
     ChatModelProperties streamingChatModel;
+
+    public ChatModelProperties getChatModel() {
+        return chatModel;
+    }
+
+    public void setChatModel(ChatModelProperties chatModel) {
+        this.chatModel = chatModel;
+    }
+
+    public ChatModelProperties getStreamingChatModel() {
+        return streamingChatModel;
+    }
+
+    public void setStreamingChatModel(ChatModelProperties streamingChatModel) {
+        this.streamingChatModel = streamingChatModel;
+    }
 }
