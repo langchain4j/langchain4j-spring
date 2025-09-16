@@ -6,7 +6,7 @@
 
     <groupId>dev.langchain4j</groupId>
     <artifactId>langchain4j-spring</artifactId>
-    <version>1.5.0-beta11-SNAPSHOT</version>
+    <version>1.6.0-beta12-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>langchain4j-spring parent POM</name>
@@ -48,7 +48,7 @@
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-bom</artifactId>
-                <version>1.5.0-SNAPSHOT</version>
+                <version>1.6.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
