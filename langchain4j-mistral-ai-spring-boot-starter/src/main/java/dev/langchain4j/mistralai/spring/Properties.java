@@ -26,5 +26,8 @@ public class Properties {
     FimModelProperties fimModel;
 
     @NestedConfigurationProperty
+    FimModelProperties streamingFimModel;
+
+    @NestedConfigurationProperty
     ModerationModelProperties moderationModel;
 }
