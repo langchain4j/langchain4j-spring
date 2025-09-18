@@ -23,7 +23,7 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
     MistralAiChatModel mistralAiChatModel(Properties properties, ObjectProvider<ChatModelListener> listeners) {
         ChatModelProperties chatModelProperties = properties.getChatModel();
-        return MistralAiChatModel.builder()
+        MistralAiChatModel.MistralAiChatModelBuilder builder = MistralAiChatModel.builder()
                 .baseUrl(chatModelProperties.getBaseUrl())
                 .apiKey(chatModelProperties.getApiKey())
                 .modelName(chatModelProperties.getModelName())
@@ -39,10 +39,17 @@ public class AutoConfig {
                 .timeout(chatModelProperties.getTimeout())
                 .logRequests(chatModelProperties.getLogRequests())
                 .logResponses(chatModelProperties.getLogResponses())
-                .maxRetries(chatModelProperties.getMaxRetries())
-                .supportedCapabilities(chatModelProperties.getSupportedCapabilities())
-                .listeners(listeners.orderedStream().toList())
-                .build();
+                .listeners(listeners.orderedStream().toList());
+
+        // Conditional parameters to avoid NPE in Mistral AI models
+        if (chatModelProperties.getMaxRetries() != null) {
+            builder.maxRetries(chatModelProperties.getMaxRetries());
+        }
+        if (chatModelProperties.getSupportedCapabilities() != null) {
+            builder.supportedCapabilities(chatModelProperties.getSupportedCapabilities());
+        }
+
+        return builder.build();
     }
 
     @Bean
@@ -50,7 +57,7 @@ public class AutoConfig {
     MistralAiStreamingChatModel mistralAiStreamingChatModel(Properties properties,
                                                             ObjectProvider<ChatModelListener> listeners) {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
-        return MistralAiStreamingChatModel.builder()
+        MistralAiStreamingChatModel.MistralAiStreamingChatModelBuilder builder = MistralAiStreamingChatModel.builder()
                 .baseUrl(chatModelProperties.getBaseUrl())
                 .apiKey(chatModelProperties.getApiKey())
                 .modelName(chatModelProperties.getModelName())
@@ -66,9 +73,14 @@ public class AutoConfig {
                 .timeout(chatModelProperties.getTimeout())
                 .logRequests(chatModelProperties.getLogRequests())
                 .logResponses(chatModelProperties.getLogResponses())
-                .supportedCapabilities(chatModelProperties.getSupportedCapabilities())
-                .listeners(listeners.orderedStream().toList())
-                .build();
+                .listeners(listeners.orderedStream().toList());
+
+        // Conditional parameters to avoid NPE in Mistral AI models
+        if (chatModelProperties.getSupportedCapabilities() != null) {
+            builder.supportedCapabilities(chatModelProperties.getSupportedCapabilities());
+        }
+
+        return builder.build();
     }
 
     @Bean
@@ -131,14 +143,19 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".moderation-model.api-key")
     MistralAiModerationModel mistralAiModerationModel(Properties properties) {
         ModerationModelProperties moderationModelProperties = properties.getModerationModel();
-        return new MistralAiModerationModel.Builder()
+        MistralAiModerationModel.Builder builder = new MistralAiModerationModel.Builder()
                 .baseUrl(moderationModelProperties.getBaseUrl())
                 .apiKey(moderationModelProperties.getApiKey())
                 .modelName(moderationModelProperties.getModelName())
                 .timeout(moderationModelProperties.getTimeout())
                 .logRequests(moderationModelProperties.getLogRequests())
-                .logResponses(moderationModelProperties.getLogResponses())
-                .maxRetries(moderationModelProperties.getMaxRetries())
-                .build();
+                .logResponses(moderationModelProperties.getLogResponses());
+
+        // Conditional parameter to avoid NPE in Mistral AI models
+        if (moderationModelProperties.getMaxRetries() != null) {
+            builder.maxRetries(moderationModelProperties.getMaxRetries());
+        }
+
+        return builder.build();
     }
 }
