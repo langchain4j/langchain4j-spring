@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.langchain4j</groupId>
@@ -29,6 +29,7 @@
         <module>langchain4j-vertex-ai-gemini-spring-boot-starter</module>
         <module>langchain4j-elasticsearch-spring-boot-starter</module>
         <module>langchain4j-milvus-spring-boot-starter</module>
+        <module>langchain4j-mistral-ai-spring-boot-starter</module>
 
         <module>langchain4j-reactor</module>
     </modules>
@@ -53,7 +54,8 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- BOM for Spring Boot dependencies, including Framework, Reactor, Testcontainers, and Test -->
+            <!-- BOM for Spring Boot dependencies, including Framework, Reactor, Testcontainers, and
+            Test -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -62,7 +64,8 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- BOM for Testcontainers dependencies, overriding the version from the Spring Boot BOM -->
+            <!-- BOM for Testcontainers dependencies, overriding the version from the Spring Boot
+            BOM -->
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
@@ -165,7 +168,8 @@
                                 <bom>
                                     <artifactId>langchain4j-spring-bom</artifactId>
                                     <name>LangChain4j Spring :: BOM</name>
-                                    <description>Bill of Materials POM for getting full, complete set of compatible versions of LangChain4j Spring modules</description>
+                                    <description>Bill of Materials POM for getting full, complete
+                                        set of compatible versions of LangChain4j Spring modules</description>
                                     <properties>
                                         <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
                                         <sonar.skip>true</sonar.skip>
