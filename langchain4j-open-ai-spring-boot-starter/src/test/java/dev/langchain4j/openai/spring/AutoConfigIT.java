@@ -570,6 +570,25 @@ class AutoConfigIT {
         assertThat(model.generate("banana").content().url()).isNotNull();
     }
 
+    @Test
+    void should_bind_custom_parameters_from_properties() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + BASE_URL,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.chat-model.custom-parameters.key1=value1",
+                        "langchain4j.open-ai.chat-model.custom-parameters.key2=value2"
+                )
+                .run(context -> {
+                    OpenAiChatModel model = context.getBean(OpenAiChatModel.class);
+
+                    assertThat(model.defaultRequestParameters().customParameters())
+                            .containsEntry("key1", "value1")
+                            .containsEntry("key2", "value2");
+                });
+    }
+
     @Configuration
     static class ListenerConfig {
 
