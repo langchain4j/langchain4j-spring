@@ -22,7 +22,7 @@ class AutoConfigIT {
 
     private static final String PROJECT_ID = System.getenv("GCP_PROJECT_ID");
     private static final String LOCATION = System.getenv("GCP_LOCATION");
-    private static final String MODEL = "gemini-1.5-flash";
+    private static final String MODEL = "gemini-2.5-flash-lite";
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
