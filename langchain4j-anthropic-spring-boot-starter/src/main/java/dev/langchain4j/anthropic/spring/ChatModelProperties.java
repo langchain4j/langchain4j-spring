@@ -4,6 +4,7 @@ import dev.langchain4j.model.chat.request.ToolChoice;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 class ChatModelProperties {
 
@@ -24,6 +25,7 @@ class ChatModelProperties {
     Integer thinkingBudgetTokens;
     Boolean returnThinking;
     Boolean sendThinking;
+    Map<String, Object> customParameters;
     Duration timeout;
     Integer maxRetries;
     Boolean logRequests;
@@ -163,6 +165,14 @@ class ChatModelProperties {
 
     public void setSendThinking(Boolean sendThinking) {
         this.sendThinking = sendThinking;
+    }
+
+    public Map<String, Object> getCustomParameters() {
+        return customParameters;
+    }
+
+    public void setCustomParameters(Map<String, Object> customParameters) {
+        this.customParameters = customParameters;
     }
 
     public Duration getTimeout() {

@@ -36,7 +36,9 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.anthropic.chat-model.api-key=" + API_KEY,
                         "langchain4j.anthropic.chat-model.model-name=claude-3-5-haiku-20241022",
-                        "langchain4j.anthropic.chat-model.max-tokens=20"
+                        "langchain4j.anthropic.chat-model.max-tokens=20",
+                        "langchain4j.anthropic.chat-model.log-requests=true",
+                        "langchain4j.anthropic.chat-model.log-responses=true"
                 )
                 .run(context -> {
 
@@ -54,7 +56,9 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.anthropic.streaming-chat-model.api-key=" + API_KEY,
                         "langchain4j.anthropic.streaming-chat-model.model-name=claude-3-5-haiku-20241022",
-                        "langchain4j.anthropic.streaming-chat-model.max-tokens=20"
+                        "langchain4j.anthropic.streaming-chat-model.max-tokens=20",
+                        "langchain4j.anthropic.streaming-chat-model.log-requests=true",
+                        "langchain4j.anthropic.streaming-chat-model.log-responses=true"
                 )
                 .run(context -> {
 
