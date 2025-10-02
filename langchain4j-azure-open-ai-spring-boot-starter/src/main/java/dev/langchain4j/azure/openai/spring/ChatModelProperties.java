@@ -13,6 +13,7 @@ record ChatModelProperties(
     String apiKey,
     String deploymentName,
     Integer maxTokens,
+    Integer maxCompletionTokens,
     Double temperature,
     Double topP,
     Map<String, Integer> logitBias,
