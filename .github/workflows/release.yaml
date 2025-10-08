@@ -42,6 +42,10 @@ jobs:
           echo "Stable version: ${{ env.STABLE_VERSION }}"
           echo "Beta version: ${{ env.BETA_VERSION }}"
 
+      - name: Create release branch
+        run: |
+          git checkout -b release-${{ env.STABLE_VERSION }}
+
       - name: Extract current stable SNAPSHOT version from POM property
         id: extract-stable-snapshot-version
         run: |
@@ -65,6 +69,22 @@ jobs:
 
       - name: Update beta version property
         run: mvn versions:set-property -Dproperty=langchain4j.beta.version -DnewVersion=${{ env.BETA_VERSION }}
+
+      - name: Commit version changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Release versions ${{ env.STABLE_VERSION }} and ${{ env.BETA_VERSION }}"
+
+      - name: Push release branch
+        run: |
+          git push origin release-${{ env.STABLE_VERSION }}
+
+      - name: Tag release
+        run: |
+          git tag ${{ env.STABLE_VERSION }}
+          git push origin ${{ env.STABLE_VERSION }}
 
       - name: release
         run: mvn -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
