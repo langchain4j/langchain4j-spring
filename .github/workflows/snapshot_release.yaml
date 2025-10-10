@@ -1,6 +1,8 @@
 name: snapshot_release
 
 on:
+  repository_dispatch:
+    types: [ trigger-snapshot-release ]
   workflow_dispatch:
   push:
     branches:
@@ -19,6 +21,7 @@ jobs:
           server-id: central
           server-username: MAVEN_CENTRAL_USERNAME
           server-password: MAVEN_CENTRAL_PASSWORD
+
       - name: snapshot_release
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
