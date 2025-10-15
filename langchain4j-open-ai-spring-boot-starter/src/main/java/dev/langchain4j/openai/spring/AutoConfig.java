@@ -86,6 +86,7 @@ public class AutoConfig {
                 .logRequests(chatModelProperties.logRequests())
                 .logResponses(chatModelProperties.logResponses())
                 .customHeaders(chatModelProperties.customHeaders())
+                .customQueryParams(chatModelProperties.customQueryParams())
                 .listeners(listeners.orderedStream().toList())
                 .build();
     }
@@ -140,6 +141,7 @@ public class AutoConfig {
                 .logRequests(chatModelProperties.logRequests())
                 .logResponses(chatModelProperties.logResponses())
                 .customHeaders(chatModelProperties.customHeaders())
+                .customQueryParams(chatModelProperties.customQueryParams())
                 .listeners(listeners.orderedStream().toList())
                 .build();
     }
@@ -198,6 +200,7 @@ public class AutoConfig {
                 .logRequests(languageModelProperties.logRequests())
                 .logResponses(languageModelProperties.logResponses())
                 .customHeaders(languageModelProperties.customHeaders())
+                .customQueryParams(languageModelProperties.customQueryParams())
                 .build();
     }
 
@@ -230,6 +233,7 @@ public class AutoConfig {
                 .logRequests(languageModelProperties.logRequests())
                 .logResponses(languageModelProperties.logResponses())
                 .customHeaders(languageModelProperties.customHeaders())
+                .customQueryParams(languageModelProperties.customQueryParams())
                 .build();
     }
 
@@ -290,6 +294,7 @@ public class AutoConfig {
                 .logRequests(embeddingModelProperties.logRequests())
                 .logResponses(embeddingModelProperties.logResponses())
                 .customHeaders(embeddingModelProperties.customHeaders())
+                .customQueryParams(embeddingModelProperties.customQueryParams())
                 .build();
     }
 
@@ -322,6 +327,7 @@ public class AutoConfig {
                 .logRequests(moderationModelProperties.logRequests())
                 .logResponses(moderationModelProperties.logResponses())
                 .customHeaders(moderationModelProperties.customHeaders())
+                .customQueryParams(moderationModelProperties.customQueryParams())
                 .build();
     }
 
@@ -359,6 +365,7 @@ public class AutoConfig {
                 .logRequests(imageModelProperties.logRequests())
                 .logResponses(imageModelProperties.logResponses())
                 .customHeaders(imageModelProperties.customHeaders())
+                .customQueryParams(imageModelProperties.customQueryParams())
                 .build();
     }
 
