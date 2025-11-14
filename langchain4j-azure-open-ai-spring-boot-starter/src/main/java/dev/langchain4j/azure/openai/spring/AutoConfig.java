@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import com.azure.ai.openai.models.ReasoningEffortValue;
 
 import java.time.Duration;
 
@@ -39,6 +40,7 @@ public class AutoConfig {
                 .deploymentName(chatModelProperties.deploymentName())
                 .maxTokens(chatModelProperties.maxTokens())
                 .maxCompletionTokens(chatModelProperties.maxCompletionTokens())
+                .reasoningEffort(chatModelProperties.reasoningEffort())
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
                 .logitBias(chatModelProperties.logitBias())
@@ -86,6 +88,7 @@ public class AutoConfig {
                 .deploymentName(chatModelProperties.deploymentName())
                 .maxTokens(chatModelProperties.maxTokens())
                 .maxCompletionTokens(chatModelProperties.maxCompletionTokens())
+                .reasoningEffort(chatModelProperties.reasoningEffort())
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
                 .logitBias(chatModelProperties.logitBias())
