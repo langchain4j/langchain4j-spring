@@ -9,6 +9,7 @@ import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.tool.ToolProvider;
 import org.springframework.stereotype.Service;
 
 import java.lang.annotation.Retention;
@@ -103,4 +104,10 @@ public @interface AiService {
      * this attribute specifies the names of beans containing methods annotated with {@link Tool} that should be used by this AI Service.
      */
     String[] tools() default {};
+
+    /**
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the name of a {@link ToolProvider} bean that should be used by this AI Service.
+     */
+    String toolProvider() default "";
 }
