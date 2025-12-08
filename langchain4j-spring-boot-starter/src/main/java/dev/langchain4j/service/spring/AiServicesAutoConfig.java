@@ -12,6 +12,7 @@ import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
+import dev.langchain4j.service.tool.ToolProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.MutablePropertyValues;
@@ -58,6 +59,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
             String[] contentRetrievers = beanFactory.getBeanNamesForType(ContentRetriever.class);
             String[] retrievalAugmentors = beanFactory.getBeanNamesForType(RetrievalAugmentor.class);
             String[] moderationModels = beanFactory.getBeanNamesForType(ModerationModel.class);
+            String[] toolProviders = beanFactory.getBeanNamesForType(ToolProvider.class);
 
             Set<String> toolBeanNames = new HashSet<>();
             List<ToolSpecification> toolSpecifications = new ArrayList<>();
@@ -162,6 +164,16 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         moderationModels,
                         "moderationModel",
                         "moderationModel",
+                        propertyValues
+                );
+
+                addBeanReference(
+                        ToolProvider.class,
+                        aiServiceAnnotation,
+                        aiServiceAnnotation.toolProvider(),
+                        toolProviders,
+                        "toolProvider",
+                        "toolProvider",
                         propertyValues
                 );
 
