@@ -29,6 +29,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * - {@link ChatMemoryProvider}
  * - {@link ContentRetriever}
  * - {@link RetrievalAugmentor}
+ * - {@link ToolProvider}
  * - All beans containing methods annotated with {@code @}{@link Tool}
  * </pre>
  * You can also explicitly specify which components (beans) should be wired into this AI Service
@@ -41,6 +42,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * - {@link #chatMemoryProvider()}
  * - {@link #contentRetriever()}
  * - {@link #retrievalAugmentor()}
+ * - {@link #toolProvider()}
  * </pre>
  * See more information about AI Services <a href="https://docs.langchain4j.dev/tutorials/ai-services">here</a>
  * and in the Javadoc of {@link AiServices}.
