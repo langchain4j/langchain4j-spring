@@ -1,5 +1,6 @@
 package dev.langchain4j.azure.openai.spring;
 
+import java.time.Duration;
 import java.util.Map;
 
 record ImageModelProperties(
@@ -13,7 +14,7 @@ record ImageModelProperties(
     String user,
     String style,
     String responseFormat,
-    Integer timeout,
+    Duration timeout,
     Integer maxRetries,
     Boolean logRequestsAndResponses,
     String userAgentSuffix,

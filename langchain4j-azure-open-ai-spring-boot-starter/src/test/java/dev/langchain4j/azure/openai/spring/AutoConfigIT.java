@@ -153,7 +153,7 @@ class AutoConfigIT {
                         "langchain4j.azure-open-ai.chat-model.non-azure-api-key=" + NO_AZURE_OPENAI_KEY,
                         "langchain4j.azure-open-ai.chat-model.deployment-name=" + deploymentName,
                         "langchain4j.azure-open-ai.chat-model.max-tokens=20",
-                        "langchain4j.azure-open-ai.chat-model.timeout=60"
+                        "langchain4j.azure-open-ai.chat-model.timeout=60s"
                 )
                 .run(context -> {
 
@@ -178,7 +178,7 @@ class AutoConfigIT {
                         "langchain4j.azure-open-ai.streaming-chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
                         "langchain4j.azure-open-ai.streaming-chat-model.deployment-name=" + deploymentName,
                         "langchain4j.azure-open-ai.streaming-chat-model.max-tokens=20",
-                        "langchain4j.azure-open-ai.streaming-chat-model.timeout=60"
+                        "langchain4j.azure-open-ai.streaming-chat-model.timeout=60s"
                 )
                 .run(context -> {
 
@@ -216,7 +216,7 @@ class AutoConfigIT {
                         "langchain4j.azure-open-ai.streaming-chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
                         "langchain4j.azure-open-ai.streaming-chat-model.deployment-name=gpt-4o-mini",
                         "langchain4j.azure-open-ai.streaming-chat-model.max-tokens=20",
-                        "langchain4j.azure-open-ai.streaming-chat-model.timeout=60"
+                        "langchain4j.azure-open-ai.streaming-chat-model.timeout=60s"
                 )
                 .withUserConfiguration(ListenerConfig.class)
                 .run(context -> {

@@ -2,6 +2,7 @@ package dev.langchain4j.azure.openai.spring;
 
 import dev.langchain4j.model.chat.Capability;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +24,7 @@ record ChatModelProperties(
     Double frequencyPenalty,
     Long seed,
     Boolean strictJsonSchema,
-    Integer timeout, // TODO use Duration instead
+    Duration timeout,
     Integer maxRetries,
     Boolean logRequestsAndResponses,
     String userAgentSuffix,

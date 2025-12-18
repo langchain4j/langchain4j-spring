@@ -1,5 +1,6 @@
 package dev.langchain4j.azure.openai.spring;
 
+import java.time.Duration;
 import java.util.Map;
 
 record EmbeddingModelProperties(
@@ -8,7 +9,7 @@ record EmbeddingModelProperties(
     String serviceVersion,
     String apiKey,
     String deploymentName,
-    Integer timeout, // TODO use duration instead
+    Duration timeout,
     Integer maxRetries,
     Boolean logRequestsAndResponses,
     String userAgentSuffix,
