@@ -9,7 +9,7 @@ import dev.langchain4j.http.client.SuccessfulHttpResponse;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
 import dev.langchain4j.http.client.sse.ServerSentEventParser;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
-import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
+import org.springframework.boot.http.client.HttpClientSettings;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,7 @@ public class SpringRestClient implements HttpClient {
 
         RestClient.Builder restClientBuilder = getOrDefault(builder.restClientBuilder(), RestClient::builder);
 
-        ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.defaults();
+        HttpClientSettings settings = HttpClientSettings.defaults();
         if (builder.connectTimeout() != null) {
             settings = settings.withConnectTimeout(builder.connectTimeout());
         }
@@ -78,7 +78,7 @@ public class SpringRestClient implements HttpClient {
 
             return SuccessfulHttpResponse.builder()
                     .statusCode(responseEntity.getStatusCode().value())
-                    .headers(responseEntity.getHeaders())
+                    .headers(responseEntity.getHeaders().asMultiValueMap())
                     .body(responseEntity.getBody())
                     .build();
         } catch (RestClientResponseException e) {
@@ -111,7 +111,7 @@ public class SpringRestClient implements HttpClient {
 
                             SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
                                     .statusCode(statusCode)
-                                    .headers(springResponse.getHeaders())
+                                    .headers(springResponse.getHeaders().asMultiValueMap())
                                     .build();
                             ignoringExceptions(() -> listener.onOpen(response));
 
