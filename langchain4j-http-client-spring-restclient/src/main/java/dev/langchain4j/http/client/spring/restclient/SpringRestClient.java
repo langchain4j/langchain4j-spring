@@ -7,11 +7,9 @@ import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
 import dev.langchain4j.http.client.sse.ServerSentEventParser;
-import org.springframework.boot.web.client.ClientHttpRequestFactories;
-import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
@@ -31,15 +29,13 @@ public class SpringRestClient implements HttpClient {
 
         RestClient.Builder restClientBuilder = getOrDefault(builder.restClientBuilder(), RestClient::builder);
 
-        ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.DEFAULTS;
+        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory =new HttpComponentsClientHttpRequestFactory();
         if (builder.connectTimeout() != null) {
-            settings = settings.withConnectTimeout(builder.connectTimeout());
+            clientHttpRequestFactory.setConnectionRequestTimeout(builder.connectTimeout());
         }
         if (builder.readTimeout() != null) {
-            settings = settings.withReadTimeout(builder.readTimeout());
+            clientHttpRequestFactory.setReadTimeout(builder.readTimeout());
         }
-        ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactories.get(settings);
-
         this.delegate = restClientBuilder
                 .requestFactory(clientHttpRequestFactory)
                 .build();
@@ -73,7 +69,7 @@ public class SpringRestClient implements HttpClient {
 
             return SuccessfulHttpResponse.builder()
                     .statusCode(responseEntity.getStatusCode().value())
-                    .headers(responseEntity.getHeaders())
+                    .headers(responseEntity.getHeaders().asMultiValueMap())
                     .body(responseEntity.getBody())
                     .build();
         } catch (RestClientResponseException e) {
@@ -106,7 +102,7 @@ public class SpringRestClient implements HttpClient {
 
                             SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
                                     .statusCode(statusCode)
-                                    .headers(springResponse.getHeaders())
+                                    .headers(springResponse.getHeaders().asMultiValueMap())
                                     .build();
                             ignoringExceptions(() -> listener.onOpen(response));
 
