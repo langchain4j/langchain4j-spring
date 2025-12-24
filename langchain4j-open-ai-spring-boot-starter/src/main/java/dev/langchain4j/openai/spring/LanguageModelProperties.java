@@ -14,6 +14,7 @@ record LanguageModelProperties(
         Integer maxRetries,
         Boolean logRequests,
         Boolean logResponses,
-        Map<String, String> customHeaders
+        Map<String, String> customHeaders,
+        Map<String, String> customQueryParams
 ) {
 }
