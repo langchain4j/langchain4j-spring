@@ -1,7 +1,14 @@
 package dev.langchain4j.mistralai.spring;
 
-import static dev.langchain4j.mistralai.spring.Properties.PREFIX;
-
+import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
+import dev.langchain4j.model.chat.listener.ChatModelListener;
+import dev.langchain4j.model.mistralai.MistralAiChatModel;
+import dev.langchain4j.model.mistralai.MistralAiEmbeddingModel;
+import dev.langchain4j.model.mistralai.MistralAiFimModel;
+import dev.langchain4j.model.mistralai.MistralAiModerationModel;
+import dev.langchain4j.model.mistralai.MistralAiStreamingChatModel;
+import dev.langchain4j.model.mistralai.MistralAiStreamingFimModel;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -16,15 +23,7 @@ import org.springframework.core.task.support.ContextPropagatingTaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 
-import dev.langchain4j.http.client.HttpClientBuilder;
-import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
-import dev.langchain4j.model.chat.listener.ChatModelListener;
-import dev.langchain4j.model.mistralai.MistralAiChatModel;
-import dev.langchain4j.model.mistralai.MistralAiEmbeddingModel;
-import dev.langchain4j.model.mistralai.MistralAiFimModel;
-import dev.langchain4j.model.mistralai.MistralAiModerationModel;
-import dev.langchain4j.model.mistralai.MistralAiStreamingChatModel;
-import dev.langchain4j.model.mistralai.MistralAiStreamingFimModel;
+import static dev.langchain4j.mistralai.spring.Properties.PREFIX;
 
 @AutoConfiguration
 @EnableConfigurationProperties(Properties.class)
@@ -55,29 +54,29 @@ public class AutoConfig {
         ChatModelProperties chatModelProperties = properties.getChatModel();
         MistralAiChatModel.MistralAiChatModelBuilder builder = MistralAiChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(chatModelProperties.getBaseUrl())
-                .apiKey(chatModelProperties.getApiKey())
-                .modelName(chatModelProperties.getModelName())
-                .temperature(chatModelProperties.getTemperature())
-                .topP(chatModelProperties.getTopP())
-                .maxTokens(chatModelProperties.getMaxTokens())
-                .safePrompt(chatModelProperties.getSafePrompt())
-                .randomSeed(chatModelProperties.getRandomSeed())
-                .responseFormat(chatModelProperties.getResponseFormat())
-                .stopSequences(chatModelProperties.getStopSequences())
-                .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
-                .presencePenalty(chatModelProperties.getPresencePenalty())
-                .timeout(chatModelProperties.getTimeout())
-                .logRequests(chatModelProperties.getLogRequests())
-                .logResponses(chatModelProperties.getLogResponses())
+                .baseUrl(chatModelProperties.baseUrl())
+                .apiKey(chatModelProperties.apiKey())
+                .modelName(chatModelProperties.modelName())
+                .temperature(chatModelProperties.temperature())
+                .topP(chatModelProperties.topP())
+                .maxTokens(chatModelProperties.maxTokens())
+                .safePrompt(chatModelProperties.safePrompt())
+                .randomSeed(chatModelProperties.randomSeed())
+                .responseFormat(chatModelProperties.responseFormat())
+                .stopSequences(chatModelProperties.stopSequences())
+                .frequencyPenalty(chatModelProperties.frequencyPenalty())
+                .presencePenalty(chatModelProperties.presencePenalty())
+                .timeout(chatModelProperties.timeout())
+                .logRequests(chatModelProperties.logRequests())
+                .logResponses(chatModelProperties.logResponses())
                 .listeners(listeners.orderedStream().toList());
 
         // Conditional parameters to avoid NPE in Mistral AI models
-        if (chatModelProperties.getMaxRetries() != null) {
-            builder.maxRetries(chatModelProperties.getMaxRetries());
+        if (chatModelProperties.maxRetries() != null) {
+            builder.maxRetries(chatModelProperties.maxRetries());
         }
-        if (chatModelProperties.getSupportedCapabilities() != null) {
-            builder.supportedCapabilities(chatModelProperties.getSupportedCapabilities());
+        if (chatModelProperties.supportedCapabilities() != null) {
+            builder.supportedCapabilities(chatModelProperties.supportedCapabilities());
         }
 
         return builder.build();
@@ -102,26 +101,26 @@ public class AutoConfig {
         ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         MistralAiStreamingChatModel.MistralAiStreamingChatModelBuilder builder = MistralAiStreamingChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(chatModelProperties.getBaseUrl())
-                .apiKey(chatModelProperties.getApiKey())
-                .modelName(chatModelProperties.getModelName())
-                .temperature(chatModelProperties.getTemperature())
-                .topP(chatModelProperties.getTopP())
-                .maxTokens(chatModelProperties.getMaxTokens())
-                .safePrompt(chatModelProperties.getSafePrompt())
-                .randomSeed(chatModelProperties.getRandomSeed())
-                .responseFormat(chatModelProperties.getResponseFormat())
-                .stopSequences(chatModelProperties.getStopSequences())
-                .frequencyPenalty(chatModelProperties.getFrequencyPenalty())
-                .presencePenalty(chatModelProperties.getPresencePenalty())
-                .timeout(chatModelProperties.getTimeout())
-                .logRequests(chatModelProperties.getLogRequests())
-                .logResponses(chatModelProperties.getLogResponses())
+                .baseUrl(chatModelProperties.baseUrl())
+                .apiKey(chatModelProperties.apiKey())
+                .modelName(chatModelProperties.modelName())
+                .temperature(chatModelProperties.temperature())
+                .topP(chatModelProperties.topP())
+                .maxTokens(chatModelProperties.maxTokens())
+                .safePrompt(chatModelProperties.safePrompt())
+                .randomSeed(chatModelProperties.randomSeed())
+                .responseFormat(chatModelProperties.responseFormat())
+                .stopSequences(chatModelProperties.stopSequences())
+                .frequencyPenalty(chatModelProperties.frequencyPenalty())
+                .presencePenalty(chatModelProperties.presencePenalty())
+                .timeout(chatModelProperties.timeout())
+                .logRequests(chatModelProperties.logRequests())
+                .logResponses(chatModelProperties.logResponses())
                 .listeners(listeners.orderedStream().toList());
 
         // Conditional parameters to avoid NPE in Mistral AI models
-        if (chatModelProperties.getSupportedCapabilities() != null) {
-            builder.supportedCapabilities(chatModelProperties.getSupportedCapabilities());
+        if (chatModelProperties.supportedCapabilities() != null) {
+            builder.supportedCapabilities(chatModelProperties.supportedCapabilities());
         }
 
         return builder.build();
@@ -169,13 +168,13 @@ public class AutoConfig {
         EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         return MistralAiEmbeddingModel.builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(embeddingModelProperties.getBaseUrl())
-                .apiKey(embeddingModelProperties.getApiKey())
-                .modelName(embeddingModelProperties.getModelName())
-                .timeout(embeddingModelProperties.getTimeout())
-                .logRequests(embeddingModelProperties.getLogRequests())
-                .logResponses(embeddingModelProperties.getLogResponses())
-                .maxRetries(embeddingModelProperties.getMaxRetries())
+                .baseUrl(embeddingModelProperties.baseUrl())
+                .apiKey(embeddingModelProperties.apiKey())
+                .modelName(embeddingModelProperties.modelName())
+                .timeout(embeddingModelProperties.timeout())
+                .logRequests(embeddingModelProperties.logRequests())
+                .logResponses(embeddingModelProperties.logResponses())
+                .maxRetries(embeddingModelProperties.maxRetries())
                 .build();
     }
 
@@ -197,19 +196,19 @@ public class AutoConfig {
         FimModelProperties fimModelProperties = properties.getFimModel();
         return MistralAiFimModel.builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(fimModelProperties.getBaseUrl())
-                .apiKey(fimModelProperties.getApiKey())
-                .modelName(fimModelProperties.getModelName())
-                .temperature(fimModelProperties.getTemperature())
-                .maxTokens(fimModelProperties.getMaxTokens())
-                .minTokens(fimModelProperties.getMinTokens())
-                .topP(fimModelProperties.getTopP())
-                .randomSeed(fimModelProperties.getRandomSeed())
-                .stop(fimModelProperties.getStop())
-                .timeout(fimModelProperties.getTimeout())
-                .logRequests(fimModelProperties.getLogRequests())
-                .logResponses(fimModelProperties.getLogResponses())
-                .maxRetries(fimModelProperties.getMaxRetries())
+                .baseUrl(fimModelProperties.baseUrl())
+                .apiKey(fimModelProperties.apiKey())
+                .modelName(fimModelProperties.modelName())
+                .temperature(fimModelProperties.temperature())
+                .maxTokens(fimModelProperties.maxTokens())
+                .minTokens(fimModelProperties.minTokens())
+                .topP(fimModelProperties.topP())
+                .randomSeed(fimModelProperties.randomSeed())
+                .stop(fimModelProperties.stop())
+                .timeout(fimModelProperties.timeout())
+                .logRequests(fimModelProperties.logRequests())
+                .logResponses(fimModelProperties.logResponses())
+                .maxRetries(fimModelProperties.maxRetries())
                 .build();
     }
 
@@ -231,18 +230,18 @@ public class AutoConfig {
         FimModelProperties fimModelProperties = properties.getStreamingFimModel();
         return MistralAiStreamingFimModel.builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(fimModelProperties.getBaseUrl())
-                .apiKey(fimModelProperties.getApiKey())
-                .modelName(fimModelProperties.getModelName())
-                .temperature(fimModelProperties.getTemperature())
-                .maxTokens(fimModelProperties.getMaxTokens())
-                .minTokens(fimModelProperties.getMinTokens())
-                .topP(fimModelProperties.getTopP())
-                .randomSeed(fimModelProperties.getRandomSeed())
-                .stop(fimModelProperties.getStop())
-                .timeout(fimModelProperties.getTimeout())
-                .logRequests(fimModelProperties.getLogRequests())
-                .logResponses(fimModelProperties.getLogResponses())
+                .baseUrl(fimModelProperties.baseUrl())
+                .apiKey(fimModelProperties.apiKey())
+                .modelName(fimModelProperties.modelName())
+                .temperature(fimModelProperties.temperature())
+                .maxTokens(fimModelProperties.maxTokens())
+                .minTokens(fimModelProperties.minTokens())
+                .topP(fimModelProperties.topP())
+                .randomSeed(fimModelProperties.randomSeed())
+                .stop(fimModelProperties.stop())
+                .timeout(fimModelProperties.timeout())
+                .logRequests(fimModelProperties.logRequests())
+                .logResponses(fimModelProperties.logResponses())
                 .build();
     }
 
@@ -288,16 +287,16 @@ public class AutoConfig {
         ModerationModelProperties moderationModelProperties = properties.getModerationModel();
         MistralAiModerationModel.Builder builder = new MistralAiModerationModel.Builder()
                 .httpClientBuilder(httpClientBuilder)
-                .baseUrl(moderationModelProperties.getBaseUrl())
-                .apiKey(moderationModelProperties.getApiKey())
-                .modelName(moderationModelProperties.getModelName())
-                .timeout(moderationModelProperties.getTimeout())
-                .logRequests(moderationModelProperties.getLogRequests())
-                .logResponses(moderationModelProperties.getLogResponses());
+                .baseUrl(moderationModelProperties.baseUrl())
+                .apiKey(moderationModelProperties.apiKey())
+                .modelName(moderationModelProperties.modelName())
+                .timeout(moderationModelProperties.timeout())
+                .logRequests(moderationModelProperties.logRequests())
+                .logResponses(moderationModelProperties.logResponses());
 
         // Conditional parameter to avoid NPE in Mistral AI models
-        if (moderationModelProperties.getMaxRetries() != null) {
-            builder.maxRetries(moderationModelProperties.getMaxRetries());
+        if (moderationModelProperties.maxRetries() != null) {
+            builder.maxRetries(moderationModelProperties.maxRetries());
         }
 
         return builder.build();
