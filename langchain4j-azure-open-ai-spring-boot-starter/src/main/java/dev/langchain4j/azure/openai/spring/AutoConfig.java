@@ -40,7 +40,6 @@ public class AutoConfig {
                 .deploymentName(chatModelProperties.deploymentName())
                 .maxTokens(chatModelProperties.maxTokens())
                 .maxCompletionTokens(chatModelProperties.maxCompletionTokens())
-                .reasoningEffort(ReasoningEffortValue.fromString(chatModelProperties.reasoningEffort()))
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
                 .logitBias(chatModelProperties.logitBias())
@@ -60,6 +59,9 @@ public class AutoConfig {
                 .supportedCapabilities(chatModelProperties.supportedCapabilities());
         if (chatModelProperties.nonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
+        }
+        if(chatModelProperties.reasoningEffort() != null && !chatModelProperties.reasoningEffort().isEmpty()) {
+            builder.reasoningEffort(ReasoningEffortValue.fromString(chatModelProperties.reasoningEffort()));
         }
         return builder.build();
     }
@@ -88,7 +90,6 @@ public class AutoConfig {
                 .deploymentName(chatModelProperties.deploymentName())
                 .maxTokens(chatModelProperties.maxTokens())
                 .maxCompletionTokens(chatModelProperties.maxCompletionTokens())
-                .reasoningEffort(ReasoningEffortValue.fromString(chatModelProperties.reasoningEffort()))
                 .temperature(chatModelProperties.temperature())
                 .topP(chatModelProperties.topP())
                 .logitBias(chatModelProperties.logitBias())
@@ -107,6 +108,9 @@ public class AutoConfig {
                 .supportedCapabilities(chatModelProperties.supportedCapabilities());
         if (chatModelProperties.nonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
+        }
+        if(chatModelProperties.reasoningEffort() != null && !chatModelProperties.reasoningEffort().isEmpty()) {
+            builder.reasoningEffort(ReasoningEffortValue.fromString(chatModelProperties.reasoningEffort()));
         }
         return builder.build();
     }
