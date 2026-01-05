@@ -32,6 +32,6 @@ record ChatModelProperties(
     Map<String, String> customHeaders,
     String nonAzureApiKey,
     Set<Capability> supportedCapabilities,
-    ReasoningEffortValue reasoningEffort
+    String reasoningEffort
 ) {
 }
