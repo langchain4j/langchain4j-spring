@@ -138,10 +138,6 @@ public class SpringRestClient implements HttpClient {
                 .uri(request.url())
                 .headers(httpHeaders -> httpHeaders.putAll(request.headers()));
 
-        if (request.body() != null) {
-            requestBodySpec.body(request.body());
-        }
-
         if (request.formDataFields().isEmpty() && request.formDataFiles().isEmpty()) {
             if (request.body() != null) {
                 requestBodySpec.body(request.body());
