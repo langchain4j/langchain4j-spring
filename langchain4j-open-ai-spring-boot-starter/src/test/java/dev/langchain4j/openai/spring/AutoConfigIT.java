@@ -111,10 +111,10 @@ class AutoConfigIT {
     void should_provide_streaming_chat_model() {
         contextRunner
                 .withPropertyValues(
-                        // not setting base URL to use OpenAI API without caching proxy (proxy responds way faster)
+                        // not setting base URL to use OpenAI API without caching proxy (proxy responds way too fast)
                         "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
                         "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini",
-                        "langchain4j.open-ai.streaming-chat-model.max-tokens=50"
+                        "langchain4j.open-ai.streaming-chat-model.max-tokens=100"
                 )
                 .run(context -> {
 
@@ -125,7 +125,7 @@ class AutoConfigIT {
                     CompletableFuture<ChatResponse> future1 = new CompletableFuture<>();
                     AtomicReference<LocalDateTime> streamingStarted1 = new AtomicReference<>();
                     AtomicReference<LocalDateTime> streamingFinished1 = new AtomicReference<>();
-                    model.chat("Tell me a story exactly 50 words long", new StreamingChatResponseHandler() {
+                    model.chat("Tell me a story exactly 100 words long", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
@@ -149,7 +149,7 @@ class AutoConfigIT {
                     CompletableFuture<ChatResponse> future2 = new CompletableFuture<>();
                     AtomicReference<LocalDateTime> streamingStarted2 = new AtomicReference<>();
                     AtomicReference<LocalDateTime> streamingFinished2 = new AtomicReference<>();
-                    model.chat("Tell me a story exactly 50 words long", new StreamingChatResponseHandler() {
+                    model.chat("Tell me a story exactly 100 words long", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
