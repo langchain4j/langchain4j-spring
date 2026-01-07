@@ -32,7 +32,7 @@ class AutoConfigIT {
     void provide_chat_model() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.0-flash-exp"
+                        "langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.5-flash-lite"
                 )
                 .run(context -> {
                     ChatModel chatModel = context.getBean(ChatModel.class);
@@ -50,7 +50,7 @@ class AutoConfigIT {
     void provide_chat_model_with_property_values() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.chatModel.modelName=gemini-2.0-flash-exp",
+                        "langchain4j.google-ai-gemini.chatModel.modelName=gemini-2.5-flash-lite",
                         "langchain4j.google-ai-gemini.chatModel.temperature=0.7",
                         "langchain4j.google-ai-gemini.chatModel.topP=0.9",
                         "langchain4j.google-ai-gemini.chatModel.topK=40",
@@ -73,7 +73,7 @@ class AutoConfigIT {
     void provide_streaming_chat_model() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.streaming-chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.streaming-chat-model.model-name=gemini-2.0-flash-exp"
+                        "langchain4j.google-ai-gemini.streaming-chat-model.model-name=gemini-2.5-flash-lite"
                 )
                 .run(context -> {
                     StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
@@ -106,7 +106,7 @@ class AutoConfigIT {
     void provide_streaming_chat_model_with_property_values() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.streaming-chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.streamingChatModel.modelName=gemini-2.0-flash-exp",
+                        "langchain4j.google-ai-gemini.streamingChatModel.modelName=gemini-2.5-flash-lite",
                         "langchain4j.google-ai-gemini.streamingChatModel.temperature=0.7",
                         "langchain4j.google-ai-gemini.streamingChatModel.topP=0.9",
                         "langchain4j.google-ai-gemini.streamingChatModel.topK=40",
