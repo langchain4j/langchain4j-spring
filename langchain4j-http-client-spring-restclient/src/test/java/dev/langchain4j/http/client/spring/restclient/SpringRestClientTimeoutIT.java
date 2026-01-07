@@ -4,7 +4,7 @@ import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpClientTimeoutIT;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
-import org.springframework.http.client.ReactorNettyClientRequestFactory;
+import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
@@ -26,7 +26,7 @@ class SpringRestClientTimeoutIT extends HttpClientTimeoutIT {
                         .readTimeout(readTimeout)
                         .build(),
                 SpringRestClient.builder()
-                        .restClientBuilder(RestClient.builder().requestFactory(new ReactorNettyClientRequestFactory()))
+                        .restClientBuilder(RestClient.builder().requestFactory(new ReactorClientHttpRequestFactory()))
                         .readTimeout(readTimeout)
                         .build(),
                 SpringRestClient.builder()

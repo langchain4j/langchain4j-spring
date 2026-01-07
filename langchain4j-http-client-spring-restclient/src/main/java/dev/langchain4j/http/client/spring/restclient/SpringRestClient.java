@@ -8,8 +8,8 @@ import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
 import dev.langchain4j.http.client.sse.ServerSentEventParser;
-import org.springframework.boot.web.client.ClientHttpRequestFactories;
-import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.ResponseEntity;
@@ -36,14 +36,14 @@ public class SpringRestClient implements HttpClient {
 
         RestClient.Builder restClientBuilder = getOrDefault(builder.restClientBuilder(), RestClient::builder);
 
-        ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.DEFAULTS;
+        ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.defaults();
         if (builder.connectTimeout() != null) {
             settings = settings.withConnectTimeout(builder.connectTimeout());
         }
         if (builder.readTimeout() != null) {
             settings = settings.withReadTimeout(builder.readTimeout());
         }
-        ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactories.get(settings);
+        ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryBuilder.detect().build(settings);
 
         this.delegate = restClientBuilder
                 .requestFactory(clientHttpRequestFactory)
