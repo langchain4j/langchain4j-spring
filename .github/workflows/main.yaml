@@ -11,6 +11,7 @@ on:
 jobs:
   java_build:
     strategy:
+      max-parallel: 1
       matrix:
         java_version: [ 17, 21, 22, 23 ]
     runs-on: ubuntu-latest
