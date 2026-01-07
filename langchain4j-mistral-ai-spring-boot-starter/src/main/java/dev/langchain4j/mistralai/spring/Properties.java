@@ -73,5 +73,4 @@ public class Properties {
     public void setModerationModel(ModerationModelProperties moderationModel) {
         this.moderationModel = moderationModel;
     }
-
 }
