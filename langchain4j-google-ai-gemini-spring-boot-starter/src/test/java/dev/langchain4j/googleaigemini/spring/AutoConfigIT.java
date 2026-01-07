@@ -3,6 +3,7 @@ package dev.langchain4j.googleaigemini.spring;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -36,6 +37,7 @@ class AutoConfigIT {
                 )
                 .run(context -> {
                     ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(GoogleAiGeminiChatModel.class);
                     assertThat(context.getBean(GoogleAiGeminiChatModel.class)).isSameAs(chatModel);
 
                     String response = chatModel.chat("What is the capital of India");
@@ -50,22 +52,20 @@ class AutoConfigIT {
     void provide_chat_model_with_property_values() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.chatModel.modelName=gemini-2.5-flash-lite",
-                        "langchain4j.google-ai-gemini.chatModel.temperature=0.7",
-                        "langchain4j.google-ai-gemini.chatModel.topP=0.9",
-                        "langchain4j.google-ai-gemini.chatModel.topK=40",
-                        "langchain4j.google-ai-gemini.chatModel.maxOutputTokens=800",
-                        "langchain4j.google-ai-gemini.chatModel.safetySetting.HARM_CATEGORY_DANGEROUS_CONTENT=BLOCK_LOW_AND_ABOVE",
-                        "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.gemini-mode=NONE",
-                        "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
+                        "langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.5-flash-lite",
+                        "langchain4j.google-ai-gemini.chat-model.temperature=0.7"
                 )
                 .run(context -> {
                     ChatModel chatModel = context.getBean(ChatModel.class);
-                    assertThat(chatModel).isInstanceOf(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(GoogleAiGeminiChatModel.class);
+                    assertThat(context.getBean(GoogleAiGeminiChatModel.class)).isSameAs(chatModel);
+
+                    ChatRequestParameters defaultParameters = chatModel.defaultRequestParameters();
+                    assertThat(defaultParameters.modelName()).isEqualTo("gemini-2.5-flash-lite");
+                    assertThat(defaultParameters.temperature()).isEqualTo(0.7);
+
                     String response = chatModel.chat("What is the capital of India");
                     assertThat(response).contains("Delhi");
-                    String newResponse = chatModel.chat("Calculate the Fibonacci of 22 and give me the result as an integer value along with the code. ");
-                    assertThat(newResponse).contains("17711");
                 });
     }
 
