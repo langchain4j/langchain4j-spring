@@ -2,6 +2,8 @@ package dev.langchain4j.azure.openai.spring;
 
 import dev.langchain4j.model.chat.Capability;
 
+import com.azure.ai.openai.models.ReasoningEffortValue;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +31,7 @@ record ChatModelProperties(
     String userAgentSuffix,
     Map<String, String> customHeaders,
     String nonAzureApiKey,
-    Set<Capability> supportedCapabilities
+    Set<Capability> supportedCapabilities,
+    String reasoningEffort
 ) {
 }
