@@ -589,6 +589,140 @@ class AutoConfigIT {
                 });
     }
 
+    @Test
+    void should_provide_named_chat_models() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + BASE_URL,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.fast.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.chat-model.fast.max-tokens=20",
+                        "langchain4j.open-ai.chat-model.smart.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.chat-model.smart.max-tokens=20"
+                )
+                .run(context -> {
+                    OpenAiChatModel fastModel = context.getBean("openAiChatModelFast", OpenAiChatModel.class);
+                    OpenAiChatModel smartModel = context.getBean("openAiChatModelSmart", OpenAiChatModel.class);
+
+                    assertThat(fastModel).isNotNull();
+                    assertThat(smartModel).isNotNull();
+                    assertThat(fastModel).isNotSameAs(smartModel);
+
+                    assertThat(fastModel.chat("What is 2+2?")).contains("4");
+                    assertThat(smartModel.chat("What is 3+3?")).contains("6");
+                });
+    }
+
+    @Test
+    void should_provide_default_and_named_chat_models_together() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + BASE_URL,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.chat-model.max-tokens=20",
+                        "langchain4j.open-ai.chat-model.mini.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.chat-model.mini.max-tokens=20"
+                )
+                .run(context -> {
+                    OpenAiChatModel defaultModel = context.getBean("openAiChatModel", OpenAiChatModel.class);
+                    assertThat(defaultModel).isNotNull();
+
+                    OpenAiChatModel miniModel = context.getBean("openAiChatModelMini", OpenAiChatModel.class);
+                    assertThat(miniModel).isNotNull();
+
+                    assertThat(defaultModel).isNotSameAs(miniModel);
+
+                    assertThat(defaultModel.chat("What is 1+1?")).contains("2");
+                    assertThat(miniModel.chat("What is 2+2?")).contains("4");
+                });
+    }
+
+    @Test
+    void should_provide_named_streaming_chat_models() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.streaming-chat-model.fast.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.streaming-chat-model.fast.max-tokens=20"
+                )
+                .run(context -> {
+                    OpenAiStreamingChatModel fastModel = context.getBean("openAiStreamingChatModelFast", OpenAiStreamingChatModel.class);
+                    assertThat(fastModel).isNotNull();
+
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    fastModel.chat("What is 2+2?", new StreamingChatResponseHandler() {
+                        @Override
+                        public void onPartialResponse(String partialResponse) {
+                        }
+
+                        @Override
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
+                        }
+
+                        @Override
+                        public void onError(Throwable error) {
+                            future.completeExceptionally(error);
+                        }
+                    });
+
+                    ChatResponse response = future.get(30, SECONDS);
+                    assertThat(response.aiMessage().text()).contains("4");
+                });
+    }
+
+    @Test
+    void should_not_create_named_model_without_api_key() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.nokey.model-name=gpt-4o-mini"
+                )
+                .run(context -> {
+                    assertThat(context.containsBean("openAiChatModelNokey")).isFalse();
+                });
+    }
+
+    @Test
+    void should_inherit_global_api_key() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + BASE_URL,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.inherited.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.chat-model.inherited.max-tokens=20"
+                )
+                .run(context -> {
+                    OpenAiChatModel inheritedModel = context.getBean("openAiChatModelInherited", OpenAiChatModel.class);
+                    assertThat(inheritedModel).isNotNull();
+                    assertThat(inheritedModel.chat("What is 5+5?")).contains("10");
+                });
+    }
+
+    @Test
+    void should_provide_named_chat_model_with_listeners() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + BASE_URL,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.fast.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.chat-model.fast.max-tokens=20"
+                )
+                .withUserConfiguration(ListenerConfig.class)
+                .run(context -> {
+                    OpenAiChatModel fastModel = context.getBean("openAiChatModelFast", OpenAiChatModel.class);
+
+                    fastModel.chat("What is 2+2?");
+
+                    ChatModelListener listener1 = context.getBean("listener1", ChatModelListener.class);
+                    ChatModelListener listener2 = context.getBean("listener2", ChatModelListener.class);
+                    verify(listener1).onRequest(any());
+                    verify(listener1).onResponse(any());
+                    verify(listener2).onRequest(any());
+                    verify(listener2).onResponse(any());
+                });
+    }
+
     @Configuration
     static class ListenerConfig {
 
