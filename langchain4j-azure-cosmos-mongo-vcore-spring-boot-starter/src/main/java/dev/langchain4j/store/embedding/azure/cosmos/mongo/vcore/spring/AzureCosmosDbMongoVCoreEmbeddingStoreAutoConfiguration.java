@@ -1,8 +1,10 @@
 package dev.langchain4j.store.embedding.azure.cosmos.mongo.vcore.spring;
 
+import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.azure.cosmos.mongo.vcore.AzureCosmosDbMongoVCoreEmbeddingStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -33,10 +35,24 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public AzureCosmosDbMongoVCoreEmbeddingStore azureCosmosDbMongoVCoreEmbeddingStore(
-            AzureCosmosDbMongoVCoreEmbeddingStoreProperties properties) {
+            AzureCosmosDbMongoVCoreEmbeddingStoreProperties properties,
+            ObjectProvider<EmbeddingModel> embeddingModelProvider) {
 
         log.debug("Creating AzureCosmosDbMongoVCoreEmbeddingStore with database [{}], collection [{}].",
                 properties.getDatabaseName(), properties.getCollectionName());
+
+        Integer dimensions = properties.getDimensions();
+        if (dimensions == null) {
+            EmbeddingModel model = embeddingModelProvider.getIfAvailable();
+            if (model != null) {
+                dimensions = model.dimension();
+            }
+        }
+
+        String kind = properties.getKind();
+        if (kind == null) {
+            kind = "vector-ivf";
+        }
 
         return AzureCosmosDbMongoVCoreEmbeddingStore.builder()
                 .connectionString(properties.getConnectionString())
@@ -45,9 +61,9 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreAutoConfiguration {
                 .indexName(properties.getIndexName())
                 .applicationName(properties.getApplicationName())
                 .createIndex(properties.getCreateIndex())
-                .kind(properties.getKind())
+                .kind(kind)
                 .numLists(properties.getNumLists())
-                .dimensions(properties.getDimensions())
+                .dimensions(dimensions)
                 .m(properties.getM())
                 .efConstruction(properties.getEfConstruction())
                 .efSearch(properties.getEfSearch())
