@@ -14,6 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * langchain4j.azure.cosmos-nosql.key=your-api-key
  * langchain4j.azure.cosmos-nosql.database-name=mydb
  * langchain4j.azure.cosmos-nosql.container-name=embeddings
+ * langchain4j.azure.cosmos-nosql.dimensions=1536
  * </pre>
  *
  * @see AzureCosmosDbNoSqlEmbeddingStoreAutoConfiguration
@@ -52,6 +53,38 @@ public class AzureCosmosDbNoSqlEmbeddingStoreProperties {
      * The provisioned throughput for the vector store container.
      */
     private Integer vectorStoreThroughput;
+
+    /**
+     * The number of dimensions for the embedding vectors.
+     * This is required for vector search configuration.
+     */
+    private Integer dimensions;
+
+    /**
+     * The path to the embedding field in the document. Defaults to "/embedding".
+     */
+    private String embeddingPath = "/embedding";
+
+    /**
+     * The distance function for vector similarity search.
+     * Valid values are: COSINE, DOT_PRODUCT, EUCLIDEAN.
+     * Defaults to COSINE.
+     */
+    private String distanceFunction = "COSINE";
+
+    /**
+     * The data type for storing embedding vectors.
+     * Valid values are: FLOAT32, INT8, UINT8.
+     * Defaults to FLOAT32.
+     */
+    private String dataType = "FLOAT32";
+
+    /**
+     * The vector index type.
+     * Valid values are: FLAT, DISK_ANN, QUANTIZED_FLAT.
+     * Defaults to DISK_ANN.
+     */
+    private String vectorIndexType = "DISK_ANN";
 
     public String getEndpoint() {
         return endpoint;
@@ -99,5 +132,45 @@ public class AzureCosmosDbNoSqlEmbeddingStoreProperties {
 
     public void setVectorStoreThroughput(Integer vectorStoreThroughput) {
         this.vectorStoreThroughput = vectorStoreThroughput;
+    }
+
+    public Integer getDimensions() {
+        return dimensions;
+    }
+
+    public void setDimensions(Integer dimensions) {
+        this.dimensions = dimensions;
+    }
+
+    public String getEmbeddingPath() {
+        return embeddingPath;
+    }
+
+    public void setEmbeddingPath(String embeddingPath) {
+        this.embeddingPath = embeddingPath;
+    }
+
+    public String getDistanceFunction() {
+        return distanceFunction;
+    }
+
+    public void setDistanceFunction(String distanceFunction) {
+        this.distanceFunction = distanceFunction;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
+
+    public String getVectorIndexType() {
+        return vectorIndexType;
+    }
+
+    public void setVectorIndexType(String vectorIndexType) {
+        this.vectorIndexType = vectorIndexType;
     }
 }
