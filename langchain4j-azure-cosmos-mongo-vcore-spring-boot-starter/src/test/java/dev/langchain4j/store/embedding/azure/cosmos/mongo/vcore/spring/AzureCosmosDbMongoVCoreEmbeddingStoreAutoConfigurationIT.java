@@ -49,7 +49,8 @@ class AzureCosmosDbMongoVCoreEmbeddingStoreAutoConfigurationIT extends Embedding
                 "langchain4j.azure.cosmos-mongo-vcore.database-name=testdb",
                 "langchain4j.azure.cosmos-mongo-vcore.collection-name=" + collectionName,
                 "langchain4j.azure.cosmos-mongo-vcore.index-name=testindex",
-                "langchain4j.azure.cosmos-mongo-vcore.create-index=true"
+                "langchain4j.azure.cosmos-mongo-vcore.create-index=true",
+                "langchain4j.azure.cosmos-mongo-vcore.kind=vector-ivf"
         };
     }
 
@@ -84,6 +85,7 @@ class AzureCosmosDbMongoVCoreEmbeddingStoreAutoConfigurationIT extends Embedding
                 .collectionName(userCollectionName)
                 .indexName("userindex")
                 .createIndex(true)
+                .kind("vector-ivf")
                 .dimensions(embeddingModel.dimension())
                 .build();
 
