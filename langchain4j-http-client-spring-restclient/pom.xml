@@ -70,12 +70,10 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Why "wiremock-jetty12" and not "wiremock": https://github.com/wiremock/wiremock/issues/2922 -->
         <dependency>
-            <groupId>org.wiremock</groupId>
-            <artifactId>wiremock-jetty12</artifactId>
-            <version>3.10.0</version>
-            <scope>test</scope>
+            <groupId>org.wiremock.integrations</groupId>
+            <artifactId>wiremock-spring-boot</artifactId>
+            <version>4.1.0</version>
         </dependency>
 
         <dependency>
