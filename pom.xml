@@ -37,7 +37,7 @@
     </modules>
 
     <properties>
-        <langchain4j.stable.version>1.11.0-SNAPSHOT</langchain4j.stable.version>
+        <langchain4j.stable.version>1.11.0</langchain4j.stable.version>
         <langchain4j.beta.version>1.11.0-beta19-SNAPSHOT</langchain4j.beta.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
