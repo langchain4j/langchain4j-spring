@@ -8,10 +8,9 @@ import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
 import dev.langchain4j.http.client.sse.ServerSentEventParser;
-import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
-import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -22,8 +21,11 @@ import org.springframework.web.client.RestClientResponseException;
 
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static dev.langchain4j.http.client.spring.restclient.SpringBootHttpClientSettingsHelper.createClientHttpRequestFactory;
 import static dev.langchain4j.http.client.sse.ServerSentEventListenerUtils.ignoringExceptions;
 import static dev.langchain4j.internal.Utils.getOrDefault;
 
@@ -36,21 +38,17 @@ public class SpringRestClient implements HttpClient {
 
         RestClient.Builder restClientBuilder = getOrDefault(builder.restClientBuilder(), RestClient::builder);
 
-        ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.defaults();
-        if (builder.connectTimeout() != null) {
-            settings = settings.withConnectTimeout(builder.connectTimeout());
-        }
-        if (builder.readTimeout() != null) {
-            settings = settings.withReadTimeout(builder.readTimeout());
-        }
-        ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryBuilder.detect().build(settings);
+        ClientHttpRequestFactory clientHttpRequestFactory = createClientHttpRequestFactory(
+                builder.connectTimeout(),
+                builder.readTimeout()
+        );
 
         this.delegate = restClientBuilder
                 .requestFactory(clientHttpRequestFactory)
                 .build();
 
         this.streamingRequestExecutor = getOrDefault(builder.streamingRequestExecutor(), () -> {
-            if (builder.createDefaultStreamingRequestExecutor()) {
+            if (Boolean.TRUE.equals(builder.createDefaultStreamingRequestExecutor())) {
                 return createDefaultStreamingRequestExecutor();
             } else {
                 return null;
@@ -78,7 +76,7 @@ public class SpringRestClient implements HttpClient {
 
             return SuccessfulHttpResponse.builder()
                     .statusCode(responseEntity.getStatusCode().value())
-                    .headers(responseEntity.getHeaders())
+                    .headers(toHeadersMap(responseEntity.getHeaders()))
                     .body(responseEntity.getBody())
                     .build();
         } catch (RestClientResponseException e) {
@@ -111,7 +109,7 @@ public class SpringRestClient implements HttpClient {
 
                             SuccessfulHttpResponse response = SuccessfulHttpResponse.builder()
                                     .statusCode(statusCode)
-                                    .headers(springResponse.getHeaders())
+                                    .headers(toHeadersMap(springResponse.getHeaders()))
                                     .build();
                             ignoringExceptions(() -> listener.onOpen(response));
 
@@ -160,5 +158,13 @@ public class SpringRestClient implements HttpClient {
             });
         }
         return multipart;
+    }
+
+    private static Map<String, List<String>> toHeadersMap(HttpHeaders httpHeaders) {
+        return httpHeaders.headerSet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
     }
 }
