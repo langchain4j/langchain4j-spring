@@ -153,7 +153,7 @@ class AutoConfigIT {
                         "langchain4j.azure-open-ai.chat-model.non-azure-api-key=" + NO_AZURE_OPENAI_KEY,
                         "langchain4j.azure-open-ai.chat-model.deployment-name=" + deploymentName,
                         "langchain4j.azure-open-ai.chat-model.max-tokens=20",
-                        "langchain4j.azure-open-ai.chat-model.timeout=60"
+                        "langchain4j.azure-open-ai.chat-model.timeout=60s"
                 )
                 .run(context -> {
 
@@ -178,7 +178,7 @@ class AutoConfigIT {
                         "langchain4j.azure-open-ai.streaming-chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
                         "langchain4j.azure-open-ai.streaming-chat-model.deployment-name=" + deploymentName,
                         "langchain4j.azure-open-ai.streaming-chat-model.max-tokens=20",
-                        "langchain4j.azure-open-ai.streaming-chat-model.timeout=60"
+                        "langchain4j.azure-open-ai.streaming-chat-model.timeout=60s"
                 )
                 .run(context -> {
 
@@ -216,7 +216,7 @@ class AutoConfigIT {
                         "langchain4j.azure-open-ai.streaming-chat-model.endpoint=" + AZURE_OPENAI_ENDPOINT,
                         "langchain4j.azure-open-ai.streaming-chat-model.deployment-name=gpt-4o-mini",
                         "langchain4j.azure-open-ai.streaming-chat-model.max-tokens=20",
-                        "langchain4j.azure-open-ai.streaming-chat-model.timeout=60"
+                        "langchain4j.azure-open-ai.streaming-chat-model.timeout=60s"
                 )
                 .withUserConfiguration(ListenerConfig.class)
                 .run(context -> {
@@ -286,6 +286,204 @@ class AutoConfigIT {
                     ImageModel imageModel = context.getBean(ImageModel.class);
                     assertThat(imageModel).isInstanceOf(AzureOpenAiImageModel.class);
                     assertThat(context.getBean(AzureOpenAiImageModel.class)).isSameAs(imageModel);
+                });
+    }
+
+    @Test
+    void should_support_legacy_timeout_seconds_configuration() {
+        // Test backward compatibility: old Integer-based timeout-seconds config
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.chat-model.api-key=test-key",
+                        "langchain4j.azure-open-ai.chat-model.endpoint=https://test.openai.azure.com/",
+                        "langchain4j.azure-open-ai.chat-model.deployment-name=gpt-4o-mini",
+                        "langchain4j.azure-open-ai.chat-model.timeout-seconds=60"  // Legacy format
+                )
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    Properties properties = context.getBean(Properties.class);
+                    ChatModelProperties chatModelProperties = properties.chatModel();
+                    
+                    // Verify that legacy timeout-seconds is converted to Duration
+                    assertThat(chatModelProperties.timeout()).isNotNull();
+                    assertThat(chatModelProperties.timeout().getSeconds()).isEqualTo(60);
+                });
+    }
+
+    @Test
+    void should_support_new_duration_timeout_configuration() {
+        // Test new Duration-based timeout config with various formats
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.chat-model.api-key=test-key",
+                        "langchain4j.azure-open-ai.chat-model.endpoint=https://test.openai.azure.com/",
+                        "langchain4j.azure-open-ai.chat-model.deployment-name=gpt-4o-mini",
+                        "langchain4j.azure-open-ai.chat-model.timeout=90s"  // New Duration format: 90 seconds
+                )
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    Properties properties = context.getBean(Properties.class);
+                    ChatModelProperties chatModelProperties = properties.chatModel();
+                    
+                    // Verify Duration-based timeout with seconds format
+                    assertThat(chatModelProperties.timeout()).isNotNull();
+                    assertThat(chatModelProperties.timeout().getSeconds()).isEqualTo(90);
+                });
+    }
+
+    @Test
+    void should_support_duration_format_with_minutes() {
+        // Test Duration format with minutes - demonstrating flexibility
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.chat-model.api-key=test-key",
+                        "langchain4j.azure-open-ai.chat-model.endpoint=https://test.openai.azure.com/",
+                        "langchain4j.azure-open-ai.chat-model.deployment-name=gpt-4o-mini",
+                        "langchain4j.azure-open-ai.chat-model.timeout=2m"  // 2 minutes
+                )
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    Properties properties = context.getBean(Properties.class);
+                    ChatModelProperties chatModelProperties = properties.chatModel();
+                    
+                    assertThat(chatModelProperties.timeout()).isNotNull();
+                    assertThat(chatModelProperties.timeout().getSeconds()).isEqualTo(120);  // 2 minutes = 120 seconds
+                });
+    }
+
+    @Test
+    void should_support_duration_format_with_milliseconds() {
+        // Test Duration format with milliseconds - demonstrating sub-second precision
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.embedding-model.api-key=test-key",
+                        "langchain4j.azure-open-ai.embedding-model.endpoint=https://test.openai.azure.com/",
+                        "langchain4j.azure-open-ai.embedding-model.deployment-name=text-embedding-ada-002",
+                        "langchain4j.azure-open-ai.embedding-model.timeout=500ms"  // 500 milliseconds
+                )
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    Properties properties = context.getBean(Properties.class);
+                    EmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
+                    
+                    assertThat(embeddingModelProperties.timeout()).isNotNull();
+                    assertThat(embeddingModelProperties.timeout().toMillis()).isEqualTo(500);
+                });
+    }
+
+    @Test
+    void should_prefer_new_duration_over_legacy_timeout() {
+        // Test that new Duration format takes precedence when both are specified
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.chat-model.api-key=test-key",
+                        "langchain4j.azure-open-ai.chat-model.endpoint=https://test.openai.azure.com/",
+                        "langchain4j.azure-open-ai.chat-model.deployment-name=gpt-4o-mini",
+                        "langchain4j.azure-open-ai.chat-model.timeout=2m",  // New format (should win)
+                        "langchain4j.azure-open-ai.chat-model.timeout-seconds=60"  // Legacy format (should be ignored)
+                )
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    Properties properties = context.getBean(Properties.class);
+                    ChatModelProperties chatModelProperties = properties.chatModel();
+                    
+                    // Verify that new Duration format takes precedence
+                    assertThat(chatModelProperties.timeout()).isNotNull();
+                    assertThat(chatModelProperties.timeout().getSeconds()).isEqualTo(120);  // 2 minutes, not 60 seconds
+                });
+    }
+
+    @Test
+    void should_support_backward_compatibility_for_embedding_model() {
+        // Test backward compatibility for embedding model
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.embedding-model.api-key=test-key",
+                        "langchain4j.azure-open-ai.embedding-model.endpoint=https://test.openai.azure.com/",
+                        "langchain4j.azure-open-ai.embedding-model.deployment-name=text-embedding-ada-002",
+                        "langchain4j.azure-open-ai.embedding-model.timeout-seconds=30"  // Legacy format
+                )
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    Properties properties = context.getBean(Properties.class);
+                    EmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
+                    
+                    assertThat(embeddingModelProperties.timeout()).isNotNull();
+                    assertThat(embeddingModelProperties.timeout().getSeconds()).isEqualTo(30);
+                });
+    }
+
+    @Test
+    void should_support_backward_compatibility_for_image_model() {
+        // Test backward compatibility for image model
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.image-model.api-key=test-key",
+                        "langchain4j.azure-open-ai.image-model.endpoint=https://test.openai.azure.com/",
+                        "langchain4j.azure-open-ai.image-model.deployment-name=dall-e-3",
+                        "langchain4j.azure-open-ai.image-model.timeout-seconds=90"  // Legacy format
+                )
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    Properties properties = context.getBean(Properties.class);
+                    ImageModelProperties imageModelProperties = properties.imageModel();
+                    
+                    assertThat(imageModelProperties.timeout()).isNotNull();
+                    assertThat(imageModelProperties.timeout().getSeconds()).isEqualTo(90);
+                });
+    }
+
+    @Test
+    void should_create_chat_model_bean_with_new_duration_timeout() {
+        // Test that chat model bean is actually created with new Duration format timeout
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.chat-model.api-key=test-key",
+                        "langchain4j.azure-open-ai.chat-model.endpoint=https://test.openai.azure.com/",
+                        "langchain4j.azure-open-ai.chat-model.deployment-name=gpt-4o-mini",
+                        "langchain4j.azure-open-ai.chat-model.timeout=150s"  // 150 seconds = 2.5 minutes
+                )
+                .run(context -> {
+                    // Verify bean is created successfully
+                    assertThat(context).hasNotFailed();
+                    assertThat(context).hasSingleBean(AzureOpenAiChatModel.class);
+                    
+                    // Verify the timeout configuration
+                    Properties properties = context.getBean(Properties.class);
+                    ChatModelProperties chatModelProperties = properties.chatModel();
+                    assertThat(chatModelProperties.timeout()).isNotNull();
+                    assertThat(chatModelProperties.timeout().getSeconds()).isEqualTo(150);  // 150 seconds
+                    
+                    // Verify the bean can be retrieved
+                    AzureOpenAiChatModel chatModel = context.getBean(AzureOpenAiChatModel.class);
+                    assertThat(chatModel).isNotNull();
+                });
+    }
+
+    @Test
+    void should_create_embedding_model_bean_with_legacy_timeout() {
+        // Test that embedding model bean is created with legacy timeout format
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.azure-open-ai.embedding-model.api-key=test-key",
+                        "langchain4j.azure-open-ai.embedding-model.endpoint=https://test.openai.azure.com/",
+                        "langchain4j.azure-open-ai.embedding-model.deployment-name=text-embedding-ada-002",
+                        "langchain4j.azure-open-ai.embedding-model.timeout-seconds=45"  // Legacy format
+                )
+                .run(context -> {
+                    // Verify bean is created successfully with legacy config
+                    assertThat(context).hasNotFailed();
+                    assertThat(context).hasSingleBean(AzureOpenAiEmbeddingModel.class);
+                    
+                    // Verify the timeout is converted correctly
+                    Properties properties = context.getBean(Properties.class);
+                    EmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
+                    assertThat(embeddingModelProperties.timeout()).isNotNull();
+                    assertThat(embeddingModelProperties.timeout().getSeconds()).isEqualTo(45);
+                    
+                    // Verify the bean can be retrieved
+                    AzureOpenAiEmbeddingModel embeddingModel = context.getBean(AzureOpenAiEmbeddingModel.class);
+                    assertThat(embeddingModel).isNotNull();
                 });
     }
 
