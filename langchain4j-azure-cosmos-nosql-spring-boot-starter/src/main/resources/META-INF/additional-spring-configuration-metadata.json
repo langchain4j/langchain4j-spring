@@ -1,0 +1,56 @@
+{
+  "properties": [],
+  "hints": [
+    {
+      "name": "langchain4j.azure.cosmos-nosql.distance-function",
+      "values": [
+        {
+          "value": "COSINE",
+          "description": "Cosine distance - suitable for normalized vectors."
+        },
+        {
+          "value": "DOT_PRODUCT",
+          "description": "Dot product distance - suitable for non-normalized vectors."
+        },
+        {
+          "value": "EUCLIDEAN",
+          "description": "Euclidean distance - L2 norm."
+        }
+      ]
+    },
+    {
+      "name": "langchain4j.azure.cosmos-nosql.data-type",
+      "values": [
+        {
+          "value": "FLOAT32",
+          "description": "32-bit floating point - highest precision."
+        },
+        {
+          "value": "INT8",
+          "description": "8-bit signed integer - lower memory usage."
+        },
+        {
+          "value": "UINT8",
+          "description": "8-bit unsigned integer - lower memory usage."
+        }
+      ]
+    },
+    {
+      "name": "langchain4j.azure.cosmos-nosql.vector-index-type",
+      "values": [
+        {
+          "value": "DISK_ANN",
+          "description": "Disk-based Approximate Nearest Neighbor - recommended for large datasets."
+        },
+        {
+          "value": "FLAT",
+          "description": "Flat index - exact search, suitable for small datasets."
+        },
+        {
+          "value": "QUANTIZED_FLAT",
+          "description": "Quantized flat index - compressed vectors, balance between speed and accuracy."
+        }
+      ]
+    }
+  ]
+}
