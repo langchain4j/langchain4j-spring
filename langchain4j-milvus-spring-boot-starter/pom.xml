@@ -62,7 +62,7 @@
 
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>milvus</artifactId>
+            <artifactId>testcontainers-milvus</artifactId>
             <scope>test</scope>
         </dependency>
 

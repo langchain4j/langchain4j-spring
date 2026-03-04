@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -21,7 +20,11 @@ import org.springframework.web.client.RestClient;
 
 import static dev.langchain4j.openai.spring.Properties.PREFIX;
 
-@AutoConfiguration(after = RestClientAutoConfiguration.class)
+@AutoConfiguration(afterName = {
+        "org.springframework.boot.restclient.autoconfigure.RestClientAutoConfiguration", // Spring Boot 4 support
+        "org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration"  // Spring Boot 3 support
+    }
+)
 @EnableConfigurationProperties(Properties.class)
 public class AutoConfig {
 
