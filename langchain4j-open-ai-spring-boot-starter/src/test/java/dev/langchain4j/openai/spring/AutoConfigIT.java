@@ -97,7 +97,7 @@ class AutoConfigIT {
     void should_create_chat_model_with_default_http_client() {
 
         OpenAiChatModel model = OpenAiChatModel.builder()
-                .baseUrl(System.getenv("OPENAI_BASE_URL"))
+                .baseUrl(BASE_URL)
                 .apiKey(API_KEY)
                 .modelName("gpt-4o-mini")
                 .temperature(0.0)
