@@ -4,7 +4,7 @@ import dev.langchain4j.model.googleai.GoogleAiEmbeddingModel.TaskType;
 
 import java.time.Duration;
 
-record EmbeddingModelProperties(
+public record EmbeddingModelProperties(
         String apiKey,
         String modelName,
         String titleMetadataKey,

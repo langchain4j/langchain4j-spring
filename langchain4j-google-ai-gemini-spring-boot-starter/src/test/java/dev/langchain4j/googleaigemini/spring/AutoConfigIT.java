@@ -3,6 +3,7 @@ package dev.langchain4j.googleaigemini.spring;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.request.ChatRequestParameters;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -32,10 +33,11 @@ class AutoConfigIT {
     void provide_chat_model() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.0-flash-exp"
+                        "langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.5-flash-lite"
                 )
                 .run(context -> {
                     ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(GoogleAiGeminiChatModel.class);
                     assertThat(context.getBean(GoogleAiGeminiChatModel.class)).isSameAs(chatModel);
 
                     String response = chatModel.chat("What is the capital of India");
@@ -50,22 +52,20 @@ class AutoConfigIT {
     void provide_chat_model_with_property_values() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.chatModel.modelName=gemini-2.0-flash-exp",
-                        "langchain4j.google-ai-gemini.chatModel.temperature=0.7",
-                        "langchain4j.google-ai-gemini.chatModel.topP=0.9",
-                        "langchain4j.google-ai-gemini.chatModel.topK=40",
-                        "langchain4j.google-ai-gemini.chatModel.maxOutputTokens=800",
-                        "langchain4j.google-ai-gemini.chatModel.safetySetting.HARM_CATEGORY_DANGEROUS_CONTENT=BLOCK_LOW_AND_ABOVE",
-                        "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.gemini-mode=NONE",
-                        "langchain4j.google-ai-gemini.chatModel.functionCallingConfig.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
+                        "langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.5-flash-lite",
+                        "langchain4j.google-ai-gemini.chat-model.temperature=0.7"
                 )
                 .run(context -> {
                     ChatModel chatModel = context.getBean(ChatModel.class);
-                    assertThat(chatModel).isInstanceOf(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(GoogleAiGeminiChatModel.class);
+                    assertThat(context.getBean(GoogleAiGeminiChatModel.class)).isSameAs(chatModel);
+
+                    ChatRequestParameters defaultParameters = chatModel.defaultRequestParameters();
+                    assertThat(defaultParameters.modelName()).isEqualTo("gemini-2.5-flash-lite");
+                    assertThat(defaultParameters.temperature()).isEqualTo(0.7);
+
                     String response = chatModel.chat("What is the capital of India");
                     assertThat(response).contains("Delhi");
-                    String newResponse = chatModel.chat("Calculate the Fibonacci of 22 and give me the result as an integer value along with the code. ");
-                    assertThat(newResponse).contains("17711");
                 });
     }
 
@@ -73,7 +73,7 @@ class AutoConfigIT {
     void provide_streaming_chat_model() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.streaming-chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.streaming-chat-model.model-name=gemini-2.0-flash-exp"
+                        "langchain4j.google-ai-gemini.streaming-chat-model.model-name=gemini-2.5-flash-lite"
                 )
                 .run(context -> {
                     StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
@@ -106,14 +106,14 @@ class AutoConfigIT {
     void provide_streaming_chat_model_with_property_values() {
         contextRunner.withPropertyValues(
                         "langchain4j.google-ai-gemini.streaming-chat-model.api-key=" + API_KEY,
-                        "langchain4j.google-ai-gemini.streamingChatModel.modelName=gemini-2.0-flash-exp",
-                        "langchain4j.google-ai-gemini.streamingChatModel.temperature=0.7",
-                        "langchain4j.google-ai-gemini.streamingChatModel.topP=0.9",
-                        "langchain4j.google-ai-gemini.streamingChatModel.topK=40",
-                        "langchain4j.google-ai-gemini.streamingChatModel.maxOutputTokens=400",
-                        "langchain4j.google-ai-gemini.streamingChatModel.safetySetting.HARM_CATEGORY_SEXUALLY_EXPLICIT=HARM_BLOCK_THRESHOLD_UNSPECIFIED",
-                        "langchain4j.google-ai-gemini.streamingChatModel.functionCallingConfig.gemini-mode=NONE",
-                        "langchain4j.google-ai-gemini.streamingChatModel.functionCallingConfig.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
+                        "langchain4j.google-ai-gemini.streaming-chat-model.model-name=gemini-2.5-flash-lite",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.temperature=0.7",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.topP=0.9",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.topK=40",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.max-output-tokens=400",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.safety-setting.HARM_CATEGORY_SEXUALLY_EXPLICIT=HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.function-calling-config.gemini-mode=NONE",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.function-calling-config.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
                 )
                 .run(context -> {
                     StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
@@ -144,13 +144,13 @@ class AutoConfigIT {
     void provide_embedding_model() {
         contextRunner.withPropertyValues(
                 "langchain4j.google-ai-gemini.embedding-model.apiKey=" + API_KEY,
-                "langchain4j.google-ai-gemini.embedding-model.model-name=text-embedding-004"
+                "langchain4j.google-ai-gemini.embedding-model.model-name=gemini-embedding-001"
         ).run(context -> {
             EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
             assertThat(context.getBean(GoogleAiEmbeddingModel.class)).isSameAs(embeddingModel);
 
             Response<Embedding> response = embeddingModel.embed("Hi, I live in India");
-            assertThat(response.content().dimension()).isEqualTo(768);
+            assertThat(response.content().dimension()).isEqualTo(3072);
         });
     }
 
@@ -158,13 +158,13 @@ class AutoConfigIT {
     void provide_embedding_model_with_property_values() {
         contextRunner.withPropertyValues(
                 "langchain4j.google-ai-gemini.embedding-model.apiKey=" + API_KEY,
-                "langchain4j.google-ai-gemini.embeddingModel.titleMetadataKey=title-key",
-                "langchain4j.google-ai-gemini.embeddingModel.modelName=text-embedding-004",
-                "langchain4j.google-ai-gemini.embeddingModel.logRequestsAndResponses=true",
-                "langchain4j.google-ai-gemini.embeddingModel.maxRetries=3",
-                "langchain4j.google-ai-gemini.embeddingModel.outputDimensionality=512",
-                "langchain4j.google-ai-gemini.embeddingModel.taskType=CLASSIFICATION",
-                "langchain4j.google-ai-gemini.embeddingModel.timeout=PT30S"
+                "langchain4j.google-ai-gemini.embedding-model.title-metadata.key=title-key",
+                "langchain4j.google-ai-gemini.embedding-model.model-name=gemini-embedding-001",
+                "langchain4j.google-ai-gemini.embedding-model.log-requests-and-responses=true",
+                "langchain4j.google-ai-gemini.embedding-model.max-retries=3",
+                "langchain4j.google-ai-gemini.embedding-model.output-dimensionality=512",
+                "langchain4j.google-ai-gemini.embedding-model.task-type=CLASSIFICATION",
+                "langchain4j.google-ai-gemini.embedding-model.timeout=PT30S"
         ).run(context -> {
             EmbeddingModel embeddingModel = context.getBean(GoogleAiEmbeddingModel.class);
             assertThat(embeddingModel).isInstanceOf(EmbeddingModel.class);

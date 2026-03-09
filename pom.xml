@@ -6,7 +6,7 @@
 
     <groupId>dev.langchain4j</groupId>
     <artifactId>langchain4j-spring</artifactId>
-    <version>1.11.0-beta19-SNAPSHOT</version>
+    <version>1.13.0-beta22-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>langchain4j-spring parent POM</name>
@@ -23,6 +23,8 @@
         <module>langchain4j-open-ai-spring-boot-starter</module>
         <module>langchain4j-azure-ai-search-spring-boot-starter</module>
         <module>langchain4j-azure-open-ai-spring-boot-starter</module>
+        <module>langchain4j-azure-cosmos-mongo-vcore-spring-boot-starter</module>
+        <module>langchain4j-azure-cosmos-nosql-spring-boot-starter</module>
         <module>langchain4j-voyage-ai-spring-boot-starter</module>
         <module>langchain4j-github-models-spring-boot-starter</module>
         <module>langchain4j-google-ai-gemini-spring-boot-starter</module>
@@ -35,13 +37,13 @@
     </modules>
 
     <properties>
-        <langchain4j.stable.version>1.11.0-SNAPSHOT</langchain4j.stable.version>
-        <langchain4j.beta.version>1.11.0-beta19-SNAPSHOT</langchain4j.beta.version>
+        <langchain4j.stable.version>1.13.0-SNAPSHOT</langchain4j.stable.version>
+        <langchain4j.beta.version>1.13.0-beta22-SNAPSHOT</langchain4j.beta.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.boot.version>3.3.8</spring.boot.version>
-        <testcontainers.version>1.20.4</testcontainers.version>
+        <project.build.outputTimestamp>2026-03-05T16:11:23Z</project.build.outputTimestamp>
+        <spring.boot.version>3.5.11</spring.boot.version>
         <tinylog.version>2.7.0</tinylog.version>
     </properties>
 
@@ -64,16 +66,6 @@
                 <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <!-- BOM for Testcontainers dependencies, overriding the version from the Spring Boot
-            BOM -->
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${testcontainers.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
             </dependency>
 
             <dependency>
@@ -99,13 +91,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.4</version>
             </plugin>
 
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.7.0</version>
+                <version>0.9.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
@@ -119,7 +111,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -133,7 +125,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.11.1</version>
+                <version>3.12.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -147,7 +139,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.4</version>
                 <executions>
                     <execution>
                         <goals>
@@ -161,7 +153,7 @@
             <plugin>
                 <groupId>io.sundr</groupId>
                 <artifactId>sundr-maven-plugin</artifactId>
-                <version>0.200.0</version>
+                <version>0.230.2</version>
                 <executions>
                     <execution>
                         <inherited>false</inherited>
@@ -194,7 +186,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.7.0</version>
+                <version>1.7.3</version>
                 <configuration>
                     <flattenMode>ossrh</flattenMode>
                     <pomElements>
@@ -259,7 +251,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.7</version>
+                        <version>3.2.8</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

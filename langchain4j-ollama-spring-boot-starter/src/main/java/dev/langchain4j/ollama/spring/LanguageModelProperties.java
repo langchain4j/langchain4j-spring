@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-class LanguageModelProperties {
+public class LanguageModelProperties {
 
     String baseUrl;
     String modelName;

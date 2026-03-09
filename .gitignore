@@ -39,3 +39,5 @@ build/
 
 ### .env files contain local environment variables ###
 .env
+
+*.log
