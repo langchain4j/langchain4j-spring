@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dev.langchain4j</groupId>
+        <artifactId>langchain4j-spring</artifactId>
+        <version>1.13.0-beta23-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>langchain4j-elasticsearch-spring-boot4-starter</artifactId>
+    <name>LangChain4j Spring Boot 4 starter for Elasticsearch</name>
+    <packaging>jar</packaging>
+
+    <properties>
+        <elastic.version>8.19.2</elastic.version>
+        <!-- You can run the tests using
+        # Elasticsearch Cloud
+        mvn verify -DELASTICSEARCH_URL=https://URL.elastic-cloud.com -DELASTICSEARCH_API_KEY=THE_KEY
+        # Elasticsearch running already Locally with a BASE64 encoded SSL CA Certificate
+        mvn verify -DELASTICSEARCH_URL=https://localhost:9200 -DELASTICSEARCH_PASSWORD=changeme -DELASTICSEARCH_CA_CERTIFICATE=BASE64-CONTENT
+        # Elasticsearch started by Testcontainers
+        mvn verify
+        # Elasticsearch started by Testcontainers with a specific password
+        mvn verify -DELASTICSEARCH_PASSWORD=changeme
+        -->
+        <ELASTICSEARCH_URL />
+        <ELASTICSEARCH_API_KEY />
+        <ELASTICSEARCH_USERNAME />
+        <ELASTICSEARCH_PASSWORD>changeme</ELASTICSEARCH_PASSWORD>
+        <ELASTICSEARCH_CA_CERTIFICATE />
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Override Spring Boot version from parent -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot4.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-elasticsearch</artifactId>
+        </dependency>
+
+        <!-- Pin Elasticsearch to 8.x because langchain4j-elasticsearch requires 8.x REST client API -->
+        <!-- and Spring Boot 4 BOM manages ES 9.x -->
+        <dependency>
+            <groupId>co.elastic.clients</groupId>
+            <artifactId>elasticsearch-java</artifactId>
+            <version>${elastic.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- needed to generate automatic metadata about available config properties -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-embeddings-all-minilm-l6-v2-q</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-spring-boot4-tests</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-elasticsearch</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.tinylog</groupId>
+            <artifactId>tinylog-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.tinylog</groupId>
+            <artifactId>slf4j-tinylog</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.21.0</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <environmentVariables>
+                        <ELASTICSEARCH_URL>${ELASTICSEARCH_URL}</ELASTICSEARCH_URL>
+                        <ELASTICSEARCH_API_KEY>${ELASTICSEARCH_API_KEY}</ELASTICSEARCH_API_KEY>
+                        <ELASTICSEARCH_USERNAME>${ELASTICSEARCH_USERNAME}</ELASTICSEARCH_USERNAME>
+                        <ELASTICSEARCH_PASSWORD>${ELASTICSEARCH_PASSWORD}</ELASTICSEARCH_PASSWORD>
+                        <ELASTICSEARCH_CA_CERTIFICATE>${ELASTICSEARCH_CA_CERTIFICATE}</ELASTICSEARCH_CA_CERTIFICATE>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
