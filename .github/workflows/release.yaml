@@ -101,13 +101,10 @@ jobs:
 
       - name: Trigger documentation version update
         if: env.BRANCH == 'main'
-        uses: peter-evans/repository-dispatch@v4
-        with:
-          token: ${{ secrets.GH_RELEASE_AUTOMATION }}
-          repository: langchain4j/langchain4j
-          event-type: trigger-docs-update-version
-          client-payload: |
-            {
-              "stableVersion": "${{ env.STABLE_VERSION }}",
-              "betaVersion": "${{ env.BETA_VERSION }}"
-            }
+        env:
+          GH_TOKEN: ${{ secrets.GH_RELEASE_AUTOMATION }}
+        run: |
+          gh api repos/langchain4j/langchain4j/dispatches \
+            -f event_type=trigger-docs-update-version \
+            -f 'client_payload[stableVersion]=${{ env.STABLE_VERSION }}' \
+            -f 'client_payload[betaVersion]=${{ env.BETA_VERSION }}'
