@@ -21,6 +21,13 @@ env:
   BETA_VERSION: ${{ github.event.inputs.betaVersion || github.event.client_payload.betaVersion }}
   BRANCH: ${{ github.event.inputs.branch || github.event.client_payload.branch || 'main' }}
 
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
 
   release:
@@ -28,14 +35,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ env.BRANCH }}
           fetch-depth: 0
           token: ${{ secrets.GH_RELEASE_AUTOMATION }}
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '25'
           distribution: 'temurin'
@@ -48,9 +55,9 @@ jobs:
 
       - name: Show inputs
         run: |
-          echo "Stable version: ${{ env.STABLE_VERSION }}"
-          echo "Beta version: ${{ env.BETA_VERSION }}"
-          echo "Branch to release from: ${{ env.BRANCH }}"
+          echo "Stable version: $STABLE_VERSION"
+          echo "Beta version: $BETA_VERSION"
+          echo "Branch to release from: $BRANCH"
 
       - name: Extract current stable SNAPSHOT version from POM property
         id: extract-stable-snapshot-version
@@ -59,10 +66,10 @@ jobs:
           echo "stableVersionSnapshot=$REVISION" >> $GITHUB_OUTPUT
 
       - name: Update stable versions
-        run: mvn versions:set -DnewVersion=${{ env.STABLE_VERSION }} -DoldVersion=${{ steps.extract-stable-snapshot-version.outputs.stableVersionSnapshot }} -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false
+        run: mvn versions:set -DnewVersion="$STABLE_VERSION" -DoldVersion=${{ steps.extract-stable-snapshot-version.outputs.stableVersionSnapshot }} -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false
 
       - name: Update stable version property
-        run: mvn versions:set-property -Dproperty=langchain4j.stable.version -DnewVersion=${{ env.STABLE_VERSION }} -DgenerateBackupPoms=false
+        run: mvn versions:set-property -Dproperty=langchain4j.stable.version -DnewVersion="$STABLE_VERSION" -DgenerateBackupPoms=false
 
       - name: Extract current beta SNAPSHOT version from POM property
         id: extract-beta-snapshot-version
@@ -71,10 +78,10 @@ jobs:
           echo "betaVersionSnapshot=$REVISION" >> $GITHUB_OUTPUT
 
       - name: Update beta versions
-        run: mvn versions:set -DnewVersion=${{ env.BETA_VERSION }} -DoldVersion=${{ steps.extract-beta-snapshot-version.outputs.betaVersionSnapshot }} -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false
+        run: mvn versions:set -DnewVersion="$BETA_VERSION" -DoldVersion=${{ steps.extract-beta-snapshot-version.outputs.betaVersionSnapshot }} -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false
 
       - name: Update beta version property
-        run: mvn versions:set-property -Dproperty=langchain4j.beta.version -DnewVersion=${{ env.BETA_VERSION }} -DgenerateBackupPoms=false
+        run: mvn versions:set-property -Dproperty=langchain4j.beta.version -DnewVersion="$BETA_VERSION" -DgenerateBackupPoms=false
 
       - name: Release
         run: mvn -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
@@ -87,17 +94,17 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Release versions ${{ env.STABLE_VERSION }} and ${{ env.BETA_VERSION }}"
+          git add pom.xml '**/pom.xml'
+          git commit -m "Release versions $STABLE_VERSION and $BETA_VERSION"
 
       - name: Push
         run: |
-          git push origin ${{ env.BRANCH }}
+          git push origin "$BRANCH"
 
       - name: Tag release
         run: |
-          git tag ${{ env.BETA_VERSION }}
-          git push origin ${{ env.BETA_VERSION }}
+          git tag "$BETA_VERSION"
+          git push origin "$BETA_VERSION"
 
       - name: Trigger documentation version update
         if: env.BRANCH == 'main'
@@ -106,5 +113,5 @@ jobs:
         run: |
           gh api repos/langchain4j/langchain4j/dispatches \
             -f event_type=trigger-docs-update-version \
-            -f 'client_payload[stableVersion]=${{ env.STABLE_VERSION }}' \
-            -f 'client_payload[betaVersion]=${{ env.BETA_VERSION }}'
+            -f 'client_payload[stableVersion]='"$STABLE_VERSION" \
+            -f 'client_payload[betaVersion]='"$BETA_VERSION"
