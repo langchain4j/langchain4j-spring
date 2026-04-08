@@ -13,13 +13,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
-@EnableConfigurationProperties(Properties.class)
-public class AutoConfig {
+@EnableConfigurationProperties(GitHubModelsProperties.class)
+public class GitHubModelsAutoConfig {
 
     @Bean
-    @ConditionalOnProperty(Properties.PREFIX + ".chat-model.github-token")
-    GitHubModelsChatModel gitHubModelsChatModel(Properties properties, ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.getChatModel();
+    @ConditionalOnProperty(GitHubModelsProperties.PREFIX + ".chat-model.github-token")
+    GitHubModelsChatModel gitHubModelsChatModel(GitHubModelsProperties properties, ObjectProvider<ChatModelListener> listeners) {
+        GitHubModelsChatModelProperties chatModelProperties = properties.getChatModel();
         GitHubModelsChatModel.Builder builder = GitHubModelsChatModel.builder()
                 .endpoint(chatModelProperties.getEndpoint())
                 .gitHubToken(chatModelProperties.getGitHubToken())
@@ -39,10 +39,10 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(Properties.PREFIX + ".streaming-chat-model.github-token")
-    GitHubModelsStreamingChatModel gitHubModelsStreamingChatModel(Properties properties,
+    @ConditionalOnProperty(GitHubModelsProperties.PREFIX + ".streaming-chat-model.github-token")
+    GitHubModelsStreamingChatModel gitHubModelsStreamingChatModel(GitHubModelsProperties properties,
                                                                   ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
+        GitHubModelsChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         GitHubModelsStreamingChatModel.Builder builder = GitHubModelsStreamingChatModel.builder()
                 .endpoint(chatModelProperties.getEndpoint())
                 .gitHubToken(chatModelProperties.getGitHubToken())
@@ -62,9 +62,9 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty({Properties.PREFIX + ".embedding-model.github-token"})
-    GitHubModelsEmbeddingModel openAiEmbeddingModelByApiKey(Properties properties) {
-        EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
+    @ConditionalOnProperty({GitHubModelsProperties.PREFIX + ".embedding-model.github-token"})
+    GitHubModelsEmbeddingModel openAiEmbeddingModelByApiKey(GitHubModelsProperties properties) {
+        GitHubModelsEmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         GitHubModelsEmbeddingModel.Builder builder = GitHubModelsEmbeddingModel.builder()
                 .endpoint(embeddingModelProperties.getEndpoint())
                 .gitHubToken(embeddingModelProperties.getGitHubToken())

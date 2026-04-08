@@ -2,7 +2,7 @@ package dev.langchain4j.model.githubmodels.spring;
 
 import java.time.Duration;
 
-public class EmbeddingModelProperties {
+public class GitHubModelsEmbeddingModelProperties {
 
     private String endpoint;
     private String gitHubToken;
