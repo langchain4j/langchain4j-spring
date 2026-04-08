@@ -2,17 +2,19 @@ package dev.langchain4j.voyageai.spring;
 
 import java.time.Duration;
 
-public class ScoringModelProperties {
+public class VoyageAiEmbeddingModelProperties {
 
     private String baseUrl;
     private Duration timeout;
     private Integer maxRetries;
     private String apiKey;
     private String modelName;
-    private Integer topK;
+    private String inputType;
     private Boolean truncation;
+    private String encodingFormat;
     private Boolean logRequests;
     private Boolean logResponses;
+    private Integer maxSegmentsPerBatch;
 
     public String getBaseUrl() {
         return baseUrl;
@@ -54,12 +56,12 @@ public class ScoringModelProperties {
         this.modelName = modelName;
     }
 
-    public Integer getTopK() {
-        return topK;
+    public String getInputType() {
+        return inputType;
     }
 
-    public void setTopK(Integer topK) {
-        this.topK = topK;
+    public void setInputType(String inputType) {
+        this.inputType = inputType;
     }
 
     public Boolean getTruncation() {
@@ -68,6 +70,14 @@ public class ScoringModelProperties {
 
     public void setTruncation(Boolean truncation) {
         this.truncation = truncation;
+    }
+
+    public String getEncodingFormat() {
+        return encodingFormat;
+    }
+
+    public void setEncodingFormat(String encodingFormat) {
+        this.encodingFormat = encodingFormat;
     }
 
     public Boolean getLogRequests() {
@@ -84,5 +94,13 @@ public class ScoringModelProperties {
 
     public void setLogResponses(Boolean logResponses) {
         this.logResponses = logResponses;
+    }
+
+    public Integer getMaxSegmentsPerBatch() {
+        return maxSegmentsPerBatch;
+    }
+
+    public void setMaxSegmentsPerBatch(Integer maxSegmentsPerBatch) {
+        this.maxSegmentsPerBatch = maxSegmentsPerBatch;
     }
 }

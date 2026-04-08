@@ -7,16 +7,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import static dev.langchain4j.voyageai.spring.Properties.PREFIX;
+import static dev.langchain4j.voyageai.spring.VoyageAiProperties.PREFIX;
 
 @AutoConfiguration
-@EnableConfigurationProperties(Properties.class)
-public class AutoConfig {
+@EnableConfigurationProperties(VoyageAiProperties.class)
+public class VoyageAiAutoConfig {
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")
-    VoyageAiEmbeddingModel voyageAiEmbeddingModel(Properties properties) {
-        EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
+    VoyageAiEmbeddingModel voyageAiEmbeddingModel(VoyageAiProperties properties) {
+        VoyageAiEmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         return VoyageAiEmbeddingModel.builder()
                 .baseUrl(embeddingModelProperties.getBaseUrl())
                 .timeout(embeddingModelProperties.getTimeout())
@@ -34,8 +34,8 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".scoring-model.api-key")
-    VoyageAiScoringModel voyageAiScoringModel(Properties properties) {
-        ScoringModelProperties scoringModelProperties = properties.getScoringModel();
+    VoyageAiScoringModel voyageAiScoringModel(VoyageAiProperties properties) {
+        VoyageAiScoringModelProperties scoringModelProperties = properties.getScoringModel();
         return VoyageAiScoringModel.builder()
                 .baseUrl(scoringModelProperties.getBaseUrl())
                 .timeout(scoringModelProperties.getTimeout())

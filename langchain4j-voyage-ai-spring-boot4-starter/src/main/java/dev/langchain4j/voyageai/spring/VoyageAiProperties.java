@@ -3,30 +3,30 @@ package dev.langchain4j.voyageai.spring;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@ConfigurationProperties(prefix = Properties.PREFIX)
-public class Properties {
+@ConfigurationProperties(prefix = VoyageAiProperties.PREFIX)
+public class VoyageAiProperties {
 
     static final String PREFIX = "langchain4j.voyage-ai";
 
     @NestedConfigurationProperty
-    EmbeddingModelProperties embeddingModel;
+    VoyageAiEmbeddingModelProperties embeddingModel;
 
     @NestedConfigurationProperty
-    ScoringModelProperties scoringModel;
+    VoyageAiScoringModelProperties scoringModel;
 
-    public EmbeddingModelProperties getEmbeddingModel() {
+    public VoyageAiEmbeddingModelProperties getEmbeddingModel() {
         return embeddingModel;
     }
 
-    public void setEmbeddingModel(EmbeddingModelProperties embeddingModel) {
+    public void setEmbeddingModel(VoyageAiEmbeddingModelProperties embeddingModel) {
         this.embeddingModel = embeddingModel;
     }
 
-    public ScoringModelProperties getScoringModel() {
+    public VoyageAiScoringModelProperties getScoringModel() {
         return scoringModel;
     }
 
-    public void setScoringModel(ScoringModelProperties scoringModel) {
+    public void setScoringModel(VoyageAiScoringModelProperties scoringModel) {
         this.scoringModel = scoringModel;
     }
 }

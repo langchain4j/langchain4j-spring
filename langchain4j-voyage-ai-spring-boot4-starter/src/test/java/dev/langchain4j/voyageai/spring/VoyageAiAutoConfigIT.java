@@ -19,10 +19,10 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @EnabledIfEnvironmentVariable(named = "VOYAGE_API_KEY", matches = ".+")
-class AutoConfigIT {
+class VoyageAiAutoConfigIT {
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(VoyageAiAutoConfig.class));
 
     @Test
     void should_provide_embedding_model() {
