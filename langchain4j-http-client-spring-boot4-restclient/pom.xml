@@ -54,7 +54,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- required by langchain4j-http-client / HttpClientTimeoutIT -->
+            <!-- Wiremock is required by langchain4j-http-client / HttpClientTimeoutIT -->
             <groupId>org.wiremock.integrations</groupId>
             <artifactId>wiremock-spring-boot</artifactId>
             <version>4.1.0</version>
