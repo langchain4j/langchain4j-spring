@@ -3,6 +3,7 @@ package dev.langchain4j.azure.openai.spring;
 import dev.langchain4j.data.image.Image;
 import dev.langchain4j.model.image.ImageModel;
 import dev.langchain4j.model.output.Response;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled("No access to GPT image models yet; dall-e is deprecated")
 @SpringBootTest(
         properties = {
                 "langchain4j.azure-open-ai.image-model.api-key=${AZURE_OPENAI_KEY}",
