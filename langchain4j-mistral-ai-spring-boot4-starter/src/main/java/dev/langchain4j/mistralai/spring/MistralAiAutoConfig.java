@@ -23,11 +23,11 @@ import org.springframework.core.task.support.ContextPropagatingTaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 
-import static dev.langchain4j.mistralai.spring.Properties.PREFIX;
+import static dev.langchain4j.mistralai.spring.MistralAiProperties.PREFIX;
 
 @AutoConfiguration
-@EnableConfigurationProperties(Properties.class)
-public class AutoConfig {
+@EnableConfigurationProperties(MistralAiProperties.class)
+public class MistralAiAutoConfig {
 
     private static final String TASK_EXECUTOR_THREAD_NAME_PREFIX = "LangChain4j-MistralAI-";
 
@@ -49,9 +49,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
     MistralAiChatModel mistralAiChatModel(
             @Qualifier(CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties,
+            MistralAiProperties properties,
             ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.getChatModel();
+        MistralAiChatModelProperties chatModelProperties = properties.getChatModel();
         MistralAiChatModel.MistralAiChatModelBuilder builder = MistralAiChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(chatModelProperties.baseUrl())
@@ -96,9 +96,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
     MistralAiStreamingChatModel mistralAiStreamingChatModel(
             @Qualifier(STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties,
+            MistralAiProperties properties,
             ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
+        MistralAiChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         MistralAiStreamingChatModel.MistralAiStreamingChatModelBuilder builder = MistralAiStreamingChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(chatModelProperties.baseUrl())
@@ -164,8 +164,8 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")
     MistralAiEmbeddingModel mistralAiEmbeddingModel(
             @Qualifier(EMBEDDING_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties) {
-        EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
+            MistralAiProperties properties) {
+        MistralAiEmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         return MistralAiEmbeddingModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(embeddingModelProperties.baseUrl())
@@ -192,7 +192,7 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".fim-model.api-key")
     MistralAiFimModel mistralAiFimModel(
             @Qualifier(FIM_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties) {
+            MistralAiProperties properties) {
         FimModelProperties fimModelProperties = properties.getFimModel();
         return MistralAiFimModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -226,7 +226,7 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-fim-model.api-key")
     MistralAiStreamingFimModel mistralAiStreamingFimModel(
             @Qualifier(STREAMING_FIM_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties) {
+            MistralAiProperties properties) {
         FimModelProperties fimModelProperties = properties.getStreamingFimModel();
         return MistralAiStreamingFimModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -283,8 +283,8 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".moderation-model.api-key")
     MistralAiModerationModel mistralAiModerationModel(
             @Qualifier(MODERATION_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties) {
-        ModerationModelProperties moderationModelProperties = properties.getModerationModel();
+            MistralAiProperties properties) {
+        MistralAiModerationModelProperties moderationModelProperties = properties.getModerationModel();
         MistralAiModerationModel.Builder builder = new MistralAiModerationModel.Builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(moderationModelProperties.baseUrl())

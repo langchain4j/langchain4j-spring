@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
-public record ChatModelProperties(
+public record MistralAiChatModelProperties(
         String baseUrl,
         String apiKey,
         String modelName,

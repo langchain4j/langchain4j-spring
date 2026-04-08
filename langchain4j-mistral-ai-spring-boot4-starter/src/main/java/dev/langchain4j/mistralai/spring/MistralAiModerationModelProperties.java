@@ -2,7 +2,7 @@ package dev.langchain4j.mistralai.spring;
 
 import java.time.Duration;
 
-public record EmbeddingModelProperties(
+public record MistralAiModerationModelProperties(
         String baseUrl,
         String apiKey,
         String modelName,

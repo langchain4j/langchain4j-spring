@@ -3,19 +3,19 @@ package dev.langchain4j.mistralai.spring;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@ConfigurationProperties(prefix = Properties.PREFIX)
-public class Properties {
+@ConfigurationProperties(prefix = MistralAiProperties.PREFIX)
+public class MistralAiProperties {
 
     public static final String PREFIX = "langchain4j.mistral-ai";
 
     @NestedConfigurationProperty
-    private ChatModelProperties chatModel;
+    private MistralAiChatModelProperties chatModel;
 
     @NestedConfigurationProperty
-    private ChatModelProperties streamingChatModel;
+    private MistralAiChatModelProperties streamingChatModel;
 
     @NestedConfigurationProperty
-    private EmbeddingModelProperties embeddingModel;
+    private MistralAiEmbeddingModelProperties embeddingModel;
 
     @NestedConfigurationProperty
     private FimModelProperties fimModel;
@@ -24,29 +24,29 @@ public class Properties {
     private FimModelProperties streamingFimModel;
 
     @NestedConfigurationProperty
-    private ModerationModelProperties moderationModel;
+    private MistralAiModerationModelProperties moderationModel;
 
-    public ChatModelProperties getChatModel() {
+    public MistralAiChatModelProperties getChatModel() {
         return chatModel;
     }
 
-    public void setChatModel(ChatModelProperties chatModel) {
+    public void setChatModel(MistralAiChatModelProperties chatModel) {
         this.chatModel = chatModel;
     }
 
-    public ChatModelProperties getStreamingChatModel() {
+    public MistralAiChatModelProperties getStreamingChatModel() {
         return streamingChatModel;
     }
 
-    public void setStreamingChatModel(ChatModelProperties streamingChatModel) {
+    public void setStreamingChatModel(MistralAiChatModelProperties streamingChatModel) {
         this.streamingChatModel = streamingChatModel;
     }
 
-    public EmbeddingModelProperties getEmbeddingModel() {
+    public MistralAiEmbeddingModelProperties getEmbeddingModel() {
         return embeddingModel;
     }
 
-    public void setEmbeddingModel(EmbeddingModelProperties embeddingModel) {
+    public void setEmbeddingModel(MistralAiEmbeddingModelProperties embeddingModel) {
         this.embeddingModel = embeddingModel;
     }
 
@@ -66,11 +66,11 @@ public class Properties {
         this.streamingFimModel = streamingFimModel;
     }
 
-    public ModerationModelProperties getModerationModel() {
+    public MistralAiModerationModelProperties getModerationModel() {
         return moderationModel;
     }
 
-    public void setModerationModel(ModerationModelProperties moderationModel) {
+    public void setModerationModel(MistralAiModerationModelProperties moderationModel) {
         this.moderationModel = moderationModel;
     }
 }
