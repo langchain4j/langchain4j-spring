@@ -55,12 +55,9 @@
         </dependency>
 
         <dependency>
-            <!-- needed for automatic test retries (GlobalTestRetryExtension) -->
             <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-core</artifactId>
-            <version>${langchain4j.stable.version}</version>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
+            <artifactId>langchain4j-internal-test-retry</artifactId>
+            <version>${langchain4j.beta.version}</version>
             <scope>test</scope>
         </dependency>
 
