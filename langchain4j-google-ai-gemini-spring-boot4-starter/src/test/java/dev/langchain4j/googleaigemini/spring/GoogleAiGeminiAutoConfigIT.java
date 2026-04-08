@@ -22,12 +22,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @EnabledIfEnvironmentVariable(named = "GOOGLE_AI_GEMINI_API_KEY", matches = ".+")
-class AutoConfigIT {
+class GoogleAiGeminiAutoConfigIT {
 
     private static final String API_KEY = System.getenv("GOOGLE_AI_GEMINI_API_KEY");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(GoogleAiGeminiAutoConfig.class));
 
     @Test
     void provide_chat_model() {

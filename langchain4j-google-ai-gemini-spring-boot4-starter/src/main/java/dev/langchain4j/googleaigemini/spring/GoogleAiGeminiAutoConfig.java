@@ -11,20 +11,20 @@ import org.springframework.context.annotation.Bean;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static dev.langchain4j.googleaigemini.spring.Properties.PREFIX;
+import static dev.langchain4j.googleaigemini.spring.GoogleAiGeminiProperties.PREFIX;
 
 @AutoConfiguration
-@EnableConfigurationProperties(Properties.class)
-class AutoConfig {
+@EnableConfigurationProperties(GoogleAiGeminiProperties.class)
+class GoogleAiGeminiAutoConfig {
 
     @Bean
     @ConditionalOnProperty({
             PREFIX + ".chat-model.api-key",
             PREFIX + ".chat-model.model-name"
     })
-    GoogleAiGeminiChatModel googleAiGeminiChatModel(Properties properties,
+    GoogleAiGeminiChatModel googleAiGeminiChatModel(GoogleAiGeminiProperties properties,
                                                     ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.getChatModel();
+        GoogleAiGeminiChatModelProperties chatModelProperties = properties.getChatModel();
         GoogleAiGeminiChatModel.GoogleAiGeminiChatModelBuilder builder = GoogleAiGeminiChatModel.builder()
                 .apiKey(chatModelProperties.apiKey())
                 .baseUrl(chatModelProperties.baseUrl())
@@ -66,9 +66,9 @@ class AutoConfig {
             PREFIX + ".streaming-chat-model.api-key",
             PREFIX + ".streaming-chat-model.model-name"
     })
-    GoogleAiGeminiStreamingChatModel googleAiGeminiStreamingChatModel(Properties properties,
+    GoogleAiGeminiStreamingChatModel googleAiGeminiStreamingChatModel(GoogleAiGeminiProperties properties,
                                                                       ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
+        GoogleAiGeminiChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         GoogleAiGeminiStreamingChatModel.GoogleAiGeminiStreamingChatModelBuilder builder = GoogleAiGeminiStreamingChatModel.builder()
                 .apiKey(chatModelProperties.apiKey())
                 .baseUrl(chatModelProperties.baseUrl())
@@ -111,8 +111,8 @@ class AutoConfig {
             PREFIX + ".embedding-model.api-key",
             PREFIX + ".embedding-model.model-name"
     })
-    GoogleAiEmbeddingModel googleAiEmbeddingModel(Properties properties) {
-        EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
+    GoogleAiEmbeddingModel googleAiEmbeddingModel(GoogleAiGeminiProperties properties) {
+        GoogleAiGeminiEmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         return GoogleAiEmbeddingModel.builder()
                 .modelName(embeddingModelProperties.modelName())
                 .apiKey(embeddingModelProperties.apiKey())

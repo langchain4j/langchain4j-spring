@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-public record ChatModelProperties(
+public record GoogleAiGeminiChatModelProperties(
         String apiKey,
         String baseUrl,
         String modelName,
@@ -22,6 +22,6 @@ public record ChatModelProperties(
         Duration timeout,
         List<String> stopSequences,
         Map<String, String> safetySetting,
-        GeminiFunctionCallingConfig functionCallingConfig
+        GoogleAiGeminiFunctionCallingConfig functionCallingConfig
 ) {
 }
