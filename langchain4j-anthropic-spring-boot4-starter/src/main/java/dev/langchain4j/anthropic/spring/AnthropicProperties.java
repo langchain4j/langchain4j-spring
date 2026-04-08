@@ -3,30 +3,30 @@ package dev.langchain4j.anthropic.spring;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@ConfigurationProperties(prefix = Properties.PREFIX)
-public class Properties {
+@ConfigurationProperties(prefix = AnthropicProperties.PREFIX)
+public class AnthropicProperties {
 
     static final String PREFIX = "langchain4j.anthropic";
 
     @NestedConfigurationProperty
-    ChatModelProperties chatModel;
+    AnthropicChatModelProperties chatModel;
 
     @NestedConfigurationProperty
-    ChatModelProperties streamingChatModel;
+    AnthropicChatModelProperties streamingChatModel;
 
-    public ChatModelProperties getChatModel() {
+    public AnthropicChatModelProperties getChatModel() {
         return chatModel;
     }
 
-    public void setChatModel(ChatModelProperties chatModel) {
+    public void setChatModel(AnthropicChatModelProperties chatModel) {
         this.chatModel = chatModel;
     }
 
-    public ChatModelProperties getStreamingChatModel() {
+    public AnthropicChatModelProperties getStreamingChatModel() {
         return streamingChatModel;
     }
 
-    public void setStreamingChatModel(ChatModelProperties streamingChatModel) {
+    public void setStreamingChatModel(AnthropicChatModelProperties streamingChatModel) {
         this.streamingChatModel = streamingChatModel;
     }
 }

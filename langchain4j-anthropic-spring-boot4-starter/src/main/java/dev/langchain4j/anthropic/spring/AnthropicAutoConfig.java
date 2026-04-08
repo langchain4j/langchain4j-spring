@@ -9,16 +9,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import static dev.langchain4j.anthropic.spring.Properties.PREFIX;
+import static dev.langchain4j.anthropic.spring.AnthropicProperties.PREFIX;
 
 @AutoConfiguration
-@EnableConfigurationProperties(Properties.class)
-public class AutoConfig {
+@EnableConfigurationProperties(AnthropicProperties.class)
+public class AnthropicAutoConfig {
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
-    AnthropicChatModel anthropicChatModel(Properties properties, ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.getChatModel();
+    AnthropicChatModel anthropicChatModel(AnthropicProperties properties, ObjectProvider<ChatModelListener> listeners) {
+        AnthropicChatModelProperties chatModelProperties = properties.getChatModel();
         return AnthropicChatModel.builder()
                 .baseUrl(chatModelProperties.getBaseUrl())
                 .apiKey(chatModelProperties.getApiKey())
@@ -48,9 +48,9 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
-    AnthropicStreamingChatModel anthropicStreamingChatModel(Properties properties,
+    AnthropicStreamingChatModel anthropicStreamingChatModel(AnthropicProperties properties,
                                                             ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
+        AnthropicChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         return AnthropicStreamingChatModel.builder()
                 .baseUrl(chatModelProperties.getBaseUrl())
                 .apiKey(chatModelProperties.getApiKey())

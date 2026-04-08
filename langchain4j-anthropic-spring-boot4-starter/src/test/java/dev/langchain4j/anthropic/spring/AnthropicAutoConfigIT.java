@@ -18,12 +18,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @EnabledIfEnvironmentVariable(named = "ANTHROPIC_API_KEY", matches = ".+")
-class AutoConfigIT {
+class AnthropicAutoConfigIT {
 
     private static final String API_KEY = System.getenv("ANTHROPIC_API_KEY");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(AnthropicAutoConfig.class));
 
     @AfterEach
     void afterEach() throws InterruptedException {
