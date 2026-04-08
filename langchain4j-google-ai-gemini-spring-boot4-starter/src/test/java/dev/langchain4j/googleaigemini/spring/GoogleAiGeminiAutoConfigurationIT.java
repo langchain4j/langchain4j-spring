@@ -1,0 +1,176 @@
+package dev.langchain4j.googleaigemini.spring;
+
+import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.request.ChatRequestParameters;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.googleai.GoogleAiEmbeddingModel;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
+import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel;
+import dev.langchain4j.model.output.Response;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+
+import java.util.concurrent.CompletableFuture;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@EnabledIfEnvironmentVariable(named = "GOOGLE_AI_GEMINI_API_KEY", matches = ".+")
+class GoogleAiGeminiAutoConfigurationIT {
+
+    private static final String API_KEY = System.getenv("GOOGLE_AI_GEMINI_API_KEY");
+
+    ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(GoogleAiGeminiAutoConfiguration.class));
+
+    @Test
+    void provide_chat_model() {
+        contextRunner.withPropertyValues(
+                        "langchain4j.google-ai-gemini.chat-model.api-key=" + API_KEY,
+                        "langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.5-flash-lite"
+                )
+                .run(context -> {
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(GoogleAiGeminiChatModel.class);
+                    assertThat(context.getBean(GoogleAiGeminiChatModel.class)).isSameAs(chatModel);
+
+                    String response = chatModel.chat("What is the capital of India");
+                    assertThat(response).contains("Delhi");
+
+                    String newResponse = chatModel.chat("Calculate the Fibonacci of 22 and give me the result as an integer value along with the code. ");
+                    assertThat(newResponse).contains("17711");
+                });
+    }
+
+    @Test
+    void provide_chat_model_with_property_values() {
+        contextRunner.withPropertyValues(
+                        "langchain4j.google-ai-gemini.chat-model.api-key=" + API_KEY,
+                        "langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.5-flash-lite",
+                        "langchain4j.google-ai-gemini.chat-model.temperature=0.7"
+                )
+                .run(context -> {
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(GoogleAiGeminiChatModel.class);
+                    assertThat(context.getBean(GoogleAiGeminiChatModel.class)).isSameAs(chatModel);
+
+                    ChatRequestParameters defaultParameters = chatModel.defaultRequestParameters();
+                    assertThat(defaultParameters.modelName()).isEqualTo("gemini-2.5-flash-lite");
+                    assertThat(defaultParameters.temperature()).isEqualTo(0.7);
+
+                    String response = chatModel.chat("What is the capital of India");
+                    assertThat(response).contains("Delhi");
+                });
+    }
+
+    @Test
+    void provide_streaming_chat_model() {
+        contextRunner.withPropertyValues(
+                        "langchain4j.google-ai-gemini.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.google-ai-gemini.streaming-chat-model.model-name=gemini-2.5-flash-lite"
+                )
+                .run(context -> {
+                    StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
+                    assertThat(context.getBean(GoogleAiGeminiStreamingChatModel.class)).isSameAs(streamingChatModel);
+
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    streamingChatModel.chat("What is the capital of India", new StreamingChatResponseHandler() {
+
+                        @Override
+                        public void onPartialResponse(String partialResponse) {
+                        }
+
+                        @Override
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
+                        }
+
+                        @Override
+                        public void onError(Throwable throwable) {
+                            future.completeExceptionally(throwable);
+                        }
+                    });
+
+                    ChatResponse response = future.get(60, SECONDS);
+                    assertThat(response.aiMessage().text()).contains("Delhi");
+                });
+    }
+
+    @Test
+    void provide_streaming_chat_model_with_property_values() {
+        contextRunner.withPropertyValues(
+                        "langchain4j.google-ai-gemini.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.google-ai-gemini.streaming-chat-model.model-name=gemini-2.5-flash-lite",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.temperature=0.7",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.topP=0.9",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.topK=40",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.max-output-tokens=400",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.safety-setting.HARM_CATEGORY_SEXUALLY_EXPLICIT=HARM_BLOCK_THRESHOLD_UNSPECIFIED",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.function-calling-config.gemini-mode=NONE",
+                        "langchain4j.google-ai-gemini.streaming-chat-model.function-calling-config.allowed-function-names=allowCodeExecution,includeCodeExecutionOutput"
+                )
+                .run(context -> {
+                    StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
+                    assertThat(streamingChatModel).isInstanceOf(StreamingChatModel.class);
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    streamingChatModel.chat("What is the capital of India", new StreamingChatResponseHandler() {
+
+                        @Override
+                        public void onPartialResponse(String partialResponse) {
+                        }
+
+                        @Override
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
+                        }
+
+                        @Override
+                        public void onError(Throwable throwable) {
+                            future.completeExceptionally(throwable);
+                        }
+                    });
+                    ChatResponse response = future.get(60, SECONDS);
+                    assertThat(response.aiMessage().text()).contains("Delhi");
+                });
+    }
+
+    @Test
+    void provide_embedding_model() {
+        contextRunner.withPropertyValues(
+                "langchain4j.google-ai-gemini.embedding-model.apiKey=" + API_KEY,
+                "langchain4j.google-ai-gemini.embedding-model.model-name=gemini-embedding-001"
+        ).run(context -> {
+            EmbeddingModel embeddingModel = context.getBean(EmbeddingModel.class);
+            assertThat(context.getBean(GoogleAiEmbeddingModel.class)).isSameAs(embeddingModel);
+
+            Response<Embedding> response = embeddingModel.embed("Hi, I live in India");
+            assertThat(response.content().dimension()).isEqualTo(3072);
+        });
+    }
+
+    @Test
+    void provide_embedding_model_with_property_values() {
+        contextRunner.withPropertyValues(
+                "langchain4j.google-ai-gemini.embedding-model.apiKey=" + API_KEY,
+                "langchain4j.google-ai-gemini.embedding-model.title-metadata.key=title-key",
+                "langchain4j.google-ai-gemini.embedding-model.model-name=gemini-embedding-001",
+                "langchain4j.google-ai-gemini.embedding-model.log-requests-and-responses=true",
+                "langchain4j.google-ai-gemini.embedding-model.max-retries=3",
+                "langchain4j.google-ai-gemini.embedding-model.output-dimensionality=512",
+                "langchain4j.google-ai-gemini.embedding-model.task-type=CLASSIFICATION",
+                "langchain4j.google-ai-gemini.embedding-model.timeout=PT30S"
+        ).run(context -> {
+            EmbeddingModel embeddingModel = context.getBean(GoogleAiEmbeddingModel.class);
+            assertThat(embeddingModel).isInstanceOf(EmbeddingModel.class);
+            assertThat(context.getBean(GoogleAiEmbeddingModel.class)).isSameAs(embeddingModel);
+            Response<Embedding> response = embeddingModel.embed("Hi, I live in India");
+            assertThat(response.content().dimension()).isEqualTo(512);
+        });
+    }
+}

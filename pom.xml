@@ -15,23 +15,40 @@
 
     <modules>
         <module>langchain4j-spring-boot-starter</module>
+        <module>langchain4j-spring-boot4-starter</module>
         <module>langchain4j-spring-boot-tests</module>
+        <module>langchain4j-spring-boot4-tests</module>
         <module>langchain4j-http-client-spring-restclient</module>
+        <module>langchain4j-http-client-spring-boot4-restclient</module>
 
         <module>langchain4j-anthropic-spring-boot-starter</module>
+        <module>langchain4j-anthropic-spring-boot4-starter</module>
         <module>langchain4j-ollama-spring-boot-starter</module>
+        <module>langchain4j-ollama-spring-boot4-starter</module>
         <module>langchain4j-open-ai-spring-boot-starter</module>
+        <module>langchain4j-open-ai-spring-boot4-starter</module>
         <module>langchain4j-azure-ai-search-spring-boot-starter</module>
+        <module>langchain4j-azure-ai-search-spring-boot4-starter</module>
         <module>langchain4j-azure-open-ai-spring-boot-starter</module>
+        <module>langchain4j-azure-open-ai-spring-boot4-starter</module>
         <module>langchain4j-azure-cosmos-mongo-vcore-spring-boot-starter</module>
+        <module>langchain4j-azure-cosmos-mongo-vcore-spring-boot4-starter</module>
         <module>langchain4j-azure-cosmos-nosql-spring-boot-starter</module>
+        <module>langchain4j-azure-cosmos-nosql-spring-boot4-starter</module>
         <module>langchain4j-voyage-ai-spring-boot-starter</module>
+        <module>langchain4j-voyage-ai-spring-boot4-starter</module>
         <module>langchain4j-github-models-spring-boot-starter</module>
+        <module>langchain4j-github-models-spring-boot4-starter</module>
         <module>langchain4j-google-ai-gemini-spring-boot-starter</module>
+        <module>langchain4j-google-ai-gemini-spring-boot4-starter</module>
         <module>langchain4j-vertex-ai-gemini-spring-boot-starter</module>
+        <module>langchain4j-vertex-ai-gemini-spring-boot4-starter</module>
         <module>langchain4j-elasticsearch-spring-boot-starter</module>
+        <module>langchain4j-elasticsearch-spring-boot4-starter</module>
         <module>langchain4j-milvus-spring-boot-starter</module>
+        <module>langchain4j-milvus-spring-boot4-starter</module>
         <module>langchain4j-mistral-ai-spring-boot-starter</module>
+        <module>langchain4j-mistral-ai-spring-boot4-starter</module>
 
         <module>langchain4j-reactor</module>
     </modules>
@@ -43,7 +60,8 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputTimestamp>2026-03-13T10:37:29Z</project.build.outputTimestamp>
-        <spring.boot.version>3.5.11</spring.boot.version>
+        <spring.boot3.version>3.5.11</spring.boot3.version>
+        <spring.boot4.version>4.0.5</spring.boot4.version>
         <tinylog.version>2.7.0</tinylog.version>
     </properties>
 
@@ -63,7 +81,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>${spring.boot3.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -174,6 +192,7 @@
                                     <modules>
                                         <excludes>
                                             <exclude>*:langchain4j-spring-boot-tests</exclude>
+                                            <exclude>*:langchain4j-spring-boot4-tests</exclude>
                                         </excludes>
                                     </modules>
                                 </bom>
