@@ -1,6 +1,6 @@
 package dev.langchain4j.vertexai.gemini.spring;
 
-public class ChatModelProperties {
+public class VertexAiGeminiChatModelProperties {
 
     private String project;
     private String location;

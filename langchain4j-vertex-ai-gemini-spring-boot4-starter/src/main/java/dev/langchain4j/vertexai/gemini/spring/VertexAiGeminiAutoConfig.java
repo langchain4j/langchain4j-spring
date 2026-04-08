@@ -9,17 +9,17 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import static dev.langchain4j.vertexai.gemini.spring.Properties.PREFIX;
+import static dev.langchain4j.vertexai.gemini.spring.VertexAiGeminiProperties.PREFIX;
 
 @AutoConfiguration
-@EnableConfigurationProperties(Properties.class)
-public class AutoConfig {
+@EnableConfigurationProperties(VertexAiGeminiProperties.class)
+public class VertexAiGeminiAutoConfig {
 
     @Bean
     @ConditionalOnProperty(name = PREFIX + ".chat-model.enabled", havingValue = "true")
-    VertexAiGeminiChatModel vertexAiGeminiChatModel(Properties properties,
+    VertexAiGeminiChatModel vertexAiGeminiChatModel(VertexAiGeminiProperties properties,
                                                     ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.getChatModel();
+        VertexAiGeminiChatModelProperties chatModelProperties = properties.getChatModel();
         return VertexAiGeminiChatModel.builder()
                 .project(chatModelProperties.getProject())
                 .location(chatModelProperties.getLocation())
@@ -35,9 +35,9 @@ public class AutoConfig {
 
     @Bean
     @ConditionalOnProperty(name = PREFIX + ".streaming-chat-model.enabled", havingValue = "true")
-    VertexAiGeminiStreamingChatModel vertexAiGeminiStreamingChatModel(Properties properties,
+    VertexAiGeminiStreamingChatModel vertexAiGeminiStreamingChatModel(VertexAiGeminiProperties properties,
                                                                       ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties streamingChatProperties = properties.getStreamingChatModel();
+        VertexAiGeminiChatModelProperties streamingChatProperties = properties.getStreamingChatModel();
         return VertexAiGeminiStreamingChatModel.builder()
                 .project(streamingChatProperties.getProject())
                 .location(streamingChatProperties.getLocation())

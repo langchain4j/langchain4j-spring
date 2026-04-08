@@ -3,30 +3,30 @@ package dev.langchain4j.vertexai.gemini.spring;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@ConfigurationProperties(prefix = Properties.PREFIX)
-public class Properties {
+@ConfigurationProperties(prefix = VertexAiGeminiProperties.PREFIX)
+public class VertexAiGeminiProperties {
 
     static final String PREFIX = "langchain4j.vertex-ai-gemini";
 
     @NestedConfigurationProperty
-    ChatModelProperties chatModel;
+    VertexAiGeminiChatModelProperties chatModel;
 
     @NestedConfigurationProperty
-    ChatModelProperties streamingChatModel;
+    VertexAiGeminiChatModelProperties streamingChatModel;
 
-    public ChatModelProperties getChatModel() {
+    public VertexAiGeminiChatModelProperties getChatModel() {
         return chatModel;
     }
 
-    public void setChatModel(ChatModelProperties chatModel) {
+    public void setChatModel(VertexAiGeminiChatModelProperties chatModel) {
         this.chatModel = chatModel;
     }
 
-    public ChatModelProperties getStreamingChatModel() {
+    public VertexAiGeminiChatModelProperties getStreamingChatModel() {
         return streamingChatModel;
     }
 
-    public void setStreamingChatModel(ChatModelProperties streamingChatModel) {
+    public void setStreamingChatModel(VertexAiGeminiChatModelProperties streamingChatModel) {
         this.streamingChatModel = streamingChatModel;
     }
 }
