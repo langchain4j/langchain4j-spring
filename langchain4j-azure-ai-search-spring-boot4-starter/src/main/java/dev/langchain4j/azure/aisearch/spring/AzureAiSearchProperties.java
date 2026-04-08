@@ -5,8 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 
-@ConfigurationProperties(prefix = Properties.PREFIX)
-public class Properties {
+@ConfigurationProperties(prefix = AzureAiSearchProperties.PREFIX)
+public class AzureAiSearchProperties {
 
     static final String PREFIX = "langchain4j.azure.ai-search";
 

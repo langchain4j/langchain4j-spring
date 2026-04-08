@@ -32,9 +32,9 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @EnabledIfEnvironmentVariable(named = "AZURE_SEARCH_KEY", matches = ".+")
-class AutoConfigIT {
+class AzureAiSearchAutoConfigIT {
 
-    private static final Logger log = LoggerFactory.getLogger(AutoConfigIT.class);
+    private static final Logger log = LoggerFactory.getLogger(AzureAiSearchAutoConfigIT.class);
 
     private static final String AZURE_SEARCH_KEY = System.getenv("AZURE_SEARCH_KEY");
     private static final String AZURE_SEARCH_ENDPOINT = System.getenv("AZURE_SEARCH_ENDPOINT");
@@ -51,7 +51,7 @@ class AutoConfigIT {
     private final SearchIndex index = new SearchIndex(indexName);
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(AzureAiSearchAutoConfig.class));
 
     @AfterEach
     void afterEach() {
@@ -63,11 +63,11 @@ class AutoConfigIT {
 
         contextRunner
                 .withPropertyValues(
-                        Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
-                        Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
-                        Properties.PREFIX + ".content-retriever.dimensions=" + dimensions,
-                        Properties.PREFIX + ".content-retriever.create-or-update-index=" + "true",
-                        Properties.PREFIX + ".content-retriever.query-type=" + "VECTOR"
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.dimensions=" + dimensions,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.create-or-update-index=" + "true",
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.query-type=" + "VECTOR"
                 ).withBean(EmbeddingModel.class, () -> embeddingModel)
                 .run(context -> {
                     ContentRetriever contentRetriever = context.getBean(ContentRetriever.class);
@@ -94,12 +94,12 @@ class AutoConfigIT {
 
         contextRunner
                 .withPropertyValues(
-                        Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
-                        Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
-                        Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
-                        Properties.PREFIX + ".content-retriever.max-results=" + "3",
-                        Properties.PREFIX + ".content-retriever.min-score=" + "0.6",
-                        Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.VECTOR
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.max-results=" + "3",
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.min-score=" + "0.6",
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.VECTOR
                 ).withBean(SearchIndex.class, () -> index)
                 .withBean(EmbeddingModel.class, () -> embeddingModel)
                 .run(context -> {
@@ -115,10 +115,10 @@ class AutoConfigIT {
 
         contextRunner
                 .withPropertyValues(
-                        Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
-                        Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
-                        Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
-                        Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.FULL_TEXT
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.FULL_TEXT
                 )
                 .run(context -> {
                     ContentRetriever contentRetriever = context.getBean(ContentRetriever.class);
@@ -134,10 +134,10 @@ class AutoConfigIT {
 
         contextRunner
                 .withPropertyValues(
-                        Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
-                        Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
-                        Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
-                        Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.HYBRID
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.HYBRID
                 ).withBean(SearchIndex.class, () -> index)
                 .withBean(EmbeddingModel.class, () -> embeddingModel)
                 .run(context -> {
@@ -158,11 +158,11 @@ class AutoConfigIT {
 
         contextRunner
                 .withPropertyValues(
-                        Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
-                        Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
-                        Properties.PREFIX + ".content-retriever.dimensions=" + dimensions,
-                        Properties.PREFIX + ".content-retriever.create-or-update-index=" + "true",
-                        Properties.PREFIX + ".content-retriever.query-type=" + "VECTOR"
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.dimensions=" + dimensions,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.create-or-update-index=" + "true",
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.query-type=" + "VECTOR"
                 ).withBean(EmbeddingModel.class, () -> embeddingModel)
                 .run(context -> {
                     ContentRetriever contentRetriever = context.getBean(ContentRetriever.class);
@@ -189,12 +189,12 @@ class AutoConfigIT {
 
         contextRunner
                 .withPropertyValues(
-                        Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
-                        Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
-                        Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
-                        Properties.PREFIX + ".content-retriever.max-results=" + "3",
-                        Properties.PREFIX + ".content-retriever.min-score=" + "0.4",
-                        Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.HYBRID_WITH_RERANKING
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.max-results=" + "3",
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.min-score=" + "0.4",
+                        AzureAiSearchProperties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.HYBRID_WITH_RERANKING
                 ).withBean(SearchIndex.class, () -> index)
                 .withBean(EmbeddingModel.class, () -> embeddingModel)
                 .run(context -> {
@@ -214,10 +214,10 @@ class AutoConfigIT {
 
         contextRunner
                 .withPropertyValues(
-                        Properties.PREFIX + ".embedding-store.api-key=" + AZURE_SEARCH_KEY,
-                        Properties.PREFIX + ".embedding-store.endpoint=" + AZURE_SEARCH_ENDPOINT,
-                        Properties.PREFIX + ".embedding-store.dimensions=" + 384,
-                        Properties.PREFIX + ".embedding-store.create-or-update-index=" + "true"
+                        AzureAiSearchProperties.PREFIX + ".embedding-store.api-key=" + AZURE_SEARCH_KEY,
+                        AzureAiSearchProperties.PREFIX + ".embedding-store.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        AzureAiSearchProperties.PREFIX + ".embedding-store.dimensions=" + 384,
+                        AzureAiSearchProperties.PREFIX + ".embedding-store.create-or-update-index=" + "true"
                 ).withBean(EmbeddingModel.class, () -> embeddingModel)
                 .run(context -> {
                     EmbeddingStore<TextSegment> embeddingStore = context.getBean(EmbeddingStore.class);
