@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class AutoConfigIT {
+class OllamaAutoConfigIT {
 
     private static final String OLLAMA_BASE_URL = System.getenv("OLLAMA_BASE_URL");
     private static final String MODEL_NAME = "phi";
@@ -65,7 +65,7 @@ class AutoConfigIT {
     }
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(OllamaAutoConfig.class));
 
     @Test
     void should_provide_chat_model() {

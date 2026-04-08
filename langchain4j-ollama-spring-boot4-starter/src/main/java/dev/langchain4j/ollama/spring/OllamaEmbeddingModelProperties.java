@@ -3,7 +3,7 @@ package dev.langchain4j.ollama.spring;
 import java.time.Duration;
 import java.util.Map;
 
-public class EmbeddingModelProperties {
+public class OllamaEmbeddingModelProperties {
 
     String baseUrl;
     String modelName;

@@ -19,11 +19,11 @@ import org.springframework.core.task.support.ContextPropagatingTaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 
-import static dev.langchain4j.ollama.spring.Properties.PREFIX;
+import static dev.langchain4j.ollama.spring.OllamaProperties.PREFIX;
 
 @AutoConfiguration(after = RestClientAutoConfiguration.class)
-@EnableConfigurationProperties(Properties.class)
-public class AutoConfig {
+@EnableConfigurationProperties(OllamaProperties.class)
+public class OllamaAutoConfig {
 
     private static final String TASK_EXECUTOR_THREAD_NAME_PREFIX = "LangChain4j-Ollama-";
 
@@ -43,10 +43,10 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".chat-model.base-url")
     OllamaChatModel ollamaChatModel(
             @Qualifier(CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties,
+            OllamaProperties properties,
             ObjectProvider<ChatModelListener> listeners
     ) {
-        ChatModelProperties chatModelProperties = properties.getChatModel();
+        OllamaChatModelProperties chatModelProperties = properties.getChatModel();
         return OllamaChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(chatModelProperties.getBaseUrl())
@@ -90,10 +90,10 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.base-url")
     OllamaStreamingChatModel ollamaStreamingChatModel(
             @Qualifier(STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties,
+            OllamaProperties properties,
             ObjectProvider<ChatModelListener> listeners
     ) {
-        ChatModelProperties chatModelProperties = properties.getStreamingChatModel();
+        OllamaChatModelProperties chatModelProperties = properties.getStreamingChatModel();
         return OllamaStreamingChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(chatModelProperties.getBaseUrl())
@@ -160,9 +160,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".language-model.base-url")
     OllamaLanguageModel ollamaLanguageModel(
             @Qualifier(LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties
+            OllamaProperties properties
     ) {
-        LanguageModelProperties languageModelProperties = properties.getLanguageModel();
+        OllamaLanguageModelProperties languageModelProperties = properties.getLanguageModel();
         return OllamaLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(languageModelProperties.getBaseUrl())
@@ -196,9 +196,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.base-url")
     OllamaStreamingLanguageModel ollamaStreamingLanguageModel(
             @Qualifier(STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties
+            OllamaProperties properties
     ) {
-        LanguageModelProperties languageModelProperties = properties.getStreamingLanguageModel();
+        OllamaLanguageModelProperties languageModelProperties = properties.getStreamingLanguageModel();
         return OllamaStreamingLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(languageModelProperties.getBaseUrl())
@@ -256,9 +256,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".embedding-model.base-url")
     OllamaEmbeddingModel ollamaEmbeddingModel(
             @Qualifier(EMBEDDING_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties
+            OllamaProperties properties
     ) {
-        EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
+        OllamaEmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         return OllamaEmbeddingModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(embeddingModelProperties.getBaseUrl())

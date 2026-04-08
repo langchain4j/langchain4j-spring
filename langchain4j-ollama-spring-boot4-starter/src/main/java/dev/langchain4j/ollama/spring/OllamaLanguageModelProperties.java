@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-public class LanguageModelProperties {
+public class OllamaLanguageModelProperties {
 
     String baseUrl;
     String modelName;
