@@ -13,25 +13,25 @@ import org.springframework.context.annotation.Bean;
 import java.time.Duration;
 
 @AutoConfiguration
-@EnableConfigurationProperties(Properties.class)
-public class AutoConfig {
+@EnableConfigurationProperties(AzureOpenAiProperties.class)
+public class AzureOpenAiAutoConfig {
 
     @Bean
-    @ConditionalOnProperty(Properties.PREFIX + ".chat-model.api-key")
-    AzureOpenAiChatModel openAiChatModelByAPIKey(Properties properties,
+    @ConditionalOnProperty(AzureOpenAiProperties.PREFIX + ".chat-model.api-key")
+    AzureOpenAiChatModel openAiChatModelByAPIKey(AzureOpenAiProperties properties,
                                                  ObjectProvider<ChatModelListener> listeners) {
         return openAiChatModel(properties, listeners);
     }
 
     @Bean
-    @ConditionalOnProperty(Properties.PREFIX + ".chat-model.non-azure-api-key")
-    AzureOpenAiChatModel openAiChatModelByNonAzureApiKey(Properties properties,
+    @ConditionalOnProperty(AzureOpenAiProperties.PREFIX + ".chat-model.non-azure-api-key")
+    AzureOpenAiChatModel openAiChatModelByNonAzureApiKey(AzureOpenAiProperties properties,
                                                          ObjectProvider<ChatModelListener> listeners) {
         return openAiChatModel(properties, listeners);
     }
 
-    AzureOpenAiChatModel openAiChatModel(Properties properties, ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.chatModel();
+    AzureOpenAiChatModel openAiChatModel(AzureOpenAiProperties properties, ObjectProvider<ChatModelListener> listeners) {
+        AzureOpenAiChatModelProperties chatModelProperties = properties.chatModel();
         AzureOpenAiChatModel.Builder builder = AzureOpenAiChatModel.builder()
                 .endpoint(chatModelProperties.endpoint())
                 .serviceVersion(chatModelProperties.serviceVersion())
@@ -63,22 +63,22 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(Properties.PREFIX + ".streaming-chat-model.api-key")
-    AzureOpenAiStreamingChatModel openAiStreamingChatModelByApiKey(Properties properties,
+    @ConditionalOnProperty(AzureOpenAiProperties.PREFIX + ".streaming-chat-model.api-key")
+    AzureOpenAiStreamingChatModel openAiStreamingChatModelByApiKey(AzureOpenAiProperties properties,
                                                                    ObjectProvider<ChatModelListener> listeners) {
         return openAiStreamingChatModel(properties, listeners);
     }
 
     @Bean
-    @ConditionalOnProperty(Properties.PREFIX + ".streaming-chat-model.non-azure-api-key")
-    AzureOpenAiStreamingChatModel openAiStreamingChatModelByNonAzureApiKey(Properties properties,
+    @ConditionalOnProperty(AzureOpenAiProperties.PREFIX + ".streaming-chat-model.non-azure-api-key")
+    AzureOpenAiStreamingChatModel openAiStreamingChatModelByNonAzureApiKey(AzureOpenAiProperties properties,
                                                                            ObjectProvider<ChatModelListener> listeners) {
         return openAiStreamingChatModel(properties, listeners);
     }
 
-    AzureOpenAiStreamingChatModel openAiStreamingChatModel(Properties properties,
+    AzureOpenAiStreamingChatModel openAiStreamingChatModel(AzureOpenAiProperties properties,
                                                            ObjectProvider<ChatModelListener> listeners) {
-        ChatModelProperties chatModelProperties = properties.streamingChatModel();
+        AzureOpenAiChatModelProperties chatModelProperties = properties.streamingChatModel();
         AzureOpenAiStreamingChatModel.Builder builder = AzureOpenAiStreamingChatModel.builder()
                 .endpoint(chatModelProperties.endpoint())
                 .serviceVersion(chatModelProperties.serviceVersion())
@@ -109,19 +109,19 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty({Properties.PREFIX + ".embedding-model.api-key"})
-    AzureOpenAiEmbeddingModel openAiEmbeddingModelByApiKey(Properties properties) {
+    @ConditionalOnProperty({AzureOpenAiProperties.PREFIX + ".embedding-model.api-key"})
+    AzureOpenAiEmbeddingModel openAiEmbeddingModelByApiKey(AzureOpenAiProperties properties) {
         return openAiEmbeddingModel(properties);
     }
 
     @Bean
-    @ConditionalOnProperty({Properties.PREFIX + ".embedding-model.non-azure-api-key"})
-    AzureOpenAiEmbeddingModel openAiEmbeddingModelByNonAzureApiKey(Properties properties) {
+    @ConditionalOnProperty({AzureOpenAiProperties.PREFIX + ".embedding-model.non-azure-api-key"})
+    AzureOpenAiEmbeddingModel openAiEmbeddingModelByNonAzureApiKey(AzureOpenAiProperties properties) {
         return openAiEmbeddingModel(properties);
     }
 
-    AzureOpenAiEmbeddingModel openAiEmbeddingModel(Properties properties) {
-        EmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
+    AzureOpenAiEmbeddingModel openAiEmbeddingModel(AzureOpenAiProperties properties) {
+        AzureOpenAiEmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
         AzureOpenAiEmbeddingModel.Builder builder = AzureOpenAiEmbeddingModel.builder()
                 .endpoint(embeddingModelProperties.endpoint())
                 .serviceVersion(embeddingModelProperties.serviceVersion())
@@ -141,19 +141,19 @@ public class AutoConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(Properties.PREFIX + ".image-model.api-key")
-    AzureOpenAiImageModel openAiImageModelByApiKey(Properties properties) {
+    @ConditionalOnProperty(AzureOpenAiProperties.PREFIX + ".image-model.api-key")
+    AzureOpenAiImageModel openAiImageModelByApiKey(AzureOpenAiProperties properties) {
         return openAiImageModel(properties);
     }
 
     @Bean
-    @ConditionalOnProperty(Properties.PREFIX + ".image-model.non-azure-api-key")
-    AzureOpenAiImageModel openAiImageModelByNonAzureApiKey(Properties properties) {
+    @ConditionalOnProperty(AzureOpenAiProperties.PREFIX + ".image-model.non-azure-api-key")
+    AzureOpenAiImageModel openAiImageModelByNonAzureApiKey(AzureOpenAiProperties properties) {
         return openAiImageModel(properties);
     }
 
-    AzureOpenAiImageModel openAiImageModel(Properties properties) {
-        ImageModelProperties imageModelProperties = properties.imageModel();
+    AzureOpenAiImageModel openAiImageModel(AzureOpenAiProperties properties) {
+        AzureOpenAiImageModelProperties imageModelProperties = properties.imageModel();
         AzureOpenAiImageModel.Builder builder = AzureOpenAiImageModel.builder()
                 .endpoint(imageModelProperties.endpoint())
                 .serviceVersion(imageModelProperties.serviceVersion())

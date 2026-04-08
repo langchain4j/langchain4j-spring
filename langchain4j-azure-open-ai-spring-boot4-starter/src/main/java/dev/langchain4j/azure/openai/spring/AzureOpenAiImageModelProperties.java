@@ -2,18 +2,22 @@ package dev.langchain4j.azure.openai.spring;
 
 import java.util.Map;
 
-record EmbeddingModelProperties(
+record AzureOpenAiImageModelProperties(
 
     String endpoint,
     String serviceVersion,
     String apiKey,
     String deploymentName,
-    Integer timeout, // TODO use duration instead
+    String quality,
+    String size,
+    String user,
+    String style,
+    String responseFormat,
+    Integer timeout,
     Integer maxRetries,
     Boolean logRequestsAndResponses,
     String userAgentSuffix,
-    Integer dimensions,
     Map<String, String> customHeaders,
     String nonAzureApiKey
-) {
+){
 }

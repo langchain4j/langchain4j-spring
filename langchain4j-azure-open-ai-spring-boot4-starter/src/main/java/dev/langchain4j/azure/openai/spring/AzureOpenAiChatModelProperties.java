@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-record ChatModelProperties(
+record AzureOpenAiChatModelProperties(
 
     String endpoint,
     String serviceVersion,

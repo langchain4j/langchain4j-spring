@@ -3,20 +3,20 @@ package dev.langchain4j.azure.openai.spring;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@ConfigurationProperties(prefix = Properties.PREFIX)
-public record Properties(
+@ConfigurationProperties(prefix = AzureOpenAiProperties.PREFIX)
+public record AzureOpenAiProperties(
 
     @NestedConfigurationProperty
-    ChatModelProperties chatModel,
+    AzureOpenAiChatModelProperties chatModel,
 
     @NestedConfigurationProperty
-    ChatModelProperties streamingChatModel,
+    AzureOpenAiChatModelProperties streamingChatModel,
 
     @NestedConfigurationProperty
-    EmbeddingModelProperties embeddingModel,
+    AzureOpenAiEmbeddingModelProperties embeddingModel,
 
     @NestedConfigurationProperty
-    ImageModelProperties imageModel
+    AzureOpenAiImageModelProperties imageModel
 ) {
     static final String PREFIX = "langchain4j.azure-open-ai";
 }
