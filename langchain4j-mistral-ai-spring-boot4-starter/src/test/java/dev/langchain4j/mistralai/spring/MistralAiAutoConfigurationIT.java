@@ -40,12 +40,12 @@ import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.model.output.Response;
 
 @EnabledIfEnvironmentVariable(named = "MISTRAL_AI_API_KEY", matches = ".+")
-public class MistralAiAutoConfigIT {
+public class MistralAiAutoConfigurationIT {
 
     private static final String API_KEY = System.getenv("MISTRAL_AI_API_KEY");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(MistralAiAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(MistralAiAutoConfiguration.class));
 
     @Test
     void should_provide_chat_model() {

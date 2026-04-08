@@ -15,7 +15,7 @@ import static dev.langchain4j.googleaigemini.spring.GoogleAiGeminiProperties.PRE
 
 @AutoConfiguration
 @EnableConfigurationProperties(GoogleAiGeminiProperties.class)
-class GoogleAiGeminiAutoConfig {
+class GoogleAiGeminiAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty({

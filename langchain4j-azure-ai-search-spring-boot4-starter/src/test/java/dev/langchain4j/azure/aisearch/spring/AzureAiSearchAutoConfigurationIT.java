@@ -32,9 +32,9 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @EnabledIfEnvironmentVariable(named = "AZURE_SEARCH_KEY", matches = ".+")
-class AzureAiSearchAutoConfigIT {
+class AzureAiSearchAutoConfigurationIT {
 
-    private static final Logger log = LoggerFactory.getLogger(AzureAiSearchAutoConfigIT.class);
+    private static final Logger log = LoggerFactory.getLogger(AzureAiSearchAutoConfigurationIT.class);
 
     private static final String AZURE_SEARCH_KEY = System.getenv("AZURE_SEARCH_KEY");
     private static final String AZURE_SEARCH_ENDPOINT = System.getenv("AZURE_SEARCH_ENDPOINT");
@@ -51,7 +51,7 @@ class AzureAiSearchAutoConfigIT {
     private final SearchIndex index = new SearchIndex(indexName);
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AzureAiSearchAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(AzureAiSearchAutoConfiguration.class));
 
     @AfterEach
     void afterEach() {

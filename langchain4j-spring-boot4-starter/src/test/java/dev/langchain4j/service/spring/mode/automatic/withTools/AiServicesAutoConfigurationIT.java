@@ -1,7 +1,7 @@
 package dev.langchain4j.service.spring.mode.automatic.withTools;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
 import dev.langchain4j.service.spring.mode.automatic.withTools.aop.ToolObserverAspect;
 import dev.langchain4j.service.spring.mode.automatic.withTools.listener.AiServiceRegisteredEventListener;
@@ -24,10 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class AiServicesAutoConfigIT {
+class AiServicesAutoConfigurationIT {
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class));
 
     @Test
     void should_create_AI_service_with_tool_which_is_public_method_in_public_class() {

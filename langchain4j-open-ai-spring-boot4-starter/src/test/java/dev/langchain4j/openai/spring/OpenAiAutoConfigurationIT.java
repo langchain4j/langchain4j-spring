@@ -36,14 +36,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
-class OpenAiAutoConfigIT {
+class OpenAiAutoConfigurationIT {
 
     private static final String BASE_URL = StringUtils.hasText(System.getenv("OPENAI_BASE_URL"))
             ? System.getenv("OPENAI_BASE_URL") : "https://api.openai.com/v1";
     private static final String API_KEY = System.getenv("OPENAI_API_KEY");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(OpenAiAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(OpenAiAutoConfiguration.class));
 
     @Test
     void should_provide_chat_model() {

@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 @EnableConfigurationProperties(RagProperties.class)
-public class RagAutoConfig {
+public class RagAutoConfiguration {
 
     // TODO make these beans lazy?
 

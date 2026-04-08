@@ -1,6 +1,6 @@
 package dev.langchain4j.service.spring.mode.automatic.withProfiles;
 
-import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AiServiceWithProfilesIT {
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class));
 
     @Test
     void should_not_create_ai_service() {

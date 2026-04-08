@@ -13,7 +13,7 @@ import static dev.langchain4j.vertexai.gemini.spring.VertexAiGeminiProperties.PR
 
 @AutoConfiguration
 @EnableConfigurationProperties(VertexAiGeminiProperties.class)
-public class VertexAiGeminiAutoConfig {
+public class VertexAiGeminiAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = PREFIX + ".chat-model.enabled", havingValue = "true")

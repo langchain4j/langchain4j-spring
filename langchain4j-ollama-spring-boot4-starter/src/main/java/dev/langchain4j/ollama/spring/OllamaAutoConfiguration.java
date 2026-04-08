@@ -23,7 +23,7 @@ import static dev.langchain4j.ollama.spring.OllamaProperties.PREFIX;
 
 @AutoConfiguration(after = RestClientAutoConfiguration.class)
 @EnableConfigurationProperties(OllamaProperties.class)
-public class OllamaAutoConfig {
+public class OllamaAutoConfiguration {
 
     private static final String TASK_EXECUTOR_THREAD_NAME_PREFIX = "LangChain4j-Ollama-";
 

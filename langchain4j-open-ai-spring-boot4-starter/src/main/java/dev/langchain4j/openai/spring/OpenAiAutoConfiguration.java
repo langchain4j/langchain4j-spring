@@ -23,7 +23,7 @@ import static dev.langchain4j.openai.spring.OpenAiProperties.PREFIX;
 
 @AutoConfiguration(after = RestClientAutoConfiguration.class)
 @EnableConfigurationProperties(OpenAiProperties.class)
-public class OpenAiAutoConfig {
+public class OpenAiAutoConfiguration {
 
     private static final String TASK_EXECUTOR_THREAD_NAME_PREFIX = "LangChain4j-OpenAI-";
 

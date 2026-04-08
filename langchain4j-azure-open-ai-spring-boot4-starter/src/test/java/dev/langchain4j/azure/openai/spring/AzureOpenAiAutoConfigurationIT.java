@@ -40,14 +40,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
-class AzureOpenAiAutoConfigIT {
+class AzureOpenAiAutoConfigurationIT {
 
     private static final String AZURE_OPENAI_KEY = System.getenv("AZURE_OPENAI_KEY");
     private static final String AZURE_OPENAI_ENDPOINT = System.getenv("AZURE_OPENAI_ENDPOINT");
     private static final String NO_AZURE_OPENAI_KEY = System.getenv("OPENAI_API_KEY");
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AzureOpenAiAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(AzureOpenAiAutoConfiguration.class));
 
     @ParameterizedTest(name = "Deployment name: {0}")
     @CsvSource({

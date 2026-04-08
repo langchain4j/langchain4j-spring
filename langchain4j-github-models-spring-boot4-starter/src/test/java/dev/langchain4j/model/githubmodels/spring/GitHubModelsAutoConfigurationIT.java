@@ -19,12 +19,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @EnabledIfEnvironmentVariable(named = "GITHUB_TOKEN", matches = ".+")
-class GitHubModelsAutoConfigIT {
+class GitHubModelsAutoConfigurationIT {
 
     private static final String GITHUB_TOKEN = System.getenv("GITHUB_TOKEN");
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(GitHubModelsAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(GitHubModelsAutoConfiguration.class));
 
     @Test
     void should_provide_chat_model() {

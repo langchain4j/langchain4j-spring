@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
 @EnableConfigurationProperties(GitHubModelsProperties.class)
-public class GitHubModelsAutoConfig {
+public class GitHubModelsAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(GitHubModelsProperties.PREFIX + ".chat-model.github-token")

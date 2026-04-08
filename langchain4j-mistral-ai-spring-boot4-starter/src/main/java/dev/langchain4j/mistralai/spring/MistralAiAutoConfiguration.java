@@ -27,7 +27,7 @@ import static dev.langchain4j.mistralai.spring.MistralAiProperties.PREFIX;
 
 @AutoConfiguration
 @EnableConfigurationProperties(MistralAiProperties.class)
-public class MistralAiAutoConfig {
+public class MistralAiAutoConfiguration {
 
     private static final String TASK_EXECUTOR_THREAD_NAME_PREFIX = "LangChain4j-MistralAI-";
 

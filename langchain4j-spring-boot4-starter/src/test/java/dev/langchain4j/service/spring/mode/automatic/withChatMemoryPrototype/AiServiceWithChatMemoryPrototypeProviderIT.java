@@ -1,6 +1,6 @@
 package dev.langchain4j.service.spring.mode.automatic.withChatMemoryPrototype;
 
-import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AiServiceWithChatMemoryPrototypeProviderIT {
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class));
 
     @Test
     void should_create_AI_services_with_separate_chat_memories() {

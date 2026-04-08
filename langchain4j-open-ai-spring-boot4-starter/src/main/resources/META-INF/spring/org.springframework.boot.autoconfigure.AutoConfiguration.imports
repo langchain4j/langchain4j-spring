@@ -1,1 +1,1 @@
-dev.langchain4j.openai.spring.OpenAiAutoConfig
+dev.langchain4j.openai.spring.OpenAiAutoConfiguration

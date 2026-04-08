@@ -13,7 +13,7 @@ import static dev.langchain4j.anthropic.spring.AnthropicProperties.PREFIX;
 
 @AutoConfiguration
 @EnableConfigurationProperties(AnthropicProperties.class)
-public class AnthropicAutoConfig {
+public class AnthropicAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")

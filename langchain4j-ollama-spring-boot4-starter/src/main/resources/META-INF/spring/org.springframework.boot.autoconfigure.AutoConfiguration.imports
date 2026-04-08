@@ -1,1 +1,1 @@
-dev.langchain4j.ollama.spring.OllamaAutoConfig
+dev.langchain4j.ollama.spring.OllamaAutoConfiguration

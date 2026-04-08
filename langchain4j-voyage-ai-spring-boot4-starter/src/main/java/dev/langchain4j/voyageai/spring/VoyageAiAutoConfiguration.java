@@ -11,7 +11,7 @@ import static dev.langchain4j.voyageai.spring.VoyageAiProperties.PREFIX;
 
 @AutoConfiguration
 @EnableConfigurationProperties(VoyageAiProperties.class)
-public class VoyageAiAutoConfig {
+public class VoyageAiAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")

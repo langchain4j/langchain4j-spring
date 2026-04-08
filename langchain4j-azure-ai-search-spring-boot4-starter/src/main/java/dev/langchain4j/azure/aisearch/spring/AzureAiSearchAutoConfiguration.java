@@ -14,7 +14,7 @@ import static dev.langchain4j.azure.aisearch.spring.AzureAiSearchProperties.PREF
 
 @AutoConfiguration
 @EnableConfigurationProperties(AzureAiSearchProperties.class)
-public class AzureAiSearchAutoConfig {
+public class AzureAiSearchAutoConfiguration {
     @Bean
     @ConditionalOnProperty(PREFIX + ".content-retriever.api-key")
     public AzureAiSearchContentRetriever azureAiSearchContentRetriever(AzureAiSearchProperties properties, @Nullable EmbeddingModel embeddingModel, @Nullable SearchIndex index) {

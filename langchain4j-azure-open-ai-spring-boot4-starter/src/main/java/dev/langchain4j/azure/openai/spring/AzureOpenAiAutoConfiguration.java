@@ -14,7 +14,7 @@ import java.time.Duration;
 
 @AutoConfiguration
 @EnableConfigurationProperties(AzureOpenAiProperties.class)
-public class AzureOpenAiAutoConfig {
+public class AzureOpenAiAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(AzureOpenAiProperties.PREFIX + ".chat-model.api-key")

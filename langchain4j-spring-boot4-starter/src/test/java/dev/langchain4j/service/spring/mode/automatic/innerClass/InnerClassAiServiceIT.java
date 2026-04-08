@@ -1,6 +1,6 @@
 package dev.langchain4j.service.spring.mode.automatic.innerClass;
 
-import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import dev.langchain4j.service.spring.mode.automatic.innerClass.OuterClass.InnerAiService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class InnerClassAiServiceIT {
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class));
 
     @Test
     void should_create_AI_service_that_is_inner_class() {

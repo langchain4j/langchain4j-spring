@@ -1,6 +1,6 @@
 package dev.langchain4j.service.spring.mode.automatic.differentPackage.package1;
 
-import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import dev.langchain4j.service.spring.mode.automatic.differentPackage.package2.DifferentPackageAiService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DifferentPackageAiServiceIT {
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class));
 
     @ComponentScan(value = "dev.langchain4j.service.spring.mode.automatic.differentPackage.package2")
     static class ComponentScanWithValue {

@@ -36,9 +36,9 @@ import static dev.langchain4j.service.spring.AiServiceWiringMode.AUTOMATIC;
 import static dev.langchain4j.service.spring.AiServiceWiringMode.EXPLICIT;
 import static java.util.Arrays.asList;
 
-public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
+public class AiServicesAutoConfiguration implements ApplicationEventPublisherAware {
 
-    private static final Logger log = LoggerFactory.getLogger(AiServicesAutoConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(AiServicesAutoConfiguration.class);
 
     private ApplicationEventPublisher eventPublisher;
 

@@ -1,6 +1,6 @@
 package dev.langchain4j.service.spring.mode.automatic.scanPackages.package1;
 
-import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import dev.langchain4j.service.spring.mode.automatic.scanPackages.aiService.ScanPackageAiService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ScanPackageAiServiceIT {
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class));
+            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class));
 
     @Test
     void should_create_AI_service_that_use_scanPackages_value() {
