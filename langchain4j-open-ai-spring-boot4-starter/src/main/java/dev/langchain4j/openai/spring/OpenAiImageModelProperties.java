@@ -3,15 +3,17 @@ package dev.langchain4j.openai.spring;
 import java.time.Duration;
 import java.util.Map;
 
-record EmbeddingModelProperties(
+record OpenAiImageModelProperties(
         String baseUrl,
         String apiKey,
         String organizationId,
         String projectId,
         String modelName,
-        Integer dimensions,
-        Integer maxSegmentsPerBatch,
+        String size,
+        String quality,
+        String style,
         String user,
+        String responseFormat,
         Duration timeout,
         Integer maxRetries,
         Boolean logRequests,
@@ -19,5 +21,4 @@ record EmbeddingModelProperties(
         Map<String, String> customHeaders,
         Map<String, String> customQueryParams
 ) {
-
 }

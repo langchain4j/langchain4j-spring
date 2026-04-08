@@ -19,11 +19,11 @@ import org.springframework.core.task.support.ContextPropagatingTaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 
-import static dev.langchain4j.openai.spring.Properties.PREFIX;
+import static dev.langchain4j.openai.spring.OpenAiProperties.PREFIX;
 
 @AutoConfiguration(after = RestClientAutoConfiguration.class)
-@EnableConfigurationProperties(Properties.class)
-public class AutoConfig {
+@EnableConfigurationProperties(OpenAiProperties.class)
+public class OpenAiAutoConfig {
 
     private static final String TASK_EXECUTOR_THREAD_NAME_PREFIX = "LangChain4j-OpenAI-";
 
@@ -47,10 +47,10 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
     OpenAiChatModel openAiChatModel(
             @Qualifier(CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties,
+            OpenAiProperties properties,
             ObjectProvider<ChatModelListener> listeners
     ) {
-        ChatModelProperties chatModelProperties = properties.chatModel();
+        OpenAiChatModelProperties chatModelProperties = properties.chatModel();
         return OpenAiChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(chatModelProperties.baseUrl())
@@ -105,10 +105,10 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.api-key")
     OpenAiStreamingChatModel openAiStreamingChatModel(
             @Qualifier(STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties,
+            OpenAiProperties properties,
             ObjectProvider<ChatModelListener> listeners
     ) {
-        ChatModelProperties chatModelProperties = properties.streamingChatModel();
+        OpenAiChatModelProperties chatModelProperties = properties.streamingChatModel();
         return OpenAiStreamingChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(chatModelProperties.baseUrl())
@@ -184,9 +184,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".language-model.api-key")
     OpenAiLanguageModel openAiLanguageModel(
             @Qualifier(LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties
+            OpenAiProperties properties
     ) {
-        LanguageModelProperties languageModelProperties = properties.languageModel();
+        OpenAiLanguageModelProperties languageModelProperties = properties.languageModel();
         return OpenAiLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(languageModelProperties.baseUrl())
@@ -218,9 +218,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.api-key")
     OpenAiStreamingLanguageModel openAiStreamingLanguageModel(
             @Qualifier(STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties
+            OpenAiProperties properties
     ) {
-        LanguageModelProperties languageModelProperties = properties.streamingLanguageModel();
+        OpenAiLanguageModelProperties languageModelProperties = properties.streamingLanguageModel();
         return OpenAiStreamingLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(languageModelProperties.baseUrl())
@@ -276,9 +276,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")
     OpenAiEmbeddingModel openAiEmbeddingModel(
             @Qualifier(EMBEDDING_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties
+            OpenAiProperties properties
     ) {
-        EmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
+        OpenAiEmbeddingModelProperties embeddingModelProperties = properties.embeddingModel();
         return OpenAiEmbeddingModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(embeddingModelProperties.baseUrl())
@@ -312,9 +312,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".moderation-model.api-key")
     OpenAiModerationModel openAiModerationModel(
             @Qualifier(MODERATION_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties
+            OpenAiProperties properties
     ) {
-        ModerationModelProperties moderationModelProperties = properties.moderationModel();
+        OpenAiModerationModelProperties moderationModelProperties = properties.moderationModel();
         return OpenAiModerationModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(moderationModelProperties.baseUrl())
@@ -345,9 +345,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".image-model.api-key")
     OpenAiImageModel openAiImageModel(
             @Qualifier(IMAGE_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
-            Properties properties
+            OpenAiProperties properties
     ) {
-        ImageModelProperties imageModelProperties = properties.imageModel();
+        OpenAiImageModelProperties imageModelProperties = properties.imageModel();
         return OpenAiImageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(imageModelProperties.baseUrl())

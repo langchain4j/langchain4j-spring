@@ -3,13 +3,15 @@ package dev.langchain4j.openai.spring;
 import java.time.Duration;
 import java.util.Map;
 
-record LanguageModelProperties(
+record OpenAiEmbeddingModelProperties(
         String baseUrl,
         String apiKey,
         String organizationId,
         String projectId,
         String modelName,
-        Double temperature,
+        Integer dimensions,
+        Integer maxSegmentsPerBatch,
+        String user,
         Duration timeout,
         Integer maxRetries,
         Boolean logRequests,
@@ -17,4 +19,5 @@ record LanguageModelProperties(
         Map<String, String> customHeaders,
         Map<String, String> customQueryParams
 ) {
+
 }

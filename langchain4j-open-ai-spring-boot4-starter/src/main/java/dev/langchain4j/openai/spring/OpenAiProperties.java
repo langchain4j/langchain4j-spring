@@ -3,29 +3,29 @@ package dev.langchain4j.openai.spring;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@ConfigurationProperties(prefix = Properties.PREFIX)
-public record Properties(
+@ConfigurationProperties(prefix = OpenAiProperties.PREFIX)
+public record OpenAiProperties(
 
     @NestedConfigurationProperty
-    ChatModelProperties chatModel,
+    OpenAiChatModelProperties chatModel,
 
     @NestedConfigurationProperty
-    ChatModelProperties streamingChatModel,
+    OpenAiChatModelProperties streamingChatModel,
 
     @NestedConfigurationProperty
-    LanguageModelProperties languageModel,
+    OpenAiLanguageModelProperties languageModel,
 
     @NestedConfigurationProperty
-    LanguageModelProperties streamingLanguageModel,
+    OpenAiLanguageModelProperties streamingLanguageModel,
 
     @NestedConfigurationProperty
-    EmbeddingModelProperties embeddingModel,
+    OpenAiEmbeddingModelProperties embeddingModel,
 
     @NestedConfigurationProperty
-    ModerationModelProperties moderationModel,
+    OpenAiModerationModelProperties moderationModel,
 
     @NestedConfigurationProperty
-    ImageModelProperties imageModel
+    OpenAiImageModelProperties imageModel
 ) {
     static final String PREFIX = "langchain4j.open-ai";
 
