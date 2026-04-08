@@ -60,7 +60,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputTimestamp>2026-03-13T10:37:29Z</project.build.outputTimestamp>
-        <spring.boot3.version>3.5.13</spring.boot3.version>
+        <spring.boot3.version>4.0.5</spring.boot3.version>
         <spring.boot4.version>4.0.5</spring.boot4.version>
         <tinylog.version>2.7.0</tinylog.version>
     </properties>
