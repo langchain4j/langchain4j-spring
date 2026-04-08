@@ -55,9 +55,9 @@
         </dependency>
         <dependency>
             <!-- required by langchain4j-http-client / HttpClientTimeoutIT -->
-            <groupId>org.wiremock</groupId>
-            <artifactId>wiremock</artifactId>
-            <version>3.13.1</version>
+            <groupId>org.wiremock.integrations</groupId>
+            <artifactId>wiremock-spring-boot</artifactId>
+            <version>4.1.0</version>
             <scope>test</scope>
         </dependency>
 
