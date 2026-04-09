@@ -7,7 +7,7 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-spring</artifactId>
-        <version>1.13.0-beta23</version>
+        <version>1.14.0-beta24-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>langchain4j-anthropic-spring-boot4-starter</artifactId>
