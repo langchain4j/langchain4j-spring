@@ -6,7 +6,7 @@
 
     <groupId>dev.langchain4j</groupId>
     <artifactId>langchain4j-spring</artifactId>
-    <version>1.13.0-beta23</version>
+    <version>1.14.0-beta24-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>langchain4j-spring parent POM</name>
@@ -54,12 +54,12 @@
     </modules>
 
     <properties>
-        <langchain4j.stable.version>1.13.0</langchain4j.stable.version>
-        <langchain4j.beta.version>1.13.0-beta23</langchain4j.beta.version>
+        <langchain4j.stable.version>1.14.0-SNAPSHOT</langchain4j.stable.version>
+        <langchain4j.beta.version>1.14.0-beta24-SNAPSHOT</langchain4j.beta.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.outputTimestamp>2026-04-09T13:08:11Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-04-09T14:42:03Z</project.build.outputTimestamp>
         <spring.boot3.version>3.5.13</spring.boot3.version>
         <spring.boot4.version>4.0.5</spring.boot4.version>
         <tinylog.version>2.7.0</tinylog.version>
