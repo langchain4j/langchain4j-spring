@@ -27,6 +27,8 @@
         <module>langchain4j-ollama-spring-boot4-starter</module>
         <module>langchain4j-open-ai-spring-boot-starter</module>
         <module>langchain4j-open-ai-spring-boot4-starter</module>
+        <module>langchain4j-open-ai-official-spring-boot-starter</module>
+        <module>langchain4j-open-ai-official-spring-boot4-starter</module>
         <module>langchain4j-azure-ai-search-spring-boot-starter</module>
         <module>langchain4j-azure-ai-search-spring-boot4-starter</module>
         <module>langchain4j-azure-open-ai-spring-boot-starter</module>
