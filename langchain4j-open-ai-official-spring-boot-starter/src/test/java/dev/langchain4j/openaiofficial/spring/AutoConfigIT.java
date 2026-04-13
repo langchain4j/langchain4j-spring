@@ -39,14 +39,15 @@ class AutoConfigIT {
     class OpenAi {
 
         private static final String API_KEY = System.getenv("OPENAI_API_KEY");
+        private static final String MODEL_NAME = "gpt-5-mini";
 
         @Test
         void should_provide_chat_model() {
             contextRunner
                     .withPropertyValues(
                             "langchain4j.open-ai-official.chat-model.api-key=" + API_KEY,
-                            "langchain4j.open-ai-official.chat-model.model-name=gpt-4o-mini",
-                            "langchain4j.open-ai-official.chat-model.max-completion-tokens=20"
+                            "langchain4j.open-ai-official.chat-model.model-name=" + MODEL_NAME,
+                            "langchain4j.open-ai-official.chat-model.max-completion-tokens=200"
                     )
                     .run(context -> {
 
@@ -63,8 +64,8 @@ class AutoConfigIT {
             contextRunner
                     .withPropertyValues(
                             "langchain4j.open-ai-official.chat-model.api-key=" + API_KEY,
-                            "langchain4j.open-ai-official.chat-model.model-name=gpt-4o-mini",
-                            "langchain4j.open-ai-official.chat-model.max-completion-tokens=20"
+                            "langchain4j.open-ai-official.chat-model.model-name=" + MODEL_NAME,
+                            "langchain4j.open-ai-official.chat-model.max-completion-tokens=200"
                     )
                     .withUserConfiguration(ListenerConfig.class)
                     .run(context -> {
@@ -90,8 +91,8 @@ class AutoConfigIT {
             contextRunner
                     .withPropertyValues(
                             "langchain4j.open-ai-official.streaming-chat-model.api-key=" + API_KEY,
-                            "langchain4j.open-ai-official.streaming-chat-model.model-name=gpt-4o-mini",
-                            "langchain4j.open-ai-official.streaming-chat-model.max-completion-tokens=20"
+                            "langchain4j.open-ai-official.streaming-chat-model.model-name=" + MODEL_NAME,
+                            "langchain4j.open-ai-official.streaming-chat-model.max-completion-tokens=200"
                     )
                     .run(context -> {
 
@@ -123,23 +124,21 @@ class AutoConfigIT {
     }
 
     @Nested
-    @EnabledIfEnvironmentVariable(named = "AZURE_OPENAI_API_KEY", matches = ".+")
-    class AzureOpenAi {
+    @EnabledIfEnvironmentVariable(named = "MICROSOFT_FOUNDRY_API_KEY", matches = ".+")
+    class MicrosoftFoundry {
 
-        private static final String AZURE_ENDPOINT = System.getenv("AZURE_OPENAI_ENDPOINT");
-        private static final String API_KEY = System.getenv("AZURE_OPENAI_API_KEY");
-        private static final String DEPLOYMENT_NAME = System.getenv("AZURE_OPENAI_DEPLOYMENT_NAME");
+        private static final String ENDPOINT = System.getenv("MICROSOFT_FOUNDRY_ENDPOINT");
+        private static final String API_KEY = System.getenv("MICROSOFT_FOUNDRY_API_KEY");
+        private static final String MODEL_NAME = "gpt-5-mini";
 
         @Test
         void should_provide_chat_model() {
             contextRunner
                     .withPropertyValues(
-                            "langchain4j.open-ai-official.chat-model.base-url=" + AZURE_ENDPOINT,
+                            "langchain4j.open-ai-official.chat-model.base-url=" + ENDPOINT,
                             "langchain4j.open-ai-official.chat-model.api-key=" + API_KEY,
-                            "langchain4j.open-ai-official.chat-model.is-microsoft-foundry=true",
-                            "langchain4j.open-ai-official.chat-model.microsoft-foundry-deployment-name=" + DEPLOYMENT_NAME,
-                            "langchain4j.open-ai-official.chat-model.model-name=" + DEPLOYMENT_NAME,
-                            "langchain4j.open-ai-official.chat-model.max-completion-tokens=20"
+                            "langchain4j.open-ai-official.chat-model.model-name=" + MODEL_NAME,
+                            "langchain4j.open-ai-official.chat-model.max-completion-tokens=200"
                     )
                     .run(context -> {
 
@@ -155,12 +154,10 @@ class AutoConfigIT {
         void should_provide_chat_model_with_listeners() {
             contextRunner
                     .withPropertyValues(
-                            "langchain4j.open-ai-official.chat-model.base-url=" + AZURE_ENDPOINT,
+                            "langchain4j.open-ai-official.chat-model.base-url=" + ENDPOINT,
                             "langchain4j.open-ai-official.chat-model.api-key=" + API_KEY,
-                            "langchain4j.open-ai-official.chat-model.is-microsoft-foundry=true",
-                            "langchain4j.open-ai-official.chat-model.microsoft-foundry-deployment-name=" + DEPLOYMENT_NAME,
-                            "langchain4j.open-ai-official.chat-model.model-name=" + DEPLOYMENT_NAME,
-                            "langchain4j.open-ai-official.chat-model.max-completion-tokens=20"
+                            "langchain4j.open-ai-official.chat-model.model-name=" + MODEL_NAME,
+                            "langchain4j.open-ai-official.chat-model.max-completion-tokens=200"
                     )
                     .withUserConfiguration(ListenerConfig.class)
                     .run(context -> {
@@ -185,12 +182,10 @@ class AutoConfigIT {
         void should_provide_streaming_chat_model() {
             contextRunner
                     .withPropertyValues(
-                            "langchain4j.open-ai-official.streaming-chat-model.base-url=" + AZURE_ENDPOINT,
+                            "langchain4j.open-ai-official.streaming-chat-model.base-url=" + ENDPOINT,
                             "langchain4j.open-ai-official.streaming-chat-model.api-key=" + API_KEY,
-                            "langchain4j.open-ai-official.streaming-chat-model.is-microsoft-foundry=true",
-                            "langchain4j.open-ai-official.streaming-chat-model.microsoft-foundry-deployment-name=" + DEPLOYMENT_NAME,
-                            "langchain4j.open-ai-official.streaming-chat-model.model-name=" + DEPLOYMENT_NAME,
-                            "langchain4j.open-ai-official.streaming-chat-model.max-completion-tokens=20"
+                            "langchain4j.open-ai-official.streaming-chat-model.model-name=" + MODEL_NAME,
+                            "langchain4j.open-ai-official.streaming-chat-model.max-completion-tokens=200"
                     )
                     .run(context -> {
 
@@ -257,7 +252,7 @@ class AutoConfigIT {
                 .withBean(OpenAiOfficialChatModel.class, () -> customChatModel)
                 .withPropertyValues(
                         "langchain4j.open-ai-official.chat-model.api-key=test-key",
-                        "langchain4j.open-ai-official.chat-model.model-name=gpt-4o-mini"
+                        "langchain4j.open-ai-official.chat-model.model-name=gpt-5-mini"
                 )
                 .run(context -> {
                     assertThat(context).hasSingleBean(OpenAiOfficialChatModel.class);
@@ -272,7 +267,7 @@ class AutoConfigIT {
                 .withBean(OpenAiOfficialStreamingChatModel.class, () -> customModel)
                 .withPropertyValues(
                         "langchain4j.open-ai-official.streaming-chat-model.api-key=test-key",
-                        "langchain4j.open-ai-official.streaming-chat-model.model-name=gpt-4o-mini"
+                        "langchain4j.open-ai-official.streaming-chat-model.model-name=gpt-5-mini"
                 )
                 .run(context -> {
                     assertThat(context).hasSingleBean(OpenAiOfficialStreamingChatModel.class);
@@ -302,7 +297,7 @@ class AutoConfigIT {
                 .withBean(OpenAiOfficialImageModel.class, () -> customModel)
                 .withPropertyValues(
                         "langchain4j.open-ai-official.image-model.api-key=test-key",
-                        "langchain4j.open-ai-official.image-model.model-name=dall-e-3"
+                        "langchain4j.open-ai-official.image-model.model-name=gpt-image-1"
                 )
                 .run(context -> {
                     assertThat(context).hasSingleBean(OpenAiOfficialImageModel.class);
