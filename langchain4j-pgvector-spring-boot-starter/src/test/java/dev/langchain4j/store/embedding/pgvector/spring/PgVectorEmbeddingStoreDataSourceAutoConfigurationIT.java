@@ -134,10 +134,9 @@ class PgVectorEmbeddingStoreDataSourceAutoConfigurationIT {
                         DataSourceAutoConfiguration.class,
                         PgVectorEmbeddingStoreAutoConfiguration.class))
                 .withPropertyValues(
-                        // Spring DataSource pointing to the same PG for simplicity
-                        "spring.datasource.url=" + pgVector.getJdbcUrl(),
-                        "spring.datasource.username=" + pgVector.getUsername(),
-                        "spring.datasource.password=" + pgVector.getPassword(),
+                        // Spring DataSource is H2 — if auto-config fell through to DataSource path, it would fail
+                        "spring.datasource.url=jdbc:h2:mem:testdb",
+                        "spring.datasource.driver-class-name=org.h2.Driver",
                         // Explicit pgvector properties — these should take priority
                         "langchain4j.pgvector.host=" + pgVector.getHost(),
                         "langchain4j.pgvector.port=" + pgVector.getMappedPort(5432),
