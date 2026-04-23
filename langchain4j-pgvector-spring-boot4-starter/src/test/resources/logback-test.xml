@@ -1,0 +1,10 @@
+<configuration>
+    <appender name="STDERR" class="ch.qos.logback.core.appender.StderrAppender">
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="STDERR"/>
+    </root>
+</configuration>

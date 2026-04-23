@@ -52,6 +52,11 @@
         <module>langchain4j-mistral-ai-spring-boot-starter</module>
         <module>langchain4j-mistral-ai-spring-boot4-starter</module>
 
+        <module>langchain4j-qdrant-spring-boot-starter</module>
+        <module>langchain4j-qdrant-spring-boot4-starter</module>
+
+        <module>langchain4j-pgvector-spring-boot4-starter</module>
+
         <module>langchain4j-reactor</module>
     </modules>
 
