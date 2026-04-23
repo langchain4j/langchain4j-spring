@@ -22,6 +22,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,10 @@ public class SpringRestClient implements HttpClient {
         if (builder.readTimeout() != null) {
             settings = settings.withReadTimeout(builder.readTimeout());
         }
-        ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryBuilder.detect().build(settings);
+        ClientHttpRequestFactory clientHttpRequestFactory = getRequestFactoryFromBuilder(restClientBuilder);
+        if (clientHttpRequestFactory == null) {
+            clientHttpRequestFactory = ClientHttpRequestFactoryBuilder.detect().build(settings);
+        }
 
         this.delegate = restClientBuilder
                 .requestFactory(clientHttpRequestFactory)
@@ -172,4 +176,20 @@ public class SpringRestClient implements HttpClient {
                         Map.Entry::getValue
                 ));
     }
+    /**
+     * Reads the {@code requestFactory} field from a {@link RestClient.Builder} via reflection.
+     * Returns {@code null} if no factory has been set.
+     */
+    private static ClientHttpRequestFactory getRequestFactoryFromBuilder(RestClient.Builder builder) {
+        try {
+            Field field = RestClient.Builder.class.getDeclaredField("requestFactory");
+            field.setAccessible(true);
+            return (ClientHttpRequestFactory) field.get(builder);
+        } catch (NoSuchFieldException e) {
+            return null;
+        } catch (IllegalAccessException e) {
+            return null;
+        }
+    }
+
 }
