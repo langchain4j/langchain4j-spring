@@ -21,12 +21,39 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.SocketTimeoutException;
 import java.util.Map;
 
 import static dev.langchain4j.http.client.sse.ServerSentEventListenerUtils.ignoringExceptions;
 import static dev.langchain4j.internal.Utils.getOrDefault;
 
+/**
+ * {@link HttpClient} implementation backed by Spring's {@link RestClient}.
+ *
+ * <p>Streaming token delays with Apache HttpClient 5:
+ * When Apache HttpClient 5 (httpclient5) is on the classpath — often transitively via
+ * ClickHouse JDBC, Google Cloud libraries, etc. — {@link ClientHttpRequestFactoryBuilder#detect()}
+ * picks it up automatically. This can cause streaming tokens to arrive in 15–25 second bursts
+ * instead of in real-time, because Apache HC 5 buffers HTTP response content before making it
+ * available to the caller.
+ *
+ * <p>To avoid this, configure a {@link ClientHttpRequestFactory} explicitly on the
+ * {@link RestClient.Builder} passed via {@link SpringRestClientBuilder#restClientBuilder(RestClient.Builder)}.
+ * For example, use {@link org.springframework.http.client.JdkClientHttpRequestFactory} to force
+ * the JDK-built-in {@code java.net.http.HttpClient}, which does not exhibit this buffering behavior:
+ * <pre>{@code
+ * RestClient.Builder restClientBuilder = RestClient.builder()
+ *     .requestFactory(new JdkClientHttpRequestFactory());
+ * HttpClient client = SpringRestClient.builder()
+ *     .restClientBuilder(restClientBuilder)
+ *     .build();
+ * }</pre>
+ *
+ * <p>This class respects any {@link ClientHttpRequestFactory} already configured on the provided
+ * {@link RestClient.Builder} (instead of overwriting it with auto-detect), so that callers can
+ * control which HTTP client is used regardless of classpath contents.
+ */
 public class SpringRestClient implements HttpClient {
 
     private final RestClient delegate;
@@ -43,7 +70,14 @@ public class SpringRestClient implements HttpClient {
         if (builder.readTimeout() != null) {
             settings = settings.withReadTimeout(builder.readTimeout());
         }
-        ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryBuilder.detect().build(settings);
+
+        // Use the requestFactory already configured on the RestClient.Builder if present,
+        // otherwise fall back to auto-detect (which may pick Apache HttpClient 5 from classpath
+        // and cause streaming token delays — see SpringRestClient JavaDoc).
+        ClientHttpRequestFactory clientHttpRequestFactory = getRequestFactoryFromBuilder(restClientBuilder);
+        if (clientHttpRequestFactory == null) {
+            clientHttpRequestFactory = ClientHttpRequestFactoryBuilder.detect().build(settings);
+        }
 
         this.delegate = restClientBuilder
                 .requestFactory(clientHttpRequestFactory)
@@ -160,5 +194,21 @@ public class SpringRestClient implements HttpClient {
             });
         }
         return multipart;
+    }
+
+    /**
+     * Reads the {@code requestFactory} field from a {@link RestClient.Builder} via reflection.
+     * Returns {@code null} if no factory has been set.
+     */
+    private static ClientHttpRequestFactory getRequestFactoryFromBuilder(RestClient.Builder builder) {
+        try {
+            Field field = RestClient.Builder.class.getDeclaredField("requestFactory");
+            field.setAccessible(true);
+            return (ClientHttpRequestFactory) field.get(builder);
+        } catch (NoSuchFieldException e) {
+            return null;
+        } catch (IllegalAccessException e) {
+            return null;
+        }
     }
 }
