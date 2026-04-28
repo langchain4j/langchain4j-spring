@@ -3,7 +3,7 @@ package dev.langchain4j.model.githubmodels.spring;
 import java.time.Duration;
 import java.util.List;
 
-class ChatModelProperties {
+public class ChatModelProperties {
 
     private String endpoint;
     private String gitHubToken;

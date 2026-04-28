@@ -38,8 +38,7 @@ import static org.mockito.Mockito.*;
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
 class AutoConfigIT {
 
-    private static final String BASE_URL = StringUtils.hasText(System.getenv("OPENAI_BASE_URL"))
-            ? System.getenv("OPENAI_BASE_URL") : "https://api.openai.com/v1";
+    private static final String BASE_URL = "https://api.openai.com/v1";
     private static final String API_KEY = System.getenv("OPENAI_API_KEY");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
@@ -97,7 +96,7 @@ class AutoConfigIT {
     void should_create_chat_model_with_default_http_client() {
 
         OpenAiChatModel model = OpenAiChatModel.builder()
-                .baseUrl(System.getenv("OPENAI_BASE_URL"))
+                .baseUrl(BASE_URL)
                 .apiKey(API_KEY)
                 .modelName("gpt-4o-mini")
                 .temperature(0.0)
@@ -111,10 +110,10 @@ class AutoConfigIT {
     void should_provide_streaming_chat_model() {
         contextRunner
                 .withPropertyValues(
-                        // not setting base URL to use OpenAI API without caching proxy (proxy responds way faster)
+                        // not setting base URL to use OpenAI API without caching proxy (proxy responds way too fast)
                         "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
                         "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini",
-                        "langchain4j.open-ai.streaming-chat-model.max-tokens=50"
+                        "langchain4j.open-ai.streaming-chat-model.max-tokens=100"
                 )
                 .run(context -> {
 
@@ -125,7 +124,7 @@ class AutoConfigIT {
                     CompletableFuture<ChatResponse> future1 = new CompletableFuture<>();
                     AtomicReference<LocalDateTime> streamingStarted1 = new AtomicReference<>();
                     AtomicReference<LocalDateTime> streamingFinished1 = new AtomicReference<>();
-                    model.chat("Tell me a story exactly 50 words long", new StreamingChatResponseHandler() {
+                    model.chat("Tell me a story exactly 100 words long", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {
@@ -149,7 +148,7 @@ class AutoConfigIT {
                     CompletableFuture<ChatResponse> future2 = new CompletableFuture<>();
                     AtomicReference<LocalDateTime> streamingStarted2 = new AtomicReference<>();
                     AtomicReference<LocalDateTime> streamingFinished2 = new AtomicReference<>();
-                    model.chat("Tell me a story exactly 50 words long", new StreamingChatResponseHandler() {
+                    model.chat("Tell me a story exactly 100 words long", new StreamingChatResponseHandler() {
 
                         @Override
                         public void onPartialResponse(String partialResponse) {

@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-class ChatModelProperties {
+public class ChatModelProperties {
 
     String baseUrl;
     String apiKey;
