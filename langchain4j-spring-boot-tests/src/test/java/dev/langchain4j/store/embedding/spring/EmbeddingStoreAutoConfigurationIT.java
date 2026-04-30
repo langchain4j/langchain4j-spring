@@ -71,7 +71,9 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
                     EmbeddingMatch<TextSegment> match = relevant.get(0);
                     assertThat(match.score()).isCloseTo(1, withPercentage(1));
                     assertThat(match.embeddingId()).isEqualTo(id);
-                    assertThat(match.embedding()).isEqualTo(embedding);
+                    if (assertEmbedding()) {
+                        assertThat(match.embedding()).isEqualTo(embedding);
+                    }
                     assertThat(match.embedded()).isEqualTo(segment);
                 });
     }
@@ -105,12 +107,18 @@ public abstract class EmbeddingStoreAutoConfigurationIT {
                     EmbeddingMatch<TextSegment> match = matches.get(0);
                     assertThat(match.score()).isCloseTo(1, withPercentage(1));
                     assertThat(match.embeddingId()).isEqualTo(id);
-                    assertThat(match.embedding()).isEqualTo(embedding);
+                    if (assertEmbedding()) {
+                        assertThat(match.embedding()).isEqualTo(embedding);
+                    }
                     assertThat(match.embedded()).isEqualTo(segment);
                 });
     }
 
     protected void awaitUntilPersisted(ApplicationContext context) {
 
+    }
+
+    protected boolean assertEmbedding() {
+        return true;
     }
 }
