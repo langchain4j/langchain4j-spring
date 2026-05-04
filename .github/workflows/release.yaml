@@ -1,7 +1,32 @@
 name: release
 
 on:
+  repository_dispatch:
+    types: [ trigger-release ]
   workflow_dispatch:
+    inputs:
+      stableVersion:
+        description: "Stable release version (e.g., 1.8.0)"
+        required: true
+      betaVersion:
+        description: "Beta release version (e.g., 1.8.0-beta15)"
+        required: true
+      branch:
+        description: "Branch to release from (e.g., 'main' for minor releases, 'release/x.y.z' for patch releases)"
+        required: false
+        default: "main"
+
+env:
+  STABLE_VERSION: ${{ github.event.inputs.stableVersion || github.event.client_payload.stableVersion }}
+  BETA_VERSION: ${{ github.event.inputs.betaVersion || github.event.client_payload.betaVersion }}
+  BRANCH: ${{ github.event.inputs.branch || github.event.client_payload.branch || 'main' }}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
 
@@ -10,31 +35,82 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          java-version: '17'
+          ref: ${{ env.BRANCH }}
+          fetch-depth: 0
+          token: ${{ secrets.GH_RELEASE_AUTOMATION }}
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          java-version: '25'
           distribution: 'temurin'
           cache: maven
-          server-id: ossrh
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_PASSWORD
+          server-id: central
+          server-username: MAVEN_CENTRAL_USERNAME
+          server-password: MAVEN_CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
 
-      - name: release
+      - name: Show inputs
+        run: |
+          echo "Stable version: $STABLE_VERSION"
+          echo "Beta version: $BETA_VERSION"
+          echo "Branch to release from: $BRANCH"
+
+      - name: Extract current stable SNAPSHOT version from POM property
+        id: extract-stable-snapshot-version
+        run: |
+          REVISION=$(mvn help:evaluate -Dexpression=langchain4j.stable.version -q -DforceStdout)
+          echo "stableVersionSnapshot=$REVISION" >> $GITHUB_OUTPUT
+
+      - name: Update stable versions
+        run: mvn versions:set -DnewVersion="$STABLE_VERSION" -DoldVersion=${{ steps.extract-stable-snapshot-version.outputs.stableVersionSnapshot }} -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false
+
+      - name: Update stable version property
+        run: mvn versions:set-property -Dproperty=langchain4j.stable.version -DnewVersion="$STABLE_VERSION" -DgenerateBackupPoms=false
+
+      - name: Extract current beta SNAPSHOT version from POM property
+        id: extract-beta-snapshot-version
+        run: |
+          REVISION=$(mvn help:evaluate -Dexpression=langchain4j.beta.version -q -DforceStdout)
+          echo "betaVersionSnapshot=$REVISION" >> $GITHUB_OUTPUT
+
+      - name: Update beta versions
+        run: mvn versions:set -DnewVersion="$BETA_VERSION" -DoldVersion=${{ steps.extract-beta-snapshot-version.outputs.betaVersionSnapshot }} -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false
+
+      - name: Update beta version property
+        run: mvn versions:set-property -Dproperty=langchain4j.beta.version -DnewVersion="$BETA_VERSION" -DgenerateBackupPoms=false
+
+      - name: Release
         run: mvn -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
-          AZURE_OPENAI_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
-          AZURE_SEARCH_ENDPOINT: ${{ secrets.AZURE_SEARCH_ENDPOINT }}
-          AZURE_SEARCH_KEY: ${{ secrets.AZURE_SEARCH_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+
+      - name: Commit version changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pom.xml '**/pom.xml'
+          git commit -m "Release versions $STABLE_VERSION and $BETA_VERSION"
+
+      - name: Push
+        run: |
+          git push origin "$BRANCH"
+
+      - name: Tag release
+        run: |
+          git tag "$BETA_VERSION"
+          git push origin "$BETA_VERSION"
+
+      - name: Trigger documentation version update
+        env:
+          GH_TOKEN: ${{ secrets.GH_RELEASE_AUTOMATION }}
+        run: |
+          gh api repos/langchain4j/langchain4j/dispatches \
+            -f event_type=trigger-docs-update-version \
+            -f 'client_payload[stableVersion]='"$STABLE_VERSION" \
+            -f 'client_payload[betaVersion]='"$BETA_VERSION"

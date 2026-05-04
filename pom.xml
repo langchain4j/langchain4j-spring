@@ -1,47 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.langchain4j</groupId>
     <artifactId>langchain4j-spring</artifactId>
-    <version>0.37.0-SNAPSHOT</version>
+    <version>1.15.0-beta25-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>langchain4j-spring parent POM</name>
     <description>Parent POM for langchain4j-spring submodules</description>
-    <url>https://github.com/langchain4j/langchain4j-spring</url>
+    <url>https://github.com/langchain4j/langchain4j-spring/tree/main</url>
 
     <modules>
         <module>langchain4j-spring-boot-starter</module>
+        <module>langchain4j-spring-boot4-starter</module>
         <module>langchain4j-spring-boot-tests</module>
+        <module>langchain4j-spring-boot4-tests</module>
+        <module>langchain4j-http-client-spring-restclient</module>
+        <module>langchain4j-http-client-spring-boot4-restclient</module>
 
         <module>langchain4j-anthropic-spring-boot-starter</module>
+        <module>langchain4j-anthropic-spring-boot4-starter</module>
         <module>langchain4j-ollama-spring-boot-starter</module>
+        <module>langchain4j-ollama-spring-boot4-starter</module>
         <module>langchain4j-open-ai-spring-boot-starter</module>
+        <module>langchain4j-open-ai-spring-boot4-starter</module>
+        <module>langchain4j-open-ai-official-spring-boot-starter</module>
+        <module>langchain4j-open-ai-official-spring-boot4-starter</module>
         <module>langchain4j-azure-ai-search-spring-boot-starter</module>
+        <module>langchain4j-azure-ai-search-spring-boot4-starter</module>
         <module>langchain4j-azure-open-ai-spring-boot-starter</module>
+        <module>langchain4j-azure-open-ai-spring-boot4-starter</module>
+        <module>langchain4j-azure-cosmos-mongo-vcore-spring-boot-starter</module>
+        <module>langchain4j-azure-cosmos-mongo-vcore-spring-boot4-starter</module>
+        <module>langchain4j-azure-cosmos-nosql-spring-boot-starter</module>
+        <module>langchain4j-azure-cosmos-nosql-spring-boot4-starter</module>
         <module>langchain4j-voyage-ai-spring-boot-starter</module>
+        <module>langchain4j-voyage-ai-spring-boot4-starter</module>
         <module>langchain4j-github-models-spring-boot-starter</module>
-
+        <module>langchain4j-github-models-spring-boot4-starter</module>
+        <module>langchain4j-google-ai-gemini-spring-boot-starter</module>
+        <module>langchain4j-google-ai-gemini-spring-boot4-starter</module>
         <module>langchain4j-vertex-ai-gemini-spring-boot-starter</module>
+        <module>langchain4j-vertex-ai-gemini-spring-boot4-starter</module>
         <module>langchain4j-elasticsearch-spring-boot-starter</module>
-        <module>langchain4j-redis-spring-boot-starter</module>
-        <module>langchain4j-qianfan-spring-boot-starter</module>
+        <module>langchain4j-elasticsearch-spring-boot4-starter</module>
         <module>langchain4j-milvus-spring-boot-starter</module>
-        <module>langchain4j-dashscope-spring-boot-starter</module>
+        <module>langchain4j-milvus-spring-boot4-starter</module>
+        <module>langchain4j-mistral-ai-spring-boot-starter</module>
+        <module>langchain4j-mistral-ai-spring-boot4-starter</module>
 
         <module>langchain4j-reactor</module>
     </modules>
 
     <properties>
+        <langchain4j.stable.version>1.15.0-SNAPSHOT</langchain4j.stable.version>
+        <langchain4j.beta.version>1.15.0-beta25-SNAPSHOT</langchain4j.beta.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tinylog.version>2.6.2</tinylog.version>
-        <spring.boot.version>3.2.6</spring.boot.version>
-        <testcontainers.version>1.20.3</testcontainers.version>
+        <project.build.outputTimestamp>2026-04-30T18:43:58Z</project.build.outputTimestamp>
+        <spring.boot3.version>3.5.13</spring.boot3.version>
+        <spring.boot4.version>4.0.5</spring.boot4.version>
         <tinylog.version>2.7.0</tinylog.version>
     </properties>
 
@@ -51,65 +73,33 @@
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${langchain4j.stable.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
 
+            <!-- BOM for Spring Boot dependencies, including Framework, Reactor, Testcontainers, and
+            Test -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-webflux</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-autoconfigure-processor</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-configuration-processor</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <version>${spring.boot.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.18.34</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${testcontainers.version}</version>
-                <scope>import</scope>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot3.version}</version>
                 <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.tinylog</groupId>
                 <artifactId>tinylog-impl</artifactId>
                 <version>${tinylog.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.tinylog</groupId>
                 <artifactId>slf4j-tinylog</artifactId>
                 <version>${tinylog.version}</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>
@@ -121,25 +111,27 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.3</version>
+                <version>3.5.5</version>
             </plugin>
 
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.7.0</version>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.9.0</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
+                    <!-- waitMaxTime is specified in seconds-->
+                    <waitMaxTime>1800</waitMaxTime>
                 </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -153,7 +145,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.6.3</version>
+                <version>3.12.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -167,7 +159,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.2.3</version>
+                <version>3.5.5</version>
                 <executions>
                     <execution>
                         <goals>
@@ -178,53 +170,93 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>io.sundr</groupId>
+                <artifactId>sundr-maven-plugin</artifactId>
+                <version>0.230.2</version>
+                <executions>
+                    <execution>
+                        <inherited>false</inherited>
+                        <goals>
+                            <goal>generate-bom</goal>
+                        </goals>
+                        <configuration>
+                            <boms>
+                                <bom>
+                                    <artifactId>langchain4j-spring-bom</artifactId>
+                                    <name>LangChain4j Spring :: BOM</name>
+                                    <description>Bill of Materials POM for getting full, complete
+                                        set of compatible versions of LangChain4j Spring modules</description>
+                                    <properties>
+                                        <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
+                                        <sonar.skip>true</sonar.skip>
+                                    </properties>
+                                    <modules>
+                                        <excludes>
+                                            <exclude>*:langchain4j-spring-boot-tests</exclude>
+                                            <exclude>*:langchain4j-spring-boot4-tests</exclude>
+                                        </excludes>
+                                    </modules>
+                                </bom>
+                            </boms>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.7.3</version>
+                <configuration>
+                    <flattenMode>ossrh</flattenMode>
+                    <pomElements>
+                        <build>remove</build>
+                        <repositories>remove</repositories>
+                    </pomElements>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
     <licenses>
         <license>
-            <name>Apache-2.0</name>
+            <name>The Apache Software License, Version 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
 
     <developers>
         <developer>
-            <id>deep-learning-dynamo</id>
-            <email>deeplearningdynamo@gmail.com</email>
-            <url>https://github.com/deep-learning-dynamo</url>
-        </developer>
-        <developer>
-            <id>kuraleta</id>
-            <email>digital.kuraleta@gmail.com</email>
-            <url>https://github.com/kuraleta</url>
+            <id>dliubarskyi</id>
+            <name>Dmytro Liubarskyi</name>
+            <email>info@langchain4j.dev</email>
+            <url>https://github.com/dliubarskyi</url>
         </developer>
     </developers>
 
     <scm>
-        <url>https://github.com/langchain4j/langchain4j-spring</url>
         <connection>scm:git:git://github.com/langchain4j/langchain4j-spring.git</connection>
         <developerConnection>scm:git:git@github.com:langchain4j/langchain4j-spring.git</developerConnection>
+        <url>https://github.com/langchain4j/langchain4j-spring/tree/main</url>
     </scm>
-
-    <repositories>
-        <repository>
-            <id>ossrh-snapshots</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <profiles>
 
@@ -240,7 +272,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.2.8</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -281,5 +313,19 @@
         </profile>
 
     </profiles>
+
+    <repositories>
+        <repository>
+            <name>Central Portal Snapshots</name>
+            <id>central-portal-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>

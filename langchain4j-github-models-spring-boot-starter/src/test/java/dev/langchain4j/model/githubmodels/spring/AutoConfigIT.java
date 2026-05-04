@@ -1,15 +1,15 @@
 package dev.langchain4j.model.githubmodels.spring;
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.StreamingResponseHandler;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.github.GitHubModelsChatModel;
 import dev.langchain4j.model.github.GitHubModelsEmbeddingModel;
 import dev.langchain4j.model.github.GitHubModelsStreamingChatModel;
-import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@EnabledIfEnvironmentVariable(named = "GITHUB_TOKEN", matches = ".+")
 class AutoConfigIT {
 
     private static final String GITHUB_TOKEN = System.getenv("GITHUB_TOKEN");
@@ -35,10 +36,10 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
-                    assertThat(chatLanguageModel).isInstanceOf(GitHubModelsChatModel.class);
-                    assertThat(chatLanguageModel.generate("What is the capital of France?")).contains("Paris");
-                    assertThat(context.getBean(GitHubModelsChatModel.class)).isSameAs(chatLanguageModel);
+                    ChatModel chatModel = context.getBean(ChatModel.class);
+                    assertThat(chatModel).isInstanceOf(GitHubModelsChatModel.class);
+                    assertThat(chatModel.chat("What is the capital of France?")).contains("Paris");
+                    assertThat(context.getBean(GitHubModelsChatModel.class)).isSameAs(chatModel);
                 });
     }
 
@@ -52,28 +53,28 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
-                    assertThat(streamingChatLanguageModel).isInstanceOf(GitHubModelsStreamingChatModel.class);
-                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.generate("What is the capital of France?", new StreamingResponseHandler<AiMessage>() {
+                    StreamingChatModel streamingChatModel = context.getBean(StreamingChatModel.class);
+                    assertThat(streamingChatModel).isInstanceOf(GitHubModelsStreamingChatModel.class);
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    streamingChatModel.chat("What is the capital of France?", new StreamingChatResponseHandler() {
 
                         @Override
-                        public void onNext(String token) {
+                        public void onPartialResponse(String partialResponse) {
                         }
 
                         @Override
-                        public void onComplete(Response<AiMessage> response) {
-                            future.complete(response);
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            future.complete(completeResponse);
                         }
 
                         @Override
                         public void onError(Throwable error) {
                         }
                     });
-                    Response<AiMessage> response = future.get(60, SECONDS);
-                    assertThat(response.content().text()).contains("Paris");
+                    ChatResponse response = future.get(60, SECONDS);
+                    assertThat(response.aiMessage().text()).contains("Paris");
 
-                    assertThat(context.getBean(GitHubModelsStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
+                    assertThat(context.getBean(GitHubModelsStreamingChatModel.class)).isSameAs(streamingChatModel);
                 });
     }
 

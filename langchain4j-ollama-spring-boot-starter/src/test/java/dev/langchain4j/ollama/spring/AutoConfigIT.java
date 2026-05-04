@@ -1,9 +1,10 @@
 package dev.langchain4j.ollama.spring;
 
-import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.language.LanguageModel;
 import dev.langchain4j.model.language.StreamingLanguageModel;
@@ -58,9 +59,10 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    ChatLanguageModel chatLanguageModel = context.getBean(ChatLanguageModel.class);
+                    ChatModel chatLanguageModel = context.getBean(ChatModel.class);
                     assertThat(chatLanguageModel).isInstanceOf(OllamaChatModel.class);
-                    assertThat(chatLanguageModel.generate("What is the capital of Germany?")).contains("Berlin");
+
+                    assertThat(chatLanguageModel.chat("What is the capital of Germany?")).contains("Berlin");
 
                     assertThat(context.getBean(OllamaChatModel.class)).isSameAs(chatLanguageModel);
                 });
@@ -77,17 +79,17 @@ class AutoConfigIT {
                 )
                 .run(context -> {
 
-                    StreamingChatLanguageModel streamingChatLanguageModel = context.getBean(StreamingChatLanguageModel.class);
+                    StreamingChatModel streamingChatLanguageModel = context.getBean(StreamingChatModel.class);
                     assertThat(streamingChatLanguageModel).isInstanceOf(OllamaStreamingChatModel.class);
-                    CompletableFuture<Response<AiMessage>> future = new CompletableFuture<>();
-                    streamingChatLanguageModel.generate("What is the capital of Germany?", new StreamingResponseHandler<AiMessage>() {
+                    CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+                    streamingChatLanguageModel.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
 
                         @Override
-                        public void onNext(String token) {
+                        public void onPartialResponse(String partialResponse) {
                         }
 
                         @Override
-                        public void onComplete(Response<AiMessage> response) {
+                        public void onCompleteResponse(ChatResponse response) {
                             future.complete(response);
                         }
 
@@ -95,11 +97,42 @@ class AutoConfigIT {
                         public void onError(Throwable error) {
                         }
                     });
-                    Response<AiMessage> response = future.get(60, SECONDS);
-                    assertThat(response.content().text()).contains("Berlin");
+                    ChatResponse response = future.get(60, SECONDS);
+                    assertThat(response.aiMessage().text()).contains("Berlin");
 
                     assertThat(context.getBean(OllamaStreamingChatModel.class)).isSameAs(streamingChatLanguageModel);
                 });
+    }
+
+    @Test
+    void should_create_streaming_chat_model_with_default_http_client() throws Exception {
+
+        OllamaStreamingChatModel model = OllamaStreamingChatModel.builder()
+                .baseUrl(baseUrl())
+                .modelName(MODEL_NAME)
+                .temperature(0.0)
+                // replaced maxTokens with numPredict
+                .numPredict(20)
+                .build();
+
+        CompletableFuture<ChatResponse> future = new CompletableFuture<>();
+        model.chat("What is the capital of Germany?", new StreamingChatResponseHandler() {
+
+            @Override
+            public void onPartialResponse(String partialResponse) {
+            }
+
+            @Override
+            public void onCompleteResponse(ChatResponse response) {
+                future.complete(response);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+            }
+        });
+        ChatResponse response = future.get(60, SECONDS);
+        assertThat(response.aiMessage().text()).contains("Berlin");
     }
 
     @Test

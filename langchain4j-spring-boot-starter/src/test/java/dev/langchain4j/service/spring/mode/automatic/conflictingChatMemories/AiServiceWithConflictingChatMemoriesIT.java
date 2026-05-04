@@ -1,6 +1,6 @@
 package dev.langchain4j.service.spring.mode.automatic.conflictingChatMemories;
 
-import dev.langchain4j.exception.IllegalConfigurationException;
+import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;

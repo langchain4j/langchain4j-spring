@@ -1,12 +1,8 @@
 package dev.langchain4j.ollama.spring;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@Getter
-@Setter
 @ConfigurationProperties(prefix = Properties.PREFIX)
 public class Properties {
 
@@ -26,4 +22,44 @@ public class Properties {
 
     @NestedConfigurationProperty
     EmbeddingModelProperties embeddingModel;
+
+    public ChatModelProperties getChatModel() {
+        return chatModel;
+    }
+
+    public void setChatModel(ChatModelProperties chatModel) {
+        this.chatModel = chatModel;
+    }
+
+    public ChatModelProperties getStreamingChatModel() {
+        return streamingChatModel;
+    }
+
+    public void setStreamingChatModel(ChatModelProperties streamingChatModel) {
+        this.streamingChatModel = streamingChatModel;
+    }
+
+    public LanguageModelProperties getLanguageModel() {
+        return languageModel;
+    }
+
+    public void setLanguageModel(LanguageModelProperties languageModel) {
+        this.languageModel = languageModel;
+    }
+
+    public LanguageModelProperties getStreamingLanguageModel() {
+        return streamingLanguageModel;
+    }
+
+    public void setStreamingLanguageModel(LanguageModelProperties streamingLanguageModel) {
+        this.streamingLanguageModel = streamingLanguageModel;
+    }
+
+    public EmbeddingModelProperties getEmbeddingModel() {
+        return embeddingModel;
+    }
+
+    public void setEmbeddingModel(EmbeddingModelProperties embeddingModel) {
+        this.embeddingModel = embeddingModel;
+    }
 }

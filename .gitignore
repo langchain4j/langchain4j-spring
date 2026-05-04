@@ -1,7 +1,9 @@
 target/
+**/.flattened-pom.xml
 
 ### IntelliJ IDEA ###
 .idea/*
+**/.idea/
 .idea/modules.xml
 .idea/jarRepositories.xml
 .idea/compiler.xml
@@ -37,3 +39,5 @@ build/
 
 ### .env files contain local environment variables ###
 .env
+
+*.log

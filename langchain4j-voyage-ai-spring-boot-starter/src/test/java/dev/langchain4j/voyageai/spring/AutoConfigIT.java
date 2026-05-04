@@ -9,6 +9,7 @@ import dev.langchain4j.model.voyageai.VoyageAiEmbeddingModelName;
 import dev.langchain4j.model.voyageai.VoyageAiScoringModel;
 import dev.langchain4j.model.voyageai.VoyageAiScoringModelName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -17,6 +18,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@EnabledIfEnvironmentVariable(named = "VOYAGE_API_KEY", matches = ".+")
 class AutoConfigIT {
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
