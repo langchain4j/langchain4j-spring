@@ -16,9 +16,11 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.ollama.OllamaContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -29,12 +31,26 @@ class AutoConfigIT {
 
     private static final String MODEL_NAME = "phi";
 
+    private static final String OLLAMA_HOST_CACHE = System.getProperty("user.home") + "/.ollama";
+    private static final String OLLAMA_CONTAINER_CACHE = "/root/.ollama";
+
     @Container
-    static OllamaContainer ollama = new OllamaContainer(
-            DockerImageName.parse("alpine/ollama:latest")
-                    .asCompatibleSubstituteFor("ollama/ollama")
-    )
-            .withExposedPorts(11434);
+    static OllamaContainer ollama = createOllamaContainer();
+
+    private static OllamaContainer createOllamaContainer() {
+        OllamaContainer container = new OllamaContainer(
+                DockerImageName.parse("alpine/ollama:latest")
+                        .asCompatibleSubstituteFor("ollama/ollama")
+        ).withExposedPorts(11434);
+
+        // Mount cache directory if it exists (e.g., in GitHub Actions)
+        File cacheDir = new File(OLLAMA_HOST_CACHE);
+        if (cacheDir.exists()) {
+            container.withFileSystemBind(OLLAMA_HOST_CACHE, OLLAMA_CONTAINER_CACHE, BindMode.READ_WRITE);
+        }
+
+        return container;
+    }
 
     @BeforeAll
     static void beforeAll() throws Exception {
