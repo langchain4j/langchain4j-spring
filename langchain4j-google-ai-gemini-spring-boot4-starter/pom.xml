@@ -7,7 +7,7 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-spring</artifactId>
-        <version>1.15.0-beta25-SNAPSHOT</version>
+        <version>1.15.0-beta25</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>langchain4j-google-ai-gemini-spring-boot4-starter</artifactId>
