@@ -543,8 +543,8 @@ class AutoConfigIT {
                 .withPropertyValues(
                         "langchain4j.open-ai.image-model.base-url=" + BASE_URL,
                         "langchain4j.open-ai.image-model.api-key=" + API_KEY,
-                        "langchain4j.open-ai.image-model.model-name=dall-e-2",
-                        "langchain4j.open-ai.image-model.size=256x256"
+                        "langchain4j.open-ai.image-model.model-name=gpt-image-1",
+                        "langchain4j.open-ai.image-model.quality=low"
                 )
                 .run(context -> {
 
@@ -552,7 +552,7 @@ class AutoConfigIT {
                     assertThat(model).isInstanceOf(OpenAiImageModel.class);
                     assertThat(context.getBean(OpenAiImageModel.class)).isSameAs(model);
 
-                    assertThat(model.generate("banana").content().url()).isNotNull();
+                    assertThat(model.generate("banana").content().base64Data()).isNotNull();
                 });
     }
 
@@ -562,11 +562,11 @@ class AutoConfigIT {
         OpenAiImageModel model = OpenAiImageModel.builder()
                 .baseUrl(BASE_URL)
                 .apiKey(API_KEY)
-                .modelName("dall-e-2")
-                .size("256x256")
+                .modelName("gpt-image-1")
+                .quality("low")
                 .build();
 
-        assertThat(model.generate("banana").content().url()).isNotNull();
+        assertThat(model.generate("banana").content().base64Data()).isNotNull();
     }
 
     @Test

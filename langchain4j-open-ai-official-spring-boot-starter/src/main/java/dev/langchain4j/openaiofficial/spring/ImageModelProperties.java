@@ -10,9 +10,11 @@ record ImageModelProperties(
         String modelName,
         String size,
         String quality,
-        String style,
         String user,
-        String responseFormat,
+        String background,
+        String outputFormat,
+        Long outputCompression,
+        String moderation,
         Duration timeout,
         Integer maxRetries,
         Map<String, String> customHeaders
