@@ -123,19 +123,49 @@ public class OpenAiOfficialAutoConfiguration {
     @ConditionalOnMissingBean
     OpenAiOfficialImageModel openAiOfficialImageModel(OpenAiOfficialProperties properties) {
         OpenAiOfficialImageModelProperties imageModelProperties = properties.imageModel();
-        return OpenAiOfficialImageModel.builder()
-                .baseUrl(imageModelProperties.baseUrl())
-                .apiKey(imageModelProperties.apiKey())
-                .organizationId(imageModelProperties.organizationId())
-                .modelName(imageModelProperties.modelName())
-                .size(imageModelProperties.size())
-                .quality(imageModelProperties.quality())
-                .style(imageModelProperties.style())
-                .user(imageModelProperties.user())
-                .responseFormat(imageModelProperties.responseFormat())
-                .timeout(imageModelProperties.timeout())
-                .maxRetries(imageModelProperties.maxRetries())
-                .customHeaders(imageModelProperties.customHeaders())
-                .build();
+        OpenAiOfficialImageModel.Builder builder = OpenAiOfficialImageModel.builder();
+        if (imageModelProperties.baseUrl() != null) {
+            builder.baseUrl(imageModelProperties.baseUrl());
+        }
+        if (imageModelProperties.apiKey() != null) {
+            builder.apiKey(imageModelProperties.apiKey());
+        }
+        if (imageModelProperties.organizationId() != null) {
+            builder.organizationId(imageModelProperties.organizationId());
+        }
+        if (imageModelProperties.modelName() != null) {
+            builder.modelName(imageModelProperties.modelName());
+        }
+        if (imageModelProperties.size() != null) {
+            builder.size(imageModelProperties.size());
+        }
+        if (imageModelProperties.quality() != null) {
+            builder.quality(imageModelProperties.quality());
+        }
+        if (imageModelProperties.user() != null) {
+            builder.user(imageModelProperties.user());
+        }
+        if (imageModelProperties.background() != null) {
+            builder.background(imageModelProperties.background());
+        }
+        if (imageModelProperties.outputFormat() != null) {
+            builder.outputFormat(imageModelProperties.outputFormat());
+        }
+        if (imageModelProperties.outputCompression() != null) {
+            builder.outputCompression(imageModelProperties.outputCompression());
+        }
+        if (imageModelProperties.moderation() != null) {
+            builder.moderation(imageModelProperties.moderation());
+        }
+        if (imageModelProperties.timeout() != null) {
+            builder.timeout(imageModelProperties.timeout());
+        }
+        if (imageModelProperties.maxRetries() != null) {
+            builder.maxRetries(imageModelProperties.maxRetries());
+        }
+        if (imageModelProperties.customHeaders() != null) {
+            builder.customHeaders(imageModelProperties.customHeaders());
+        }
+        return builder.build();
     }
 }
