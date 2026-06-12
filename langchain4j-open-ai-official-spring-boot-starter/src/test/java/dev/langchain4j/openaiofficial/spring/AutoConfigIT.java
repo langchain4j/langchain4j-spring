@@ -5,7 +5,6 @@ import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
-import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialChatModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialEmbeddingModel;
@@ -119,6 +118,24 @@ class AutoConfigIT {
                         });
                         ChatResponse chatResponse = future.get(30, SECONDS);
                         assertThat(chatResponse.aiMessage().text()).contains("Berlin");
+                    });
+        }
+
+        @Test
+        void should_provide_image_model() {
+            contextRunner
+                    .withPropertyValues(
+                            "langchain4j.open-ai-official.image-model.api-key=" + API_KEY,
+                            "langchain4j.open-ai-official.image-model.model-name=gpt-image-1",
+                            "langchain4j.open-ai-official.image-model.quality=low"
+                    )
+                    .run(context -> {
+
+                        ImageModel model = context.getBean(ImageModel.class);
+                        assertThat(model).isInstanceOf(OpenAiOfficialImageModel.class);
+                        assertThat(context.getBean(OpenAiOfficialImageModel.class)).isSameAs(model);
+
+                        assertThat(model.generate("banana").content().base64Data()).isNotNull();
                     });
         }
     }
