@@ -6,8 +6,15 @@ import dev.langchain4j.http.client.FormDataFile;
 import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
+import dev.langchain4j.http.client.sse.ServerSentEvent;
+import dev.langchain4j.http.client.sse.ServerSentEventContext;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
 import dev.langchain4j.http.client.sse.ServerSentEventParser;
+import dev.langchain4j.http.client.sse.ServerSentEventParsingHandle;
+import dev.langchain4j.http.client.sse.StreamingHttpEvent;
+import mutiny.zero.BackpressureStrategy;
+import mutiny.zero.TubeConfiguration;
+import mutiny.zero.ZeroPublisher;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.core.io.ByteArrayResource;
@@ -23,6 +30,9 @@ import org.springframework.web.client.RestClientResponseException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static dev.langchain4j.http.client.sse.ServerSentEventListenerUtils.ignoringExceptions;
 import static dev.langchain4j.internal.Utils.getOrDefault;
@@ -30,6 +40,7 @@ import static dev.langchain4j.internal.Utils.getOrDefault;
 public class SpringRestClient implements HttpClient {
 
     private final RestClient delegate;
+    private final AsyncTaskExecutor asyncRequestExecutor;
     private final AsyncTaskExecutor streamingRequestExecutor;
 
     public SpringRestClient(SpringRestClientBuilder builder) {
@@ -49,16 +60,24 @@ public class SpringRestClient implements HttpClient {
                 .requestFactory(clientHttpRequestFactory)
                 .build();
 
+        this.asyncRequestExecutor = getOrDefault(builder.asyncRequestExecutor(), () -> {
+            if (builder.createDefaultAsyncRequestExecutor()) {
+                return createDefaultRequestExecutor(); // TODO create lazily when it is first used?
+            } else {
+                return null;
+            }
+        });
+
         this.streamingRequestExecutor = getOrDefault(builder.streamingRequestExecutor(), () -> {
             if (builder.createDefaultStreamingRequestExecutor()) {
-                return createDefaultStreamingRequestExecutor();
+                return createDefaultRequestExecutor(); // TODO create lazily when it is first used?
             } else {
                 return null;
             }
         });
     }
 
-    private static AsyncTaskExecutor createDefaultStreamingRequestExecutor() {
+    private static AsyncTaskExecutor createDefaultRequestExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setQueueCapacity(0);
         taskExecutor.initialize();
@@ -129,6 +148,78 @@ public class SpringRestClient implements HttpClient {
                     ignoringExceptions(() -> listener.onError(e));
                 }
             }
+        });
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Spring's {@link RestClient} is blocking, so this offloads the blocking {@link #execute(HttpRequest)}
+     * to the async request executor and completes the returned future on that thread — the calling
+     * thread is never blocked, but a worker thread performs the request.
+     */
+    @Override
+    public CompletableFuture<SuccessfulHttpResponse> executeAsync(HttpRequest request) {
+        return asyncRequestExecutor.submitCompletable(() -> execute(request)); // TODO
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Backed by the blocking streaming path, so a worker thread (from the streaming request executor) is
+     * pinned for the lifetime of the stream. Cancelling the subscription cancels the SSE parsing, which
+     * closes the stream and frees the thread.
+     */
+    @Override
+    public Flow.Publisher<StreamingHttpEvent> executeWithPublisher(HttpRequest request, ServerSentEventParser parser) {
+        TubeConfiguration config = new TubeConfiguration()
+                .withBackpressureStrategy(BackpressureStrategy.BUFFER)
+                .withBufferSize(256);
+        return ZeroPublisher.create(config, tube -> {
+            AtomicReference<ServerSentEventParsingHandle> parsingHandle = new AtomicReference<>();
+            tube.whenCancelled(() -> {
+                ServerSentEventParsingHandle handle = parsingHandle.get();
+                if (handle != null) {
+                    handle.cancel();
+                }
+            });
+            execute(request, parser, new ServerSentEventListener() {
+                @Override
+                public void onOpen(SuccessfulHttpResponse response) {
+                    if (!tube.cancelled()) {
+                        tube.send(response);
+                    }
+                }
+
+                @Override
+                public void onEvent(ServerSentEvent event) {
+                    if (!tube.cancelled()) {
+                        tube.send(event);
+                    }
+                }
+
+                @Override
+                public void onEvent(ServerSentEvent event, ServerSentEventContext context) {
+                    parsingHandle.set(context.parsingHandle());
+                    if (!tube.cancelled()) {
+                        tube.send(event);
+                    }
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    if (!tube.cancelled()) {
+                        tube.fail(throwable);
+                    }
+                }
+
+                @Override
+                public void onClose() {
+                    if (!tube.cancelled()) {
+                        tube.complete();
+                    }
+                }
+            });
         });
     }
 

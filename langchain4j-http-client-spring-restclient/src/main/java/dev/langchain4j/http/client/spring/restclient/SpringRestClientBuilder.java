@@ -9,6 +9,8 @@ import java.time.Duration;
 public class SpringRestClientBuilder implements HttpClientBuilder {
 
     private RestClient.Builder restClientBuilder;
+    private AsyncTaskExecutor asyncRequestExecutor; // TODO names
+    private Boolean createDefaultAsyncRequestExecutor = true; // TODO names
     private AsyncTaskExecutor streamingRequestExecutor;
     private Boolean createDefaultStreamingRequestExecutor = true;
     private Duration connectTimeout;
@@ -20,6 +22,24 @@ public class SpringRestClientBuilder implements HttpClientBuilder {
 
     public SpringRestClientBuilder restClientBuilder(RestClient.Builder restClientBuilder) {
         this.restClientBuilder = restClientBuilder;
+        return this;
+    }
+
+    public AsyncTaskExecutor asyncRequestExecutor() {
+        return asyncRequestExecutor;
+    }
+
+    public SpringRestClientBuilder asyncRequestExecutor(AsyncTaskExecutor asyncRequestExecutor) {
+        this.asyncRequestExecutor = asyncRequestExecutor;
+        return this;
+    }
+
+    public Boolean createDefaultAsyncRequestExecutor() {
+        return createDefaultAsyncRequestExecutor;
+    }
+
+    public SpringRestClientBuilder createDefaultAsyncRequestExecutor(Boolean createDefaultAsyncRequestExecutor) {
+        this.createDefaultAsyncRequestExecutor = createDefaultAsyncRequestExecutor;
         return this;
     }
 
