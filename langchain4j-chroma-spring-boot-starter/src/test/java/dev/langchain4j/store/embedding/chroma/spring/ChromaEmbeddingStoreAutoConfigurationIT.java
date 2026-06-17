@@ -10,8 +10,7 @@ import org.testcontainers.chromadb.ChromaDBContainer;
 
 class ChromaEmbeddingStoreAutoConfigurationIT extends EmbeddingStoreAutoConfigurationIT {
 
-    static ChromaDBContainer chroma = new ChromaDBContainer("chromadb/chroma:0.5.0");
-
+    static ChromaDBContainer chroma = new ChromaDBContainer("chromadb/chroma:0.5.4");
     @BeforeAll
     static void beforeAll() {
         chroma.start();
