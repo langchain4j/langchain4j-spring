@@ -23,6 +23,7 @@ public class AutoConfig {
                 .endpoint(nestedProperties.getEndpoint())
                 .apiKey(nestedProperties.getApiKey())
                 .createOrUpdateIndex(nestedProperties.getCreateOrUpdateIndex())
+                .indexName(nestedProperties.getIndexName())
                 .embeddingModel(embeddingModel)
                 .dimensions(nestedProperties.getDimensions() == null ? 0 : nestedProperties.getDimensions())
                 .index(index)
@@ -40,6 +41,7 @@ public class AutoConfig {
                 .endpoint(nestedProperties.getEndpoint())
                 .apiKey(nestedProperties.getApiKey())
                 .createOrUpdateIndex(nestedProperties.getCreateOrUpdateIndex())
+                .indexName(nestedProperties.getIndexName())
                 .dimensions(nestedProperties.getDimensions())
                 .index(index)
                 .build();
