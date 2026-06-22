@@ -58,8 +58,8 @@
     <properties>
         <langchain4j.stable.version>1.17.0-SNAPSHOT</langchain4j.stable.version>
         <langchain4j.beta.version>1.17.0-beta27-SNAPSHOT</langchain4j.beta.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputTimestamp>2026-06-06T06:47:09Z</project.build.outputTimestamp>
         <spring.boot3.version>3.5.13</spring.boot3.version>
