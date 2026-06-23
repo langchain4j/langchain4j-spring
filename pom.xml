@@ -47,6 +47,7 @@
         <module>langchain4j-vertex-ai-gemini-spring-boot4-starter</module>
         <module>langchain4j-elasticsearch-spring-boot-starter</module>
         <module>langchain4j-elasticsearch-spring-boot4-starter</module>
+        <module>langchain4j-chroma-spring-boot-starter</module>
         <module>langchain4j-milvus-spring-boot-starter</module>
         <module>langchain4j-milvus-spring-boot4-starter</module>
         <module>langchain4j-mistral-ai-spring-boot-starter</module>
