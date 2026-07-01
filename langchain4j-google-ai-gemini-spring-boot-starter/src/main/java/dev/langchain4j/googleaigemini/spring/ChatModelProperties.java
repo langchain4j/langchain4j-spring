@@ -17,6 +17,8 @@ public record ChatModelProperties(
         Integer maxOutputTokens,
         Boolean allowCodeExecution,
         Boolean includeCodeExecutionOutput,
+		Boolean returnThinking,
+		Boolean sendThinking,
         Boolean logRequestsAndResponses,
         Integer maxRetries,
         Duration timeout,

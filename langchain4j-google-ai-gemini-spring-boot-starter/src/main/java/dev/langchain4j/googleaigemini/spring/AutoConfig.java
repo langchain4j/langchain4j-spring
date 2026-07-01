@@ -41,6 +41,8 @@ class AutoConfig {
                 .stopSequences(chatModelProperties.stopSequences())
                 .allowCodeExecution(chatModelProperties.allowCodeExecution())
                 .includeCodeExecutionOutput(chatModelProperties.includeCodeExecutionOutput())
+                .returnThinking(chatModelProperties.returnThinking())
+                .sendThinking(chatModelProperties.sendThinking())
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
                 .listeners(listeners.orderedStream().toList());
 
@@ -84,6 +86,8 @@ class AutoConfig {
                 .stopSequences(chatModelProperties.stopSequences())
                 .allowCodeExecution(chatModelProperties.allowCodeExecution())
                 .includeCodeExecutionOutput(chatModelProperties.includeCodeExecutionOutput())
+                .returnThinking(chatModelProperties.returnThinking())
+                .sendThinking(chatModelProperties.sendThinking())
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
                 .listeners(listeners.orderedStream().toList());
 
