@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import com.azure.ai.openai.models.ReasoningEffortValue;
 
 import java.time.Duration;
 
@@ -59,6 +60,9 @@ public class AutoConfig {
         if (chatModelProperties.nonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
         }
+        if(chatModelProperties.reasoningEffort() != null && !chatModelProperties.reasoningEffort().isEmpty()) {
+            builder.reasoningEffort(ReasoningEffortValue.fromString(chatModelProperties.reasoningEffort()));
+        }
         return builder.build();
     }
 
@@ -104,6 +108,9 @@ public class AutoConfig {
                 .supportedCapabilities(chatModelProperties.supportedCapabilities());
         if (chatModelProperties.nonAzureApiKey() != null) {
             builder.nonAzureApiKey(chatModelProperties.nonAzureApiKey());
+        }
+        if(chatModelProperties.reasoningEffort() != null && !chatModelProperties.reasoningEffort().isEmpty()) {
+            builder.reasoningEffort(ReasoningEffortValue.fromString(chatModelProperties.reasoningEffort()));
         }
         return builder.build();
     }
