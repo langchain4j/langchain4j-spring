@@ -3,8 +3,10 @@ package dev.langchain4j.store.embedding.chroma.spring;
 import dev.langchain4j.store.embedding.chroma.ChromaApiVersion;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.annotation.Validated;
 import java.time.Duration;
 
+@Validated
 @Validated
 @ConfigurationProperties(prefix = ChromaEmbeddingStoreProperties.PREFIX)
 public class ChromaEmbeddingStoreProperties {
