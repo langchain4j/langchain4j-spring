@@ -3,7 +3,7 @@ package dev.langchain4j.store.embedding.chroma.spring;
 import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
@@ -13,7 +13,7 @@ import static dev.langchain4j.store.embedding.chroma.spring.ChromaEmbeddingStore
 
 @AutoConfiguration
 @EnableConfigurationProperties(ChromaEmbeddingStoreProperties.class)
-@ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnBooleanProperty(prefix = PREFIX, name = "enabled", matchIfMissing = true)
 public class ChromaEmbeddingStoreAutoConfiguration {
 
     @Bean
