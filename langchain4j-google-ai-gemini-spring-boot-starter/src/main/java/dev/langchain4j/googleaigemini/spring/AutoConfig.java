@@ -44,6 +44,8 @@ class AutoConfig {
                 .returnThinking(chatModelProperties.returnThinking())
                 .sendThinking(chatModelProperties.sendThinking())
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
+                .logRequests(chatModelProperties.logRequests())
+                .logResponses(chatModelProperties.logResponses())
                 .listeners(listeners.orderedStream().toList());
 
         if (chatModelProperties.safetySetting() != null && !chatModelProperties.safetySetting().isEmpty()) {
@@ -89,6 +91,8 @@ class AutoConfig {
                 .returnThinking(chatModelProperties.returnThinking())
                 .sendThinking(chatModelProperties.sendThinking())
                 .logRequestsAndResponses(chatModelProperties.logRequestsAndResponses())
+                .logRequests(chatModelProperties.logRequests())
+                .logResponses(chatModelProperties.logResponses())
                 .listeners(listeners.orderedStream().toList());
 
 
@@ -126,6 +130,8 @@ class AutoConfig {
                 .outputDimensionality(embeddingModelProperties.outputDimensionality())
                 .timeout(embeddingModelProperties.timeout())
                 .logRequestsAndResponses(embeddingModelProperties.logRequestsAndResponses())
+                .logRequests(embeddingModelProperties.logRequests())
+                .logResponses(embeddingModelProperties.logResponses())
                 .build();
     }
 
