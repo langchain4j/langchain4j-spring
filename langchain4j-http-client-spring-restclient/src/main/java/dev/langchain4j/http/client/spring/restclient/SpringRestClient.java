@@ -9,6 +9,8 @@ import dev.langchain4j.http.client.SuccessfulHttpResponse;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
 import dev.langchain4j.http.client.sse.ServerSentEventParser;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -43,7 +45,11 @@ public class SpringRestClient implements HttpClient {
         if (builder.readTimeout() != null) {
             settings = settings.withReadTimeout(builder.readTimeout());
         }
-        ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryBuilder.detect().build(settings);
+        ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = ClientHttpRequestFactoryBuilder.detect();
+        if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
+            requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
+        }
+        ClientHttpRequestFactory clientHttpRequestFactory = requestFactoryBuilder.build(settings);
 
         this.delegate = restClientBuilder
                 .requestFactory(clientHttpRequestFactory)
