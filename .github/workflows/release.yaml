@@ -15,11 +15,20 @@ on:
         description: "Branch to release from (e.g., 'main' for minor releases, 'release/x.y.z' for patch releases)"
         required: false
         default: "main"
+      startFrom:
+        description: "Phase to start from (use to resume after a failed release)"
+        required: false
+        default: "release"
+        type: choice
+        options:
+          - release
+          - commit-and-tag
 
 env:
   STABLE_VERSION: ${{ github.event.inputs.stableVersion || github.event.client_payload.stableVersion }}
   BETA_VERSION: ${{ github.event.inputs.betaVersion || github.event.client_payload.betaVersion }}
   BRANCH: ${{ github.event.inputs.branch || github.event.client_payload.branch || 'main' }}
+  START_FROM: ${{ github.event.inputs.startFrom || github.event.client_payload.startFrom || 'release' }}
 
 permissions:
   contents: write
@@ -58,6 +67,16 @@ jobs:
           echo "Stable version: $STABLE_VERSION"
           echo "Beta version: $BETA_VERSION"
           echo "Branch to release from: $BRANCH"
+          echo "Start from phase: $START_FROM"
+
+      - name: Compute start phase number
+        id: phase
+        run: |
+          case "$START_FROM" in
+            release)        echo "num=1" >> "$GITHUB_OUTPUT" ;;
+            commit-and-tag) echo "num=2" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Unknown startFrom: $START_FROM" >&2; exit 1 ;;
+          esac
 
       - name: Extract current stable SNAPSHOT version from POM property
         id: extract-stable-snapshot-version
@@ -84,6 +103,7 @@ jobs:
         run: mvn versions:set-property -Dproperty=langchain4j.beta.version -DnewVersion="$BETA_VERSION" -DgenerateBackupPoms=false
 
       - name: Release
+        if: ${{ fromJSON(steps.phase.outputs.num) <= 1 }}
         run: mvn -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -91,6 +111,7 @@ jobs:
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
 
       - name: Commit version changes
+        if: ${{ fromJSON(steps.phase.outputs.num) <= 2 }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -98,10 +119,12 @@ jobs:
           git commit -m "Release versions $STABLE_VERSION and $BETA_VERSION"
 
       - name: Push
+        if: ${{ fromJSON(steps.phase.outputs.num) <= 2 }}
         run: |
           git push origin "$BRANCH"
 
       - name: Tag release
+        if: ${{ fromJSON(steps.phase.outputs.num) <= 2 }}
         run: |
           git tag "$BETA_VERSION"
           git push origin "$BETA_VERSION"
