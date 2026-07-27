@@ -11,10 +11,19 @@ on:
       betaVersion:
         description: "Beta release version (e.g., 1.8.0-beta15)"
         required: true
+      startFrom:
+        description: "Phase to start from (use to resume after a failed release)"
+        required: false
+        default: "release"
+        type: choice
+        options:
+          - release
+          - commit-and-tag
 
 env:
   STABLE_VERSION: ${{ github.event.inputs.stableVersion || github.event.client_payload.stableVersion }}
   BETA_VERSION: ${{ github.event.inputs.betaVersion || github.event.client_payload.betaVersion }}
+  START_FROM: ${{ github.event.inputs.startFrom || github.event.client_payload.startFrom || 'release' }}
 
 jobs:
 
@@ -41,6 +50,16 @@ jobs:
         run: |
           echo "Stable version: ${{ env.STABLE_VERSION }}"
           echo "Beta version: ${{ env.BETA_VERSION }}"
+          echo "Start from phase: ${{ env.START_FROM }}"
+
+      - name: Compute start phase number
+        id: phase
+        run: |
+          case "$START_FROM" in
+            release)        echo "num=1" >> "$GITHUB_OUTPUT" ;;
+            commit-and-tag) echo "num=2" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Unknown startFrom: $START_FROM" >&2; exit 1 ;;
+          esac
 
       - name: Create release branch
         run: |
@@ -71,6 +90,7 @@ jobs:
         run: mvn versions:set-property -Dproperty=langchain4j.beta.version -DnewVersion=${{ env.BETA_VERSION }}
 
       - name: release
+        if: ${{ fromJSON(steps.phase.outputs.num) <= 1 }}
         run: mvn -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -78,6 +98,7 @@ jobs:
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
 
       - name: Commit version changes
+        if: ${{ fromJSON(steps.phase.outputs.num) <= 2 }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -85,10 +106,12 @@ jobs:
           git commit -m "Release versions ${{ env.STABLE_VERSION }} and ${{ env.BETA_VERSION }}"
 
       - name: Push release branch
+        if: ${{ fromJSON(steps.phase.outputs.num) <= 2 }}
         run: |
           git push origin release-${{ env.BETA_VERSION }}
 
       - name: Tag release
+        if: ${{ fromJSON(steps.phase.outputs.num) <= 2 }}
         run: |
           git tag ${{ env.BETA_VERSION }}
           git push origin ${{ env.BETA_VERSION }}
