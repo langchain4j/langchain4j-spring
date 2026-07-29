@@ -49,6 +49,8 @@
         <module>langchain4j-elasticsearch-spring-boot4-starter</module>
         <module>langchain4j-milvus-spring-boot-starter</module>
         <module>langchain4j-milvus-spring-boot4-starter</module>
+        <module>langchain4j-qdrant-spring-boot-starter</module>
+        <module>langchain4j-qdrant-spring-boot4-starter</module>
         <module>langchain4j-mistral-ai-spring-boot-starter</module>
         <module>langchain4j-mistral-ai-spring-boot4-starter</module>
 
