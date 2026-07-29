@@ -28,8 +28,30 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Cache Ollama models
+        uses: actions/cache@v4
+        with:
+          path: ~/.ollama
+          key: ollama-models-${{ runner.os }}-phi-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ollama-models-${{ runner.os }}-
+
+      - name: Check Ollama cache size
+        run: |
+          if [ -d ~/.ollama ]; then
+            SIZE=$(du -sh ~/.ollama 2>/dev/null | cut -f1)
+            SIZE_BYTES=$(du -sb ~/.ollama 2>/dev/null | cut -f1)
+            echo "Ollama cache size: $SIZE ($SIZE_BYTES bytes)"
+            # 10GB = 10737418240 bytes
+            if [ "$SIZE_BYTES" -gt 10737418240 ]; then
+              echo "WARNING: Cache exceeds 10GB GitHub Actions limit."
+            fi
+          else
+            echo "No Ollama cache directory found (will be created after first run)"
+          fi
+
       - name: Build with JDK ${{ matrix.java_version }}
-        run: mvn -U -B --fail-at-end -DskipOllamaITs clean install
+        run: mvn -U -B --fail-at-end clean install #-DskipOllamaITs
         env:
           LC4J_GLOBAL_TEST_RETRY_ENABLED: true
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
