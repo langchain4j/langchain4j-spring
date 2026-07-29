@@ -128,12 +128,3 @@ jobs:
         run: |
           git tag "$BETA_VERSION"
           git push origin "$BETA_VERSION"
-
-      - name: Trigger documentation version update
-        env:
-          GH_TOKEN: ${{ secrets.GH_RELEASE_AUTOMATION }}
-        run: |
-          gh api repos/langchain4j/langchain4j/dispatches \
-            -f event_type=trigger-docs-update-version \
-            -f 'client_payload[stableVersion]='"$STABLE_VERSION" \
-            -f 'client_payload[betaVersion]='"$BETA_VERSION"
