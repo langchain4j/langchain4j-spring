@@ -52,6 +52,7 @@
         <module>langchain4j-mistral-ai-spring-boot-starter</module>
         <module>langchain4j-mistral-ai-spring-boot4-starter</module>
 
+        <module>langchain4j-easy-rag-spring-boot-starter</module>
         <module>langchain4j-reactor</module>
     </modules>
 
