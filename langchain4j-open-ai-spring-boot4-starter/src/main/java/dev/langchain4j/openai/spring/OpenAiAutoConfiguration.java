@@ -115,9 +115,9 @@ public class OpenAiAutoConfiguration {
             ObjectProvider<ChatModelListener> listeners
     ) {
         OpenAiChatModelProperties chatModelProperties = properties.streamingChatModel();
-        warnIfIgnored(chatModelProperties.supportedCapabilities(), "streaming-chat-model",
+        warnIfSet(chatModelProperties.supportedCapabilities(), "streaming-chat-model",
                 "supported-capabilities", "OpenAiStreamingChatModel does not support it");
-        warnIfIgnored(chatModelProperties.maxRetries(), "streaming-chat-model", "max-retries",
+        warnIfSet(chatModelProperties.maxRetries(), "streaming-chat-model", "max-retries",
                 "a response that has already started streaming cannot be retried");
         return OpenAiStreamingChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -232,7 +232,7 @@ public class OpenAiAutoConfiguration {
             OpenAiProperties properties
     ) {
         OpenAiLanguageModelProperties languageModelProperties = properties.streamingLanguageModel();
-        warnIfIgnored(languageModelProperties.maxRetries(), "streaming-language-model", "max-retries",
+        warnIfSet(languageModelProperties.maxRetries(), "streaming-language-model", "max-retries",
                 "a response that has already started streaming cannot be retried");
         return OpenAiStreamingLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
@@ -398,7 +398,7 @@ public class OpenAiAutoConfiguration {
      * Some properties are shared between the sync and the streaming variants of a model, but the streaming model
      * cannot honour all of them. Rather than silently ignoring such a property, say so once at startup.
      */
-    private static void warnIfIgnored(Object value, String model, String property, String reason) {
+    private static void warnIfSet(Object value, String model, String property, String reason) {
         boolean set = value instanceof Collection<?> collection ? !collection.isEmpty() : value != null;
         if (set) {
             log.warn("{}.{}.{} is set, but it is ignored: {}", PREFIX, model, property, reason);
