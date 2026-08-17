@@ -24,6 +24,7 @@ import org.springframework.web.client.RestClientResponseException;
 
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
+import java.net.http.HttpTimeoutException;
 import java.util.Map;
 
 import static dev.langchain4j.http.client.sse.ServerSentEventListenerUtils.ignoringExceptions;
@@ -45,7 +46,8 @@ public class SpringRestClient implements HttpClient {
         if (builder.readTimeout() != null) {
             settings = settings.withReadTimeout(builder.readTimeout());
         }
-        ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = ClientHttpRequestFactoryBuilder.detect();
+        ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = getOrDefault(
+                builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect);
         if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
             requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
         }
@@ -90,7 +92,7 @@ public class SpringRestClient implements HttpClient {
         } catch (RestClientResponseException e) {
             throw new HttpException(e.getStatusCode().value(), e.getMessage());
         } catch (Exception e) {
-            if (e.getCause() instanceof SocketTimeoutException) {
+            if (isTimeout(e)) {
                 throw new TimeoutException(e);
             } else {
                 throw e;
@@ -129,7 +131,7 @@ public class SpringRestClient implements HttpClient {
                             return null;
                         });
             } catch (Exception e) {
-                if (e.getCause() instanceof SocketTimeoutException) {
+                if (isTimeout(e)) {
                     ignoringExceptions(() -> listener.onError(new TimeoutException(e)));
                 } else {
                     ignoringExceptions(() -> listener.onError(e));
@@ -167,4 +169,28 @@ public class SpringRestClient implements HttpClient {
         }
         return multipart;
     }
+
+    // Reactor Netty is an optional dependency, so its exception is matched by name rather than by type
+    private static final String NETTY_READ_TIMEOUT_EXCEPTION = "io.netty.handler.timeout.ReadTimeoutException";
+
+    /**
+     * A read timeout surfaces as a different exception for every {@link ClientHttpRequestFactory} Spring may pick:
+     * {@link SocketTimeoutException} for the Apache and simple clients, {@link HttpTimeoutException} for the JDK
+     * client and Netty's own {@code ReadTimeoutException} for the Reactor client. They all mean the same thing to
+     * a caller, so they are all reported as {@link TimeoutException}.
+     */
+    private static boolean isTimeout(Throwable throwable) {
+        for (Throwable cause = throwable; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SocketTimeoutException
+                    || cause instanceof HttpTimeoutException
+                    || NETTY_READ_TIMEOUT_EXCEPTION.equals(cause.getClass().getName())) {
+                return true;
+            }
+            if (cause.getCause() == cause) {
+                break;
+            }
+        }
+        return false;
+    }
+
 }

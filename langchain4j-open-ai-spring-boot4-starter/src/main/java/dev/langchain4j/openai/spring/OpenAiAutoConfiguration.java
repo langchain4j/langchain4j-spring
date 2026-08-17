@@ -4,6 +4,8 @@ import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.openai.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -19,11 +21,15 @@ import org.springframework.core.task.support.ContextPropagatingTaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClient;
 
+import java.util.Collection;
+
 import static dev.langchain4j.openai.spring.OpenAiProperties.PREFIX;
 
 @AutoConfiguration(after = RestClientAutoConfiguration.class)
 @EnableConfigurationProperties(OpenAiProperties.class)
 public class OpenAiAutoConfiguration {
+
+    private static final Logger log = LoggerFactory.getLogger(OpenAiAutoConfiguration.class);
 
     private static final String TASK_EXECUTOR_THREAD_NAME_PREFIX = "LangChain4j-OpenAI-";
 
@@ -109,6 +115,10 @@ public class OpenAiAutoConfiguration {
             ObjectProvider<ChatModelListener> listeners
     ) {
         OpenAiChatModelProperties chatModelProperties = properties.streamingChatModel();
+        warnIfIgnored(chatModelProperties.supportedCapabilities(), "streaming-chat-model",
+                "supported-capabilities", "OpenAiStreamingChatModel does not support it");
+        warnIfIgnored(chatModelProperties.maxRetries(), "streaming-chat-model", "max-retries",
+                "a response that has already started streaming cannot be retried");
         return OpenAiStreamingChatModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(chatModelProperties.baseUrl())
@@ -128,6 +138,7 @@ public class OpenAiAutoConfiguration {
                 .seed(chatModelProperties.seed())
                 .user(chatModelProperties.user())
                 .strictTools(chatModelProperties.strictTools())
+                .strictJsonSchema(chatModelProperties.strictJsonSchema())
                 .parallelToolCalls(chatModelProperties.parallelToolCalls())
                 .store(chatModelProperties.store())
                 .metadata(chatModelProperties.metadata())
@@ -221,6 +232,8 @@ public class OpenAiAutoConfiguration {
             OpenAiProperties properties
     ) {
         OpenAiLanguageModelProperties languageModelProperties = properties.streamingLanguageModel();
+        warnIfIgnored(languageModelProperties.maxRetries(), "streaming-language-model", "max-retries",
+                "a response that has already started streaming cannot be retried");
         return OpenAiStreamingLanguageModel.builder()
                 .httpClientBuilder(httpClientBuilder)
                 .baseUrl(languageModelProperties.baseUrl())
@@ -380,4 +393,16 @@ public class OpenAiAutoConfiguration {
                 // executor is not needed for no-streaming OpenAiImageModel
                 .createDefaultStreamingRequestExecutor(false);
     }
+
+    /**
+     * Some properties are shared between the sync and the streaming variants of a model, but the streaming model
+     * cannot honour all of them. Rather than silently ignoring such a property, say so once at startup.
+     */
+    private static void warnIfIgnored(Object value, String model, String property, String reason) {
+        boolean set = value instanceof Collection<?> collection ? !collection.isEmpty() : value != null;
+        if (set) {
+            log.warn("{}.{}.{} is set, but it is ignored: {}", PREFIX, model, property, reason);
+        }
+    }
+
 }
