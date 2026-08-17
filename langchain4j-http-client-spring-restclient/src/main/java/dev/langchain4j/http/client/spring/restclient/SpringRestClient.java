@@ -170,20 +170,17 @@ public class SpringRestClient implements HttpClient {
         return multipart;
     }
 
-    // Reactor Netty is an optional dependency, so its exception is matched by name rather than by type
-    private static final String NETTY_READ_TIMEOUT_EXCEPTION = "io.netty.handler.timeout.ReadTimeoutException";
-
     /**
      * A read timeout surfaces as a different exception for every {@link ClientHttpRequestFactory} Spring may pick:
      * {@link SocketTimeoutException} for the Apache and simple clients, {@link HttpTimeoutException} for the JDK
      * client and Netty's own {@code ReadTimeoutException} for the Reactor client. They all mean the same thing to
      * a caller, so they are all reported as {@link TimeoutException}.
      */
-    private static boolean isTimeout(Throwable throwable) {
+    static boolean isTimeout(Throwable throwable) {
         for (Throwable cause = throwable; cause != null; cause = cause.getCause()) {
             if (cause instanceof SocketTimeoutException
                     || cause instanceof HttpTimeoutException
-                    || NETTY_READ_TIMEOUT_EXCEPTION.equals(cause.getClass().getName())) {
+                    || isNamedLikeATimeout(cause)) {
                 return true;
             }
             if (cause.getCause() == cause) {
@@ -191,6 +188,15 @@ public class SpringRestClient implements HttpClient {
             }
         }
         return false;
+    }
+
+    /**
+     * Clients that are optional dependencies cannot be referenced by type, so their timeouts are recognised by
+     * name. Matching the simple name rather than the fully qualified one keeps this working when the class has
+     * been relocated, which is common for Netty in shaded distributions.
+     */
+    private static boolean isNamedLikeATimeout(Throwable cause) {
+        return cause.getClass().getSimpleName().contains("Timeout");
     }
 
 }
