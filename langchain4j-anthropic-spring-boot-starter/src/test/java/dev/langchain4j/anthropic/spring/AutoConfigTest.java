@@ -105,7 +105,8 @@ class AutoConfigTest {
                     assertThat(chatModel).isInstanceOf(AnthropicChatModel.class);
                     assertThat(context.getBean(AnthropicChatModel.class)).isSameAs(chatModel);
 
-                    assertThat(chatModel.chat("What is the capital of Germany?")).contains("Berlin");
+                    // DELIBERATE FAILURE (ci-reporting-verification): must show up as a failure in the job summary
+                    assertThat(chatModel.chat("What is the capital of Germany?")).contains("Paris");
 
                     WireMock.verify(WireMock.postRequestedFor(urlEqualTo(MESSAGES_PATH))
                             .withHeader("x-api-key", equalTo(API_KEY))

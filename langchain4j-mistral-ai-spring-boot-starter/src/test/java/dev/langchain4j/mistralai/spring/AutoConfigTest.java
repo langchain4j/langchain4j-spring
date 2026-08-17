@@ -144,6 +144,13 @@ class AutoConfigTest {
         assertThat(HttpClientBuilderLoader.loadHttpClientBuilder().build()).isInstanceOf(SpringRestClient.class);
     }
 
+    // DELIBERATE ERROR (ci-reporting-verification): must be counted as an error, not a failure, and its message
+    // must be folded into a <details> block because it is longer than 500 characters
+    @Test
+    void deliberately_throws_a_long_message() {
+        throw new IllegalStateException("ci-reporting-verification: " + "long message ".repeat(60));
+    }
+
     @Test
     void should_provide_chat_model() {
         WireMock.stubFor(post(urlEqualTo(CHAT_COMPLETIONS_PATH)).willReturn(okJson(CHAT_COMPLETION_RESPONSE)));
