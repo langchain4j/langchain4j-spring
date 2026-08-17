@@ -14,6 +14,7 @@ permissions:
 jobs:
   java_build:
     strategy:
+      fail-fast: false
       max-parallel: 1
       matrix:
         java_version: [ 17, 21, 25 ]
@@ -28,19 +29,111 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      # No provider API keys are set here on purpose. The starters are covered by mock-based tests that need
+      # no credentials, so this build behaves the same for a pull request from a fork as it does for main.
+      # The few tests that do need a real provider are guarded by @EnabledIfEnvironmentVariable and therefore
+      # skip here; they run in the nightly build instead, see nightly.yaml.
       - name: Build with JDK ${{ matrix.java_version }}
-        run: mvn -U -B --fail-at-end -DskipOllamaITs clean install
+        id: build
+        run: |
+          set -o pipefail
+          mvn -U -B --fail-at-end -DskipOllamaITs clean install 2>&1 | tee maven-output.log
         env:
           LC4J_GLOBAL_TEST_RETRY_ENABLED: true
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
-          AZURE_OPENAI_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
-          AZURE_SEARCH_ENDPOINT: ${{ secrets.AZURE_SEARCH_ENDPOINT }}
-          AZURE_SEARCH_KEY: ${{ secrets.AZURE_SEARCH_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GOOGLE_AI_GEMINI_API_KEY: ${{secrets.GOOGLE_AI_GEMINI_API_KEY}}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+
+      - name: Surface build errors
+        if: failure() && steps.build.outcome == 'failure'
+        run: |
+          {
+            echo '## Build Errors (JDK ${{ matrix.java_version }})'
+            echo ''
+            echo '```'
+            # Exclude forked-JVM output re-emitted with an [ERROR] prefix (test noise).
+            grep '^\[ERROR\]' maven-output.log \
+              | grep -vE '^\[ERROR\]( +"|[[:space:]]*(Stub|DEBUG:)|[[:space:]]*$)' \
+              | head -50
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Clean Docker
+        if: always()
+        run: docker system prune -af || true
+
+      - name: Publish Test Summary
+        if: always()
+        run: |
+          python3 << 'PYEOF'
+          import xml.etree.ElementTree as ET
+          import glob, os, re
+
+          files = glob.glob('**/target/*-reports/TEST-*.xml', recursive=True)
+          total = failures = errors = skipped = 0
+          failed_tests = []
+
+          for path in files:
+              try:
+                  root = ET.parse(path).getroot()
+                  total += int(root.get('tests', 0))
+                  failures += int(root.get('failures', 0))
+                  errors += int(root.get('errors', 0))
+                  skipped += int(root.get('skipped', 0))
+                  for tc in root.findall('.//testcase'):
+                      fail = tc.find('failure')
+                      if fail is None:
+                          fail = tc.find('error')
+                      if fail is not None:
+                          cls = tc.get('classname', '')
+                          name = tc.get('name', '')
+                          trace = fail.text or ''
+                          m = re.search(r'\bat ' + re.escape(cls) + r'[.$][^\n(]*\(([^)]+\.java:\d+)\)', trace)
+                          loc = f'`{m.group(1)}`' if m else ''
+                          msg = (fail.get('message', '') or '').replace('\n', '<br>').replace('|', '\\|')
+                          if len(msg) > 500:
+                              msg = f"{msg[:500]}<details><summary>show more</summary>{msg[500:]}</details>"
+                          failed_tests.append(f"| `{cls}` | `{name}` | {loc} | {msg} |")
+              except Exception:
+                  pass
+
+          passed = total - failures - errors - skipped
+          summary = os.environ.get('GITHUB_STEP_SUMMARY', '/dev/null')
+          with open(summary, 'a') as f:
+              f.write('## Test Results\n\n')
+              if failures == 0 and errors == 0:
+                  f.write(f':white_check_mark: **{passed} passed**, {skipped} skipped out of {total} tests\n')
+              else:
+                  f.write(f':x: **{failures} failed, {errors} errors**, {passed} passed, {skipped} skipped out of {total} tests\n')
+              if failed_tests:
+                  f.write('\n### Failures\n\n')
+                  f.write('| Class | Test | Location | Error Message |\n')
+                  f.write('|-------|------|----------|---------------|\n')
+                  for line in failed_tests[:50]:
+                      f.write(line + '\n')
+                  if len(failed_tests) > 50:
+                      f.write(f'\n*... and {len(failed_tests) - 50} more*\n')
+          PYEOF
+
+      - name: Upload Test Reports
+        if: always() # always run even if the previous step failed or was cancelled
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: Test-Reports-jdk${{ matrix.java_version }}
+          path: '**/target/*-reports/*'
 
       - name: License Compliance
-        run: mvn -U -B -P compliance org.honton.chas:license-maven-plugin:compliance
+        id: compliance
+        run: |
+          set -o pipefail
+          mvn -U -B -P compliance org.honton.chas:license-maven-plugin:compliance 2>&1 | tee maven-output.log
+
+      - name: Surface compliance errors
+        if: failure() && steps.compliance.outcome == 'failure'
+        run: |
+          {
+            echo '## Build Errors (License Compliance)'
+            echo ''
+            echo '```'
+            grep '^\[ERROR\]' maven-output.log \
+              | grep -vE '^\[ERROR\]( +"|[[:space:]]*(Stub|DEBUG:)|[[:space:]]*$)' \
+              | head -50
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY

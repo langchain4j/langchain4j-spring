@@ -119,6 +119,7 @@ class AutoConfig {
         EmbeddingModelProperties embeddingModelProperties = properties.getEmbeddingModel();
         return GoogleAiEmbeddingModel.builder()
                 .modelName(embeddingModelProperties.modelName())
+                .baseUrl(embeddingModelProperties.baseUrl())
                 .apiKey(embeddingModelProperties.apiKey())
                 .maxRetries(embeddingModelProperties.maxRetries())
                 .taskType(embeddingModelProperties.taskType())
