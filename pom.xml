@@ -65,6 +65,7 @@
         <spring.boot3.version>3.5.13</spring.boot3.version>
         <spring.boot4.version>4.0.5</spring.boot4.version>
         <tinylog.version>2.7.0</tinylog.version>
+        <wiremock.version>3.10.0</wiremock.version>
     </properties>
 
     <dependencyManagement>
@@ -99,6 +100,23 @@
                 <groupId>org.tinylog</groupId>
                 <artifactId>slf4j-tinylog</artifactId>
                 <version>${tinylog.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- Why "wiremock-jetty12" and not "wiremock": https://github.com/wiremock/wiremock/issues/2922 -->
+            <dependency>
+                <groupId>org.wiremock</groupId>
+                <artifactId>wiremock-jetty12</artifactId>
+                <version>${wiremock.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- Spring Boot 4 manages a Jetty version that is incompatible with the one wiremock-jetty12
+                 expects, so the Spring Boot 4 modules use the shaded standalone distribution instead. -->
+            <dependency>
+                <groupId>org.wiremock</groupId>
+                <artifactId>wiremock-standalone</artifactId>
+                <version>${wiremock.version}</version>
                 <scope>test</scope>
             </dependency>
 

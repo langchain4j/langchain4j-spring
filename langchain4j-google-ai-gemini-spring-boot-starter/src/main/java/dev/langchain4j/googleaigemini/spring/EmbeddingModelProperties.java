@@ -6,6 +6,7 @@ import java.time.Duration;
 
 public record EmbeddingModelProperties(
         String apiKey,
+        String baseUrl,
         String modelName,
         String titleMetadataKey,
         Boolean logRequestsAndResponses,
