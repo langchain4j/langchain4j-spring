@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static dev.langchain4j.http.client.sse.ServerSentEventListenerUtils.ignoringExceptions;
 import static dev.langchain4j.internal.Utils.getOrDefault;
+import static dev.langchain4j.internal.Utils.isNullOrBlank;
 
 public class SpringRestClient implements HttpClient {
 
@@ -93,7 +94,7 @@ public class SpringRestClient implements HttpClient {
                     .body(responseEntity.getBody())
                     .build();
         } catch (RestClientResponseException e) {
-            throw new HttpException(e.getStatusCode().value(), e.getMessage());
+            throw new HttpException(e.getStatusCode().value(), errorMessage(e.getResponseBodyAsString(), e.getMessage()));
         } catch (Exception e) {
             if (isTimeout(e)) {
                 throw new TimeoutException(e);
@@ -115,7 +116,8 @@ public class SpringRestClient implements HttpClient {
                             if (!springResponse.getStatusCode().is2xxSuccessful()) {
                                 String body = springResponse.bodyTo(String.class);
 
-                                HttpException exception = new HttpException(statusCode, body);
+                                HttpException exception =
+                                        new HttpException(statusCode, errorMessage(body, springResponse.getStatusText()));
                                 ignoringExceptions(() -> listener.onError(exception));
                                 return null;
                             }
@@ -208,6 +210,16 @@ public class SpringRestClient implements HttpClient {
      */
     private static boolean isNamedLikeATimeout(Throwable cause) {
         return cause.getClass().getSimpleName().contains("Timeout");
+    }
+
+
+    /**
+     * Not every {@link ClientHttpRequestFactory} makes the error body of a failed response available. When it is
+     * there it is the most useful thing a caller can be given, and when it is not, anything is better than an
+     * exception with no message.
+     */
+    private static String errorMessage(String body, String fallback) {
+        return isNullOrBlank(body) ? fallback : body;
     }
 
 }
