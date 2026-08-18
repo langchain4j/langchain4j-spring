@@ -9,7 +9,7 @@ import dev.langchain4j.model.github.GitHubModelsChatModel;
 import dev.langchain4j.model.github.GitHubModelsEmbeddingModel;
 import dev.langchain4j.model.github.GitHubModelsStreamingChatModel;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.junit.jupiter.api.Disabled;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -18,7 +18,9 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@EnabledIfEnvironmentVariable(named = "GITHUB_TOKEN", matches = ".+")
+@Disabled("GitHub Models has been retired. The endpoint these tests used, "
+        + "https://models.inference.ai.azure.com, answers 404, and its replacement answers 410 "
+        + "github_models_retirement_brownout, so there is nothing left for them to run against.")
 class GitHubModelsAutoConfigurationIT {
 
     private static final String GITHUB_TOKEN = System.getenv("GITHUB_TOKEN");
