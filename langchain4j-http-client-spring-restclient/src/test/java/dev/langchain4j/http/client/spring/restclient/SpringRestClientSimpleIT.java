@@ -13,4 +13,14 @@ class SpringRestClientSimpleIT extends AbstractSpringRestClientIT {
     protected ClientHttpRequestFactoryBuilder<?> clientHttpRequestFactoryBuilder() {
         return ClientHttpRequestFactoryBuilder.simple();
     }
+
+    @Override
+    protected boolean supportsErrorBodyOnUnauthorized() {
+        // SimpleClientHttpRequestFactory always streams the request body, and HttpURLConnection cannot replay a
+        // streamed body to retry a 401 with credentials, so it throws HttpRetryException instead of handing over
+        // the response body it already received. Spring is then left with an empty body. Other status codes are
+        // unaffected, and there is no way to turn this off: SimpleClientHttpRequestFactory.setBufferRequestBody()
+        // is deprecated in Spring Framework 6.2 and gone in 7.0.
+        return false;
+    }
 }

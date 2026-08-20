@@ -3,7 +3,6 @@ package dev.langchain4j.azure.aisearch.spring;
 import com.azure.core.credential.AzureKeyCredential;
 import com.azure.search.documents.indexes.SearchIndexClient;
 import com.azure.search.documents.indexes.SearchIndexClientBuilder;
-import com.azure.search.documents.indexes.models.SearchIndex;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.internal.Utils;
@@ -48,7 +47,6 @@ class AutoConfigIT {
             .buildClient();
 
     private final String indexName = Utils.randomUUID();
-    private final SearchIndex index = new SearchIndex(indexName);
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
@@ -65,6 +63,7 @@ class AutoConfigIT {
                 .withPropertyValues(
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        Properties.PREFIX + ".content-retriever.index-name=" + indexName,
                         Properties.PREFIX + ".content-retriever.dimensions=" + dimensions,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "true",
                         Properties.PREFIX + ".content-retriever.query-type=" + "VECTOR"
@@ -96,11 +95,12 @@ class AutoConfigIT {
                 .withPropertyValues(
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        Properties.PREFIX + ".content-retriever.index-name=" + indexName,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
                         Properties.PREFIX + ".content-retriever.max-results=" + "3",
                         Properties.PREFIX + ".content-retriever.min-score=" + "0.6",
                         Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.VECTOR
-                ).withBean(SearchIndex.class, () -> index)
+                )
                 .withBean(EmbeddingModel.class, () -> embeddingModel)
                 .run(context -> {
                     ContentRetriever contentRetriever = context.getBean(ContentRetriever.class);
@@ -117,6 +117,7 @@ class AutoConfigIT {
                 .withPropertyValues(
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        Properties.PREFIX + ".content-retriever.index-name=" + indexName,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
                         Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.FULL_TEXT
                 )
@@ -136,9 +137,10 @@ class AutoConfigIT {
                 .withPropertyValues(
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        Properties.PREFIX + ".content-retriever.index-name=" + indexName,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
                         Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.HYBRID
-                ).withBean(SearchIndex.class, () -> index)
+                )
                 .withBean(EmbeddingModel.class, () -> embeddingModel)
                 .run(context -> {
                     ContentRetriever contentRetriever = context.getBean(ContentRetriever.class);
@@ -160,6 +162,7 @@ class AutoConfigIT {
                 .withPropertyValues(
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        Properties.PREFIX + ".content-retriever.index-name=" + indexName,
                         Properties.PREFIX + ".content-retriever.dimensions=" + dimensions,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "true",
                         Properties.PREFIX + ".content-retriever.query-type=" + "VECTOR"
@@ -191,11 +194,12 @@ class AutoConfigIT {
                 .withPropertyValues(
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        Properties.PREFIX + ".content-retriever.index-name=" + indexName,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
                         Properties.PREFIX + ".content-retriever.max-results=" + "3",
                         Properties.PREFIX + ".content-retriever.min-score=" + "0.4",
                         Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.HYBRID_WITH_RERANKING
-                ).withBean(SearchIndex.class, () -> index)
+                )
                 .withBean(EmbeddingModel.class, () -> embeddingModel)
                 .run(context -> {
                     ContentRetriever contentRetriever = context.getBean(ContentRetriever.class);
@@ -216,6 +220,7 @@ class AutoConfigIT {
                 .withPropertyValues(
                         Properties.PREFIX + ".embedding-store.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".embedding-store.endpoint=" + AZURE_SEARCH_ENDPOINT,
+                        Properties.PREFIX + ".embedding-store.index-name=" + indexName,
                         Properties.PREFIX + ".embedding-store.dimensions=" + 384,
                         Properties.PREFIX + ".embedding-store.create-or-update-index=" + "true"
                 ).withBean(EmbeddingModel.class, () -> embeddingModel)

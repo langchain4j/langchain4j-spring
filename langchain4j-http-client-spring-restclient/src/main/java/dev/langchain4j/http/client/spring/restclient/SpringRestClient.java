@@ -203,9 +203,10 @@ public class SpringRestClient implements HttpClient {
 
 
     /**
-     * Not every {@link ClientHttpRequestFactory} makes the error body of a failed response available. When it is
-     * there it is the most useful thing a caller can be given, and when it is not, anything is better than an
-     * exception with no message.
+     * Not every {@link ClientHttpRequestFactory} makes the error body of a failed response available: the simple
+     * factory, backed by {@link java.net.HttpURLConnection}, discards it on a 401, because it cannot replay a
+     * streamed request body to retry the request with credentials. When the body is there it is the most useful
+     * thing a caller can be given, and when it is not, anything is better than an exception with no message.
      */
     private static String errorMessage(String body, String fallback) {
         return isNullOrBlank(body) ? fallback : body;
