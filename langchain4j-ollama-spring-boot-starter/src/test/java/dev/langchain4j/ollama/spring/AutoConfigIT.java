@@ -24,6 +24,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.testcontainers.containers.GenericContainer;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
@@ -37,15 +38,20 @@ import static org.mockito.Mockito.*;
 class AutoConfigIT {
 
     private static final String OLLAMA_BASE_URL = System.getenv("OLLAMA_BASE_URL");
+    private static final String OLLAMA_IMAGE = "ollama/ollama:latest";
     private static final String MODEL_NAME = "phi";
+    private static final String EMBEDDING_MODEL_NAME = "all-minilm";
+    private static final int EMBEDDING_MODEL_DIMENSION = 384;
 
     static GenericContainer<?> ollama;
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws IOException, InterruptedException {
         if (isNullOrEmpty(OLLAMA_BASE_URL)) {
-            ollama = new GenericContainer<>("langchain4j/ollama-" + MODEL_NAME).withExposedPorts(11434);
+            ollama = new GenericContainer<>(OLLAMA_IMAGE).withExposedPorts(11434);
             ollama.start();
+            ollama.execInContainer("ollama", "pull", MODEL_NAME);
+            ollama.execInContainer("ollama", "pull", EMBEDDING_MODEL_NAME);
         }
     }
 
@@ -362,7 +368,7 @@ class AutoConfigIT {
         contextRunner
                 .withPropertyValues(
                         "langchain4j.ollama.embedding-model.base-url=" + baseUrl(),
-                        "langchain4j.ollama.embedding-model.model-name=" + MODEL_NAME
+                        "langchain4j.ollama.embedding-model.model-name=" + EMBEDDING_MODEL_NAME
                 )
                 .run(context -> {
 
@@ -370,7 +376,7 @@ class AutoConfigIT {
                     assertThat(model).isInstanceOf(OllamaEmbeddingModel.class);
                     assertThat(context.getBean(OllamaEmbeddingModel.class)).isSameAs(model);
 
-                    assertThat(model.embed("hi").content().dimension()).isEqualTo(2560);
+                    assertThat(model.embed("hi").content().dimension()).isEqualTo(EMBEDDING_MODEL_DIMENSION);
                 });
     }
 
@@ -379,10 +385,10 @@ class AutoConfigIT {
 
         OllamaEmbeddingModel model = OllamaEmbeddingModel.builder()
                 .baseUrl(baseUrl())
-                .modelName(MODEL_NAME)
+                .modelName(EMBEDDING_MODEL_NAME)
                 .build();
 
-        assertThat(model.embed("hi").content().dimension()).isEqualTo(2560);
+        assertThat(model.embed("hi").content().dimension()).isEqualTo(EMBEDDING_MODEL_DIMENSION);
     }
 
     @Configuration
