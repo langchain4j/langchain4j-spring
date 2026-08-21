@@ -17,6 +17,7 @@ import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.azure.search.AzureAiSearchEmbeddingStore;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
+import java.time.Duration;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -96,6 +98,7 @@ class AutoConfigIT {
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
                         Properties.PREFIX + ".content-retriever.index-name=" + indexName,
+                        Properties.PREFIX + ".content-retriever.dimensions=" + dimensions,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
                         Properties.PREFIX + ".content-retriever.max-results=" + "3",
                         Properties.PREFIX + ".content-retriever.min-score=" + "0.6",
@@ -138,6 +141,7 @@ class AutoConfigIT {
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
                         Properties.PREFIX + ".content-retriever.index-name=" + indexName,
+                        Properties.PREFIX + ".content-retriever.dimensions=" + dimensions,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
                         Properties.PREFIX + ".content-retriever.query-type=" + AzureAiSearchQueryType.HYBRID
                 )
@@ -195,6 +199,7 @@ class AutoConfigIT {
                         Properties.PREFIX + ".content-retriever.api-key=" + AZURE_SEARCH_KEY,
                         Properties.PREFIX + ".content-retriever.endpoint=" + AZURE_SEARCH_ENDPOINT,
                         Properties.PREFIX + ".content-retriever.index-name=" + indexName,
+                        Properties.PREFIX + ".content-retriever.dimensions=" + dimensions,
                         Properties.PREFIX + ".content-retriever.create-or-update-index=" + "false",
                         Properties.PREFIX + ".content-retriever.max-results=" + "3",
                         Properties.PREFIX + ".content-retriever.min-score=" + "0.4",
@@ -248,11 +253,16 @@ class AutoConfigIT {
                             .maxResults(3)
                             .build();
 
-                    List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.search(searchRequest).matches();
-                    assertThat(relevant).hasSize(3);
-                    // TODO uncomment after https://github.com/langchain4j/langchain4j/issues/1617 is closed
-                    // assertThat(relevant.get(0).embedding()).isNotNull();
-                    assertThat(relevant.get(0).embedded().text()).isIn(content1, content3, content5);
+                    Awaitility.await()
+                            .atMost(Duration.ofMinutes(1))
+                            .pollInterval(Duration.ofMillis(300))
+                            .untilAsserted(() -> {
+                                List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.search(searchRequest).matches();
+                                assertThat(relevant).hasSize(3);
+                                // TODO uncomment after https://github.com/langchain4j/langchain4j/issues/1617 is closed
+                                // assertThat(relevant.get(0).embedding()).isNotNull();
+                                assertThat(relevant.get(0).embedded().text()).isIn(content1, content3, content5);
+                            });
                 });
     }
 
