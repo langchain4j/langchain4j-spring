@@ -10,6 +10,8 @@ public record EmbeddingModelProperties(
         String modelName,
         String titleMetadataKey,
         Boolean logRequestsAndResponses,
+        Boolean logRequests,
+        Boolean logResponses,
         Integer maxRetries,
         Integer outputDimensionality,
         TaskType taskType,
