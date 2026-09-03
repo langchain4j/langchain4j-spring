@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import dev.langchain4j.http.client.HttpClientBuilderLoader;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
+import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilder;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -29,6 +30,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -542,6 +545,41 @@ class AutoConfigTest {
             }
         });
         return future;
+    }
+
+    @Test
+    void should_configure_proxy_for_chat_model() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.proxy.type=HTTP",
+                        "langchain4j.open-ai.chat-model.proxy.host=proxy.example.com",
+                        "langchain4j.open-ai.chat-model.proxy.port=8080")
+                .run(context -> assertProxy(context.getBean(
+                        "openAiChatModelHttpClientBuilder",
+                        SpringRestClientBuilder.class)));
+    }
+
+    @Test
+    void should_configure_proxy_for_image_model() {
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.image-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.image-model.proxy.type=HTTP",
+                        "langchain4j.open-ai.image-model.proxy.host=proxy.example.com",
+                        "langchain4j.open-ai.image-model.proxy.port=8080")
+                .run(context -> assertProxy(context.getBean(
+                        "openAiImageModelHttpClientBuilder",
+                        SpringRestClientBuilder.class)));
+    }
+
+    private static void assertProxy(SpringRestClientBuilder httpClientBuilder) {
+        Proxy proxy = httpClientBuilder.proxy();
+        assertThat(proxy.type()).isEqualTo(Proxy.Type.HTTP);
+
+        InetSocketAddress address = (InetSocketAddress) proxy.address();
+        assertThat(address.getHostString()).isEqualTo("proxy.example.com");
+        assertThat(address.getPort()).isEqualTo(8080);
     }
 
     @Configuration
