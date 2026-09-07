@@ -47,8 +47,34 @@ jobs:
               ;;
           esac
 
-      - name: snapshot_release
+      # A version bump pushes to main here and in the core repo moments apart, so this
+      # push-triggered run can start before the core repo has published the SNAPSHOT it depends on
+      # (that is the "Non-resolvable import POM: langchain4j-bom" failure). The core repo dispatches
+      # trigger-snapshot-release once its own snapshot is published, so skip rather than fail:
+      # that dispatch runs this again with the dependency in place.
+      - name: Check the core SNAPSHOT this build depends on is published
+        id: core-check
         if: steps.snapshot-check.outputs.proceed == 'true'
+        run: |
+          CORE_VERSION=$(mvn help:evaluate -Dexpression=langchain4j.stable.version -q -DforceStdout)
+          case "$CORE_VERSION" in
+            *-SNAPSHOT)
+              if mvn -B -U -q dependency:get -Dartifact="dev.langchain4j:langchain4j-bom:$CORE_VERSION:pom" >/dev/null 2>&1; then
+                echo "proceed=true" >> "$GITHUB_OUTPUT"
+                echo "langchain4j-bom $CORE_VERSION is available."
+              else
+                echo "proceed=false" >> "$GITHUB_OUTPUT"
+                echo "::warning::langchain4j-bom $CORE_VERSION is not published yet; skipping the snapshot deploy. The core repo triggers this workflow again once its own snapshot is published."
+              fi
+              ;;
+            *)
+              echo "proceed=true" >> "$GITHUB_OUTPUT"
+              echo "Core version $CORE_VERSION is a release, nothing to wait for."
+              ;;
+          esac
+
+      - name: snapshot_release
+        if: steps.snapshot-check.outputs.proceed == 'true' && steps.core-check.outputs.proceed == 'true'
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
