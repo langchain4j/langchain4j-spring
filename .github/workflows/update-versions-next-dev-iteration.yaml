@@ -11,15 +11,10 @@ on:
       nextBetaVersion:
         description: "Next beta SNAPSHOT version (e.g., 1.9.0-beta16-SNAPSHOT)"
         required: true
-      branch:
-        description: "Branch to bump (e.g., 'main' after a minor release, 'release/x.y.x' after a patch)"
-        required: false
-        default: "main"
 
 env:
   NEXT_STABLE_VERSION: ${{ github.event.inputs.nextStableVersion || github.event.client_payload.nextStableVersion }}
   NEXT_BETA_VERSION: ${{ github.event.inputs.nextBetaVersion || github.event.client_payload.nextBetaVersion }}
-  BRANCH: ${{ github.event.inputs.branch || github.event.client_payload.branch || 'main' }}
 
 permissions:
   contents: write
@@ -35,7 +30,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          ref: ${{ env.BRANCH }}
           fetch-depth: 0
           token: ${{ secrets.GH_RELEASE_AUTOMATION }}
 
@@ -50,7 +44,6 @@ jobs:
         run: |
           echo "Next stable version: $NEXT_STABLE_VERSION"
           echo "Next beta version: $NEXT_BETA_VERSION"
-          echo "Branch to bump: $BRANCH"
 
       - name: Extract current stable version property
         id: extract-current-stable
@@ -99,7 +92,7 @@ jobs:
 
           git add pom.xml '**/pom.xml'
           git commit -m "Update versions to $NEXT_STABLE_VERSION and $NEXT_BETA_VERSION"
-          git push origin "$BRANCH"
+          git push origin main
 
       - name: Trigger SNAPSHOT release for main repo
         env:
