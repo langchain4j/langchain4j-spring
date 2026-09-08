@@ -35,6 +35,7 @@ record ChatModelProperties(
         Boolean returnThinking,
         Duration timeout,
         Integer maxRetries,
+        ProxyProperties proxy,
         Boolean logRequests,
         Boolean logResponses,
         Map<String, String> customHeaders,
