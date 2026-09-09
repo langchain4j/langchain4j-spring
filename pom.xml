@@ -58,6 +58,8 @@
         <langchain4j.beta.version>1.21.0-beta31-SNAPSHOT</langchain4j.beta.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <!-- JDK 23+ disables classpath annotation processor discovery unless explicitly enabled. -->
+        <maven.compiler.proc>full</maven.compiler.proc>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputTimestamp>2026-09-07T10:56:10Z</project.build.outputTimestamp>
         <spring.boot3.version>3.5.13</spring.boot3.version>
