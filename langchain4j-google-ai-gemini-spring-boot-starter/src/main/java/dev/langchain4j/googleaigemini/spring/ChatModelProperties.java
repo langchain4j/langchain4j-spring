@@ -20,6 +20,8 @@ public record ChatModelProperties(
 		Boolean returnThinking,
 		Boolean sendThinking,
         Boolean logRequestsAndResponses,
+        Boolean logRequests,
+        Boolean logResponses,
         Integer maxRetries,
         Duration timeout,
         List<String> stopSequences,
