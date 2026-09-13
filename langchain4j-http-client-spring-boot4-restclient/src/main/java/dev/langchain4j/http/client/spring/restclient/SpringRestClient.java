@@ -8,8 +8,9 @@ import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
 import dev.langchain4j.http.client.sse.ServerSentEventParser;
-import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.HttpClientSettings;
 import org.springframework.core.io.ByteArrayResource;
@@ -24,6 +25,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.http.HttpTimeoutException;
 import java.util.List;
@@ -53,7 +56,10 @@ public class SpringRestClient implements HttpClient {
         ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = getOrDefault(
                 builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect);
         if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
-            requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
+            requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(httpClientBuilder -> {
+                httpClientBuilder.disableAutomaticRetries();
+                applyProxy(httpClientBuilder, builder.proxy());
+            });
         }
         ClientHttpRequestFactory clientHttpRequestFactory = requestFactoryBuilder.build(settings);
 
@@ -79,6 +85,22 @@ public class SpringRestClient implements HttpClient {
 
     public static SpringRestClientBuilder builder() {
         return new SpringRestClientBuilder();
+    }
+
+    private static void applyProxy(HttpClientBuilder httpClientBuilder, Proxy proxy) {
+        if (proxy == null || proxy.type() == Proxy.Type.DIRECT) {
+            return;
+        }
+
+        if (proxy.type() != Proxy.Type.HTTP) {
+            throw new IllegalArgumentException("Only HTTP proxies are supported");
+        }
+
+        if (!(proxy.address() instanceof InetSocketAddress proxyAddress)) {
+            throw new IllegalArgumentException("Proxy address must be an InetSocketAddress");
+        }
+
+        httpClientBuilder.setProxy(new HttpHost(proxyAddress.getHostString(), proxyAddress.getPort()));
     }
 
     @Override
