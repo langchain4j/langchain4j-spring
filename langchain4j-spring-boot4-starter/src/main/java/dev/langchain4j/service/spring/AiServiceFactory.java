@@ -12,6 +12,8 @@ import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
 import dev.langchain4j.service.tool.ToolExecutor;
+import dev.langchain4j.service.tool.ToolArgumentsErrorHandler;
+import dev.langchain4j.service.tool.ToolExecutionErrorHandler;
 import dev.langchain4j.service.tool.ToolProvider;
 import org.springframework.beans.factory.FactoryBean;
 
@@ -37,6 +39,8 @@ class AiServiceFactory implements FactoryBean<Object> {
     private RetrievalAugmentor retrievalAugmentor;
     private ModerationModel moderationModel;
     private ToolProvider toolProvider;
+    private ToolExecutionErrorHandler toolExecutionErrorHandler;
+    private ToolArgumentsErrorHandler toolArgumentsErrorHandler;
     private List<Object> tools;
 
     public AiServiceFactory(Class<Object> aiServiceClass) {
@@ -73,6 +77,14 @@ class AiServiceFactory implements FactoryBean<Object> {
 
     public void setToolProvider(ToolProvider toolProvider) {
         this.toolProvider = toolProvider;
+    }
+
+    public void setToolExecutionErrorHandler(ToolExecutionErrorHandler toolExecutionErrorHandler) {
+        this.toolExecutionErrorHandler = toolExecutionErrorHandler;
+    }
+
+    public void setToolArgumentsErrorHandler(ToolArgumentsErrorHandler toolArgumentsErrorHandler) {
+        this.toolArgumentsErrorHandler = toolArgumentsErrorHandler;
     }
 
     public void setTools(List<Object> tools) {
@@ -112,6 +124,14 @@ class AiServiceFactory implements FactoryBean<Object> {
 
         if (toolProvider != null) {
             builder = builder.toolProvider(toolProvider);
+        }
+
+        if (toolExecutionErrorHandler != null) {
+            builder = builder.toolExecutionErrorHandler(toolExecutionErrorHandler);
+        }
+
+        if (toolArgumentsErrorHandler != null) {
+            builder = builder.toolArgumentsErrorHandler(toolArgumentsErrorHandler);
         }
 
         if (!isNullOrEmpty(tools)) {
