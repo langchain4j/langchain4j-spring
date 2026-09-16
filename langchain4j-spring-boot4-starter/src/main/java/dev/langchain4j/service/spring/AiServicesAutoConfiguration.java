@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -34,7 +35,6 @@ import static dev.langchain4j.internal.Utils.isNullOrBlank;
 import static dev.langchain4j.service.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.service.spring.AiServiceWiringMode.AUTOMATIC;
 import static dev.langchain4j.service.spring.AiServiceWiringMode.EXPLICIT;
-import static java.util.Arrays.asList;
 
 public class AiServicesAutoConfiguration implements ApplicationEventPublisherAware {
 
@@ -98,6 +98,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 AiService aiServiceAnnotation = aiServiceClass.getAnnotation(AiService.class);
 
                 addBeanReference(
+                        beanFactory,
                         ChatModel.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.chatModel(),
@@ -108,6 +109,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 );
 
                 addBeanReference(
+                        beanFactory,
                         StreamingChatModel.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.streamingChatModel(),
@@ -118,6 +120,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 );
 
                 addBeanReference(
+                        beanFactory,
                         ChatMemory.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.chatMemory(),
@@ -128,6 +131,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 );
 
                 addBeanReference(
+                        beanFactory,
                         ChatMemoryProvider.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.chatMemoryProvider(),
@@ -138,6 +142,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 );
 
                 addBeanReference(
+                        beanFactory,
                         ContentRetriever.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.contentRetriever(),
@@ -148,6 +153,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 );
 
                 addBeanReference(
+                        beanFactory,
                         RetrievalAugmentor.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.retrievalAugmentor(),
@@ -158,6 +164,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 );
 
                 addBeanReference(
+                        beanFactory,
                         ModerationModel.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.moderationModel(),
@@ -168,6 +175,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 );
 
                 addBeanReference(
+                        beanFactory,
                         ToolProvider.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.toolProvider(),
@@ -178,7 +186,19 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 );
 
                 if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
-                    propertyValues.add("tools", toManagedList(asList(aiServiceAnnotation.tools())));
+                    List<String> resolvedTools = new ArrayList<>();
+                    for (String toolBeanName : aiServiceAnnotation.tools()) {
+                        String resolved = resolve(beanFactory, toolBeanName);
+                        if (isNotNullOrBlank(resolved)) {
+                            for (String singleBeanName : resolved.split(",")) {
+                                String trimmed = singleBeanName.trim();
+                                if (isNotNullOrBlank(trimmed)) {
+                                    resolvedTools.add(trimmed);
+                                }
+                            }
+                        }
+                    }
+                    propertyValues.add("tools", toManagedList(resolvedTools));
                 } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
                     propertyValues.add("tools", toManagedList(toolBeanNames));
                 } else {
@@ -196,7 +216,8 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
         };
     }
 
-    private static void addBeanReference(Class<?> beanType,
+    private static void addBeanReference(ConfigurableListableBeanFactory beanFactory,
+                                         Class<?> beanType,
                                          AiService aiServiceAnnotation,
                                          String customBeanName,
                                          String[] beanNames,
@@ -204,8 +225,9 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                                          String factoryPropertyName,
                                          MutablePropertyValues propertyValues) {
         if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
-            if (isNotNullOrBlank(customBeanName)) {
-                propertyValues.add(factoryPropertyName, new RuntimeBeanReference(customBeanName));
+            String resolvedBeanName = resolve(beanFactory, customBeanName);
+            if (isNotNullOrBlank(resolvedBeanName)) {
+                propertyValues.add(factoryPropertyName, new RuntimeBeanReference(resolvedBeanName));
             }
         } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
             if (beanNames.length == 1) {
@@ -216,6 +238,13 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
         } else {
             throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
         }
+    }
+
+    private static String resolve(ConfigurableListableBeanFactory beanFactory, String value) {
+        if (isNullOrBlank(value)) {
+            return value;
+        }
+        return beanFactory.resolveEmbeddedValue(value);
     }
 
     private static IllegalConfigurationException conflict(Class<?> beanType, Object[] beanNames, String attributeName) {
