@@ -1,6 +1,7 @@
-package dev.langchain4j.service.spring.mode.automatic.withToolErrorHandler;
+package dev.langchain4j.service.spring.mode.automatic.withToolErrorHandlers;
 
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.service.tool.ToolArgumentsErrorHandler;
 import dev.langchain4j.service.tool.ToolErrorHandlerResult;
 import dev.langchain4j.service.tool.ToolExecutionErrorHandler;
 import org.springframework.boot.SpringApplication;
@@ -9,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @SpringBootApplication
-class AiServiceWithToolErrorHandlerApplication {
+class AiServiceWithToolErrorHandlersApplication {
 
     @Component
     static class Tools {
@@ -25,7 +26,12 @@ class AiServiceWithToolErrorHandlerApplication {
         return (error, errorContext) -> ToolErrorHandlerResult.text("The order service is unavailable.");
     }
 
+    @Bean
+    ToolArgumentsErrorHandler toolArgumentsErrorHandler() {
+        return (error, errorContext) -> ToolErrorHandlerResult.text("The order ID could not be read.");
+    }
+
     public static void main(String[] args) {
-        SpringApplication.run(AiServiceWithToolErrorHandlerApplication.class, args);
+        SpringApplication.run(AiServiceWithToolErrorHandlersApplication.class, args);
     }
 }
