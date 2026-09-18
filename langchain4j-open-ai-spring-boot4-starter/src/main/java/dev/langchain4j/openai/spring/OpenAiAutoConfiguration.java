@@ -87,6 +87,8 @@ public class OpenAiAutoConfiguration {
                         .customParameters(chatModelProperties.customParameters())
                         .build())
                 .returnThinking(chatModelProperties.returnThinking())
+                .sendThinking(chatModelProperties.sendThinking(),
+                        chatModelProperties.sendThinkingFieldName())
                 .timeout(chatModelProperties.timeout())
                 .maxRetries(chatModelProperties.maxRetries())
                 .logRequests(chatModelProperties.logRequests())
@@ -148,6 +150,8 @@ public class OpenAiAutoConfiguration {
                         .customParameters(chatModelProperties.customParameters())
                         .build())
                 .returnThinking(chatModelProperties.returnThinking())
+                .sendThinking(chatModelProperties.sendThinking(),
+                        chatModelProperties.sendThinkingFieldName())
                 .timeout(chatModelProperties.timeout())
                 .logRequests(chatModelProperties.logRequests())
                 .logResponses(chatModelProperties.logResponses())
