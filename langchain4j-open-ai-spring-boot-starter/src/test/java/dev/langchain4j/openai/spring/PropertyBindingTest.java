@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.exception.TimeoutException;
@@ -31,6 +32,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
@@ -316,6 +318,73 @@ class PropertyBindingTest {
     }
 
     @Test
+    void should_bind_chat_model_send_thinking() {
+        stubChatCompletion();
+
+        // send-thinking=true without a custom field name: the default "reasoning_content" field is used
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.chat-model.send-thinking=true"
+                )
+                .run(context -> {
+                    context.getBean(ChatModel.class).chat(ChatRequest.builder()
+                            .messages(UserMessage.from("hi"),
+                                    AiMessage.builder().text("answer").thinking("thinking-1").build())
+                            .build());
+
+                    WireMock.verify(postRequestedFor(urlPathEqualTo(CHAT_COMPLETIONS_PATH))
+                            .withRequestBody(matchingJsonPath("$.messages[1].reasoning_content",
+                                    equalTo("thinking-1"))));
+                });
+
+        // send-thinking=false: previous thinking must not be sent back
+        WireMock.resetAllRequests();
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.chat-model.send-thinking=false"
+                )
+                .run(context -> {
+                    context.getBean(ChatModel.class).chat(ChatRequest.builder()
+                            .messages(UserMessage.from("hi"),
+                                    AiMessage.builder().text("answer").thinking("thinking-1").build())
+                            .build());
+
+                    WireMock.verify(postRequestedFor(urlPathEqualTo(CHAT_COMPLETIONS_PATH))
+                            .withRequestBody(
+                                    matchingJsonPath("$.messages[1].reasoning_content", absent())));
+                });
+
+        // send-thinking=true with a custom field name
+        WireMock.resetAllRequests();
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.chat-model.send-thinking=true",
+                        "langchain4j.open-ai.chat-model.send-thinking-field-name=custom_reasoning"
+                )
+                .run(context -> {
+                    context.getBean(ChatModel.class).chat(ChatRequest.builder()
+                            .messages(UserMessage.from("hi"),
+                                    AiMessage.builder().text("answer").thinking("thinking-1").build())
+                            .build());
+
+                    WireMock.verify(postRequestedFor(urlPathEqualTo(CHAT_COMPLETIONS_PATH))
+                            .withRequestBody(matchingJsonPath("$.messages[1].custom_reasoning",
+                                    equalTo("thinking-1")))
+                            .withRequestBody(
+                                    matchingJsonPath("$.messages[1].reasoning_content", absent())));
+                });
+    }
+
+    @Test
     void should_bind_chat_model_timeout() {
         WireMock.stubFor(post(urlPathEqualTo(CHAT_COMPLETIONS_PATH))
                 .willReturn(okJson("{}").withFixedDelay(3_000)));
@@ -597,6 +666,73 @@ class PropertyBindingTest {
                     ChatResponse response = chatAndGet(context.getBean(StreamingChatModel.class),
                             ChatRequest.builder().messages(UserMessage.from("hi")).build());
                     assertThat(response.aiMessage().thinking()).isEqualTo("thinking");
+                });
+    }
+
+    @Test
+    void should_bind_streaming_chat_model_send_thinking() {
+        stubStreamedChatCompletion();
+
+        // send-thinking=true without a custom field name: the default "reasoning_content" field is used
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.streaming-chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.streaming-chat-model.send-thinking=true"
+                )
+                .run(context -> {
+                    chat(context.getBean(StreamingChatModel.class), ChatRequest.builder()
+                            .messages(UserMessage.from("hi"),
+                                    AiMessage.builder().text("answer").thinking("thinking-1").build())
+                            .build());
+
+                    WireMock.verify(postRequestedFor(urlPathEqualTo(CHAT_COMPLETIONS_PATH))
+                            .withRequestBody(matchingJsonPath("$.messages[1].reasoning_content",
+                                    equalTo("thinking-1"))));
+                });
+
+        // send-thinking=false: previous thinking must not be sent back
+        WireMock.resetAllRequests();
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.streaming-chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.streaming-chat-model.send-thinking=false"
+                )
+                .run(context -> {
+                    chat(context.getBean(StreamingChatModel.class), ChatRequest.builder()
+                            .messages(UserMessage.from("hi"),
+                                    AiMessage.builder().text("answer").thinking("thinking-1").build())
+                            .build());
+
+                    WireMock.verify(postRequestedFor(urlPathEqualTo(CHAT_COMPLETIONS_PATH))
+                            .withRequestBody(
+                                    matchingJsonPath("$.messages[1].reasoning_content", absent())));
+                });
+
+        // send-thinking=true with a custom field name
+        WireMock.resetAllRequests();
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.streaming-chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini",
+                        "langchain4j.open-ai.streaming-chat-model.send-thinking=true",
+                        "langchain4j.open-ai.streaming-chat-model.send-thinking-field-name=custom_reasoning"
+                )
+                .run(context -> {
+                    chat(context.getBean(StreamingChatModel.class), ChatRequest.builder()
+                            .messages(UserMessage.from("hi"),
+                                    AiMessage.builder().text("answer").thinking("thinking-1").build())
+                            .build());
+
+                    WireMock.verify(postRequestedFor(urlPathEqualTo(CHAT_COMPLETIONS_PATH))
+                            .withRequestBody(matchingJsonPath("$.messages[1].custom_reasoning",
+                                    equalTo("thinking-1")))
+                            .withRequestBody(
+                                    matchingJsonPath("$.messages[1].reasoning_content", absent())));
                 });
     }
 
