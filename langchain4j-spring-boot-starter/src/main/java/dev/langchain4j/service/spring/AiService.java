@@ -9,6 +9,8 @@ import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.tool.ToolArgumentsErrorHandler;
+import dev.langchain4j.service.tool.ToolExecutionErrorHandler;
 import dev.langchain4j.service.tool.ToolProvider;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * - {@link ContentRetriever}
  * - {@link RetrievalAugmentor}
  * - {@link ToolProvider}
+ * - {@link ToolExecutionErrorHandler}
+ * - {@link ToolArgumentsErrorHandler}
  * - All beans containing methods annotated with {@code @}{@link Tool}
  * </pre>
  * You can also explicitly specify which components (beans) should be wired into this AI Service
@@ -43,6 +47,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * - {@link #contentRetriever()}
  * - {@link #retrievalAugmentor()}
  * - {@link #toolProvider()}
+ * - {@link #toolExecutionErrorHandler()}
+ * - {@link #toolArgumentsErrorHandler()}
  * </pre>
  * See more information about AI Services <a href="https://docs.langchain4j.dev/tutorials/ai-services">here</a>
  * and in the Javadoc of {@link AiServices}.
@@ -106,6 +112,20 @@ public @interface AiService {
      * this attribute specifies the name of a {@link ToolProvider} bean that should be used by this AI Service.
      */
     String toolProvider() default "";
+
+    /**
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the name of a {@link ToolExecutionErrorHandler} bean
+     * that should be used by this AI Service.
+     */
+    String toolExecutionErrorHandler() default "";
+
+    /**
+     * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
+     * this attribute specifies the name of a {@link ToolArgumentsErrorHandler} bean
+     * that should be used by this AI Service.
+     */
+    String toolArgumentsErrorHandler() default "";
 
     /**
      * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},

@@ -12,6 +12,8 @@ import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
+import dev.langchain4j.service.tool.ToolArgumentsErrorHandler;
+import dev.langchain4j.service.tool.ToolExecutionErrorHandler;
 import dev.langchain4j.service.tool.ToolProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +62,8 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
             String[] retrievalAugmentors = beanFactory.getBeanNamesForType(RetrievalAugmentor.class);
             String[] moderationModels = beanFactory.getBeanNamesForType(ModerationModel.class);
             String[] toolProviders = beanFactory.getBeanNamesForType(ToolProvider.class);
+            String[] toolExecutionErrorHandlers = beanFactory.getBeanNamesForType(ToolExecutionErrorHandler.class);
+            String[] toolArgumentsErrorHandlers = beanFactory.getBeanNamesForType(ToolArgumentsErrorHandler.class);
 
             Set<String> toolBeanNames = new HashSet<>();
             List<ToolSpecification> toolSpecifications = new ArrayList<>();
@@ -174,6 +178,26 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         toolProviders,
                         "toolProvider",
                         "toolProvider",
+                        propertyValues
+                );
+
+                addBeanReference(
+                        ToolExecutionErrorHandler.class,
+                        aiServiceAnnotation,
+                        aiServiceAnnotation.toolExecutionErrorHandler(),
+                        toolExecutionErrorHandlers,
+                        "toolExecutionErrorHandler",
+                        "toolExecutionErrorHandler",
+                        propertyValues
+                );
+
+                addBeanReference(
+                        ToolArgumentsErrorHandler.class,
+                        aiServiceAnnotation,
+                        aiServiceAnnotation.toolArgumentsErrorHandler(),
+                        toolArgumentsErrorHandlers,
+                        "toolArgumentsErrorHandler",
+                        "toolArgumentsErrorHandler",
                         propertyValues
                 );
 
