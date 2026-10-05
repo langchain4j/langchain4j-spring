@@ -1,9 +1,14 @@
 package dev.langchain4j.service.spring.mode.explicit.placeholder;
 
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.model.chat.mock.ChatModelMock;
 import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.ApplicationContext;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,9 +73,9 @@ class AiServiceWithPlaceholderTest {
                 )
                 .run(context -> {
                     AiServiceWithPlaceholderTools aiService = context.getBean(AiServiceWithPlaceholderTools.class);
-                    assertThat(aiService).isNotNull();
                     String response = aiService.chat("Hello");
                     assertThat(response).isEqualTo("ConfiguredModelResponse");
+                    assertThat(toolNamesSentToModel(context)).containsExactly("helperTool");
                 });
     }
 
@@ -85,9 +90,10 @@ class AiServiceWithPlaceholderTest {
                 )
                 .run(context -> {
                     AiServiceWithPlaceholderTools aiService = context.getBean(AiServiceWithPlaceholderTools.class);
-                    assertThat(aiService).isNotNull();
                     String response = aiService.chat("Hello");
                     assertThat(response).isEqualTo("ConfiguredModelResponse");
+                    assertThat(toolNamesSentToModel(context))
+                            .containsExactlyInAnyOrder("helperTool", "secondHelperTool");
                 });
     }
 
@@ -104,5 +110,13 @@ class AiServiceWithPlaceholderTest {
                             .isInstanceOf(IllegalArgumentException.class)
                             .hasMessageContaining("Could not resolve placeholder 'my.chat-model.name'");
                 });
+    }
+
+    private static List<String> toolNamesSentToModel(ApplicationContext context) {
+        ChatModelMock chatModel = context.getBean(
+                AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME, ChatModelMock.class);
+        return chatModel.requests().get(0).toolSpecifications().stream()
+                .map(ToolSpecification::name)
+                .toList();
     }
 }
