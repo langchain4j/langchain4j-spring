@@ -9,7 +9,7 @@ name: Nightly integration tests
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '17 23 * * *' # daily at 23:17 UTC, off the hour to reduce GitHub's scheduling delay
   workflow_dispatch:
 
 permissions:
