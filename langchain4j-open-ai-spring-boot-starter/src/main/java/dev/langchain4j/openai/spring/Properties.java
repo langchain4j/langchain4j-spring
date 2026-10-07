@@ -25,7 +25,10 @@ public record Properties(
     ModerationModelProperties moderationModel,
 
     @NestedConfigurationProperty
-    ImageModelProperties imageModel
+    ImageModelProperties imageModel,
+
+    @NestedConfigurationProperty
+    DecisionModelProperties decisionModel
 ) {
     static final String PREFIX = "langchain4j.open-ai";
 

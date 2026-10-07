@@ -3,6 +3,7 @@ package dev.langchain4j.openai.spring;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
+import dev.langchain4j.model.decision.listener.DecisionModelListener;
 import dev.langchain4j.model.openai.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,8 @@ public class AutoConfig {
     private static final String MODERATION_MODEL_HTTP_CLIENT_BUILDER = "openAiModerationModelHttpClientBuilder";
 
     private static final String IMAGE_MODEL_HTTP_CLIENT_BUILDER = "openAiImageModelHttpClientBuilder";
+
+    private static final String DECISION_MODEL_HTTP_CLIENT_BUILDER = "openAiDecisionModelHttpClientBuilder";
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
@@ -351,6 +354,41 @@ public class AutoConfig {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
                 // executor is not needed for no-streaming OpenAiModerationModel
+                .createDefaultStreamingRequestExecutor(false);
+    }
+
+    @Bean
+    @ConditionalOnProperty(PREFIX + ".decision-model.api-key")
+    OpenAiDecisionModel openAiDecisionModel(
+            @Qualifier(DECISION_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            Properties properties,
+            ObjectProvider<DecisionModelListener> listeners
+    ) {
+        DecisionModelProperties decisionModelProperties = properties.decisionModel();
+        return OpenAiDecisionModel.builder()
+                .httpClientBuilder(httpClientBuilder)
+                .baseUrl(decisionModelProperties.baseUrl())
+                .apiKey(decisionModelProperties.apiKey())
+                .organizationId(decisionModelProperties.organizationId())
+                .projectId(decisionModelProperties.projectId())
+                .modelName(decisionModelProperties.modelName())
+                .timeout(decisionModelProperties.timeout())
+                .maxRetries(decisionModelProperties.maxRetries())
+                .logRequests(decisionModelProperties.logRequests())
+                .logResponses(decisionModelProperties.logResponses())
+                .customHeaders(decisionModelProperties.customHeaders())
+                .customQueryParams(decisionModelProperties.customQueryParams())
+                .listeners(listeners.orderedStream().toList())
+                .build();
+    }
+
+    @Bean(DECISION_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnProperty(PREFIX + ".decision-model.api-key")
+    @ConditionalOnMissingBean(name = DECISION_MODEL_HTTP_CLIENT_BUILDER)
+    HttpClientBuilder openAiDecisionModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
+        return SpringRestClient.builder()
+                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                // executor is not needed for non-streaming OpenAiDecisionModel
                 .createDefaultStreamingRequestExecutor(false);
     }
 
