@@ -3,6 +3,7 @@ package dev.langchain4j.service.spring.mode.explicit.placeholder;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.mock.ChatModelMock;
 import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
+import dev.langchain4j.service.spring.LogCapture;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -110,6 +111,22 @@ class AiServiceWithPlaceholderTest {
                             .isInstanceOf(IllegalArgumentException.class)
                             .hasMessageContaining("Could not resolve placeholder 'my.chat-model.name'");
                 });
+    }
+
+    @Test
+    void should_flag_explicitly_named_bean_that_does_not_exist() {
+        try (LogCapture logs = LogCapture.debug(AiServicesAutoConfiguration.class)) {
+            contextRunner
+                    .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                    .withPropertyValues(
+                            "my.chat-model.name=typoChatModel",
+                            "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                    )
+                    .run(context -> {
+                        assertThat(context).hasFailed();
+                        assertThat(logs.messages()).contains("chatModel=typoChatModel (no such bean)");
+                    });
+        }
     }
 
     private static List<String> toolNamesSentToModel(ApplicationContext context) {

@@ -5,18 +5,13 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.mock.ChatModelMock;
 import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
+import dev.langchain4j.service.spring.LogCapture;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.logging.LogLevel;
-import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(OutputCaptureExtension.class)
 class AiServiceWithChatMemoryTest {
 
     ChatModelMock chatModel = ChatModelMock.thatAlwaysResponds("Your name is Klaus.");
@@ -51,24 +46,16 @@ class AiServiceWithChatMemoryTest {
     }
 
     @Test
-    void should_log_wired_components(CapturedOutput output) {
-        withDebugLogging(() -> contextRunner
-                .withUserConfiguration(AiServiceWithChatMemoryApplication.class)
-                .run(context -> assertThat(output)
-                        .contains("Registered @AiService bean 'aiServiceWithChatMemory' for "
-                                + AiServiceWithChatMemory.class.getName() + " using AUTOMATIC wiring mode")
-                        .contains("chatModel=chatModel,")
-                        .contains("chatMemory=chatMemory")
-                        .contains("streamingChatModel=null")));
-    }
-
-    private static void withDebugLogging(Runnable runnable) {
-        LoggingSystem loggingSystem = LoggingSystem.get(AiServicesAutoConfiguration.class.getClassLoader());
-        loggingSystem.setLogLevel(AiServicesAutoConfiguration.class.getName(), LogLevel.DEBUG);
-        try {
-            runnable.run();
-        } finally {
-            loggingSystem.setLogLevel(AiServicesAutoConfiguration.class.getName(), null);
+    void should_log_wired_components() {
+        try (LogCapture logs = LogCapture.debug(AiServicesAutoConfiguration.class)) {
+            contextRunner
+                    .withUserConfiguration(AiServiceWithChatMemoryApplication.class)
+                    .run(context -> assertThat(logs.messages())
+                            .contains("Registered @AiService bean 'aiServiceWithChatMemory' for "
+                                    + AiServiceWithChatMemory.class.getName() + " using AUTOMATIC wiring mode")
+                            .contains("chatModel=chatModel,")
+                            .contains("chatMemory=chatMemory")
+                            .contains("streamingChatModel=null"));
         }
     }
 }
