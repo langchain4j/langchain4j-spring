@@ -165,6 +165,8 @@ class PropertyBindingTest {
             prefix + ".tool-choice=REQUIRED",
             prefix + ".cache-system-messages=true",
             prefix + ".cache-tools=true",
+            prefix + ".cache-automatically=true",
+            prefix + ".cache-ttl=1h",
             prefix + ".thinking-type=enabled",
             prefix + ".thinking-budget-tokens=1024",
             prefix + ".send-thinking=true",
@@ -189,7 +191,11 @@ class PropertyBindingTest {
                 .withRequestBody(matchingJsonPath("$.stop_sequences[1]", equalTo("beta")))
                 .withRequestBody(matchingJsonPath("$.tool_choice.type", equalTo("any")))
                 .withRequestBody(matchingJsonPath("$.system[0].cache_control.type", equalTo("ephemeral")))
+                .withRequestBody(matchingJsonPath("$.system[0].cache_control.ttl", equalTo("1h")))
                 .withRequestBody(matchingJsonPath("$.tools[0].cache_control.type", equalTo("ephemeral")))
+                .withRequestBody(matchingJsonPath("$.tools[0].cache_control.ttl", equalTo("1h")))
+                .withRequestBody(matchingJsonPath("$.cache_control.type", equalTo("ephemeral")))
+                .withRequestBody(matchingJsonPath("$.cache_control.ttl", equalTo("1h")))
                 .withRequestBody(matchingJsonPath("$.thinking.type", equalTo("enabled")))
                 .withRequestBody(matchingJsonPath("$.thinking.budget_tokens", equalTo("1024")))
                 .withRequestBody(matchingJsonPath("$.custom-key", equalTo("custom-value"))));
