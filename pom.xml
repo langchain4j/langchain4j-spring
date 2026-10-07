@@ -65,7 +65,7 @@
         <spring.boot3.version>3.5.13</spring.boot3.version>
         <spring.boot4.version>4.0.5</spring.boot4.version>
         <tinylog.version>2.7.0</tinylog.version>
-        <wiremock.version>3.10.0</wiremock.version>
+        <wiremock.version>3.13.2</wiremock.version>
     </properties>
 
     <dependencyManagement>
