@@ -30,6 +30,8 @@ import org.springframework.context.annotation.Bean;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
 import static dev.langchain4j.internal.Utils.isNotNullOrBlank;
@@ -37,6 +39,7 @@ import static dev.langchain4j.internal.Utils.isNullOrBlank;
 import static dev.langchain4j.service.IllegalConfigurationException.illegalConfiguration;
 import static dev.langchain4j.service.spring.AiServiceWiringMode.AUTOMATIC;
 import static dev.langchain4j.service.spring.AiServiceWiringMode.EXPLICIT;
+import static java.util.stream.Collectors.toSet;
 
 public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
 
@@ -65,7 +68,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
             String[] toolExecutionErrorHandlers = beanFactory.getBeanNamesForType(ToolExecutionErrorHandler.class);
             String[] toolArgumentsErrorHandlers = beanFactory.getBeanNamesForType(ToolArgumentsErrorHandler.class);
 
-            Set<String> toolBeanNames = new LinkedHashSet<>();
+            Set<String> toolBeanNames = new HashSet<>();
             List<ToolSpecification> toolSpecifications = new ArrayList<>();
             for (String beanName : beanFactory.getBeanDefinitionNames()) {
                 try {
@@ -91,6 +94,10 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
             }
 
             String[] aiServices = beanFactory.getBeanNamesForAnnotation(AiService.class);
+            // AI services are re-registered under these names one by one in the loop below
+            Set<String> aiServiceBeanNames = Arrays.stream(aiServices)
+                    .map(AiServicesAutoConfig::lowercaseFirstLetter)
+                    .collect(toSet());
             for (String aiService : aiServices) {
                 Class<?> aiServiceClass = beanFactory.getType(aiService);
 
@@ -100,7 +107,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                 MutablePropertyValues propertyValues = aiServiceBeanDefinition.getPropertyValues();
 
                 AiService aiServiceAnnotation = aiServiceClass.getAnnotation(AiService.class);
-                Map<String, Object> wiredComponents = new LinkedHashMap<>();
+                Map<String, String> wiredBeanNames = new LinkedHashMap<>();
 
                 addBeanReference(
                         beanFactory,
@@ -111,7 +118,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         "chatModel",
                         "chatModel",
                         propertyValues,
-                        wiredComponents
+                        wiredBeanNames
                 );
 
                 addBeanReference(
@@ -123,7 +130,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         "streamingChatModel",
                         "streamingChatModel",
                         propertyValues,
-                        wiredComponents
+                        wiredBeanNames
                 );
 
                 addBeanReference(
@@ -135,7 +142,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         "chatMemory",
                         "chatMemory",
                         propertyValues,
-                        wiredComponents
+                        wiredBeanNames
                 );
 
                 addBeanReference(
@@ -147,7 +154,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         "chatMemoryProvider",
                         "chatMemoryProvider",
                         propertyValues,
-                        wiredComponents
+                        wiredBeanNames
                 );
 
                 addBeanReference(
@@ -159,7 +166,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         "contentRetriever",
                         "contentRetriever",
                         propertyValues,
-                        wiredComponents
+                        wiredBeanNames
                 );
 
                 addBeanReference(
@@ -171,7 +178,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         "retrievalAugmentor",
                         "retrievalAugmentor",
                         propertyValues,
-                        wiredComponents
+                        wiredBeanNames
                 );
 
                 addBeanReference(
@@ -183,7 +190,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         "moderationModel",
                         "moderationModel",
                         propertyValues,
-                        wiredComponents
+                        wiredBeanNames
                 );
 
                 addBeanReference(
@@ -195,7 +202,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         "toolProvider",
                         "toolProvider",
                         propertyValues,
-                        wiredComponents
+                        wiredBeanNames
                 );
 
                 addBeanReference(
@@ -207,7 +214,7 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         "toolExecutionErrorHandler",
                         "toolExecutionErrorHandler",
                         propertyValues,
-                        wiredComponents
+                        wiredBeanNames
                 );
 
                 addBeanReference(
@@ -219,9 +226,10 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         "toolArgumentsErrorHandler",
                         "toolArgumentsErrorHandler",
                         propertyValues,
-                        wiredComponents
+                        wiredBeanNames
                 );
 
+                Collection<String> wiredTools;
                 if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
                     List<String> resolvedTools = new ArrayList<>();
                     for (String toolBeanName : aiServiceAnnotation.tools()) {
@@ -236,10 +244,10 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                         }
                     }
                     propertyValues.add("tools", toManagedList(resolvedTools));
-                    wiredComponents.put("tools", describeAll(beanFactory, resolvedTools));
+                    wiredTools = resolvedTools;
                 } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
                     propertyValues.add("tools", toManagedList(toolBeanNames));
-                    wiredComponents.put("tools", toolBeanNames);
+                    wiredTools = toolBeanNames;
                 } else {
                     throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
                 }
@@ -251,7 +259,8 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                 if (log.isDebugEnabled()) {
                     log.debug("Registered @AiService bean '{}' for {} using {} wiring mode, wired components: {}",
                             lowercaseFirstLetter(aiService), aiServiceClass.getName(),
-                            aiServiceAnnotation.wiringMode(), wiredComponents);
+                            aiServiceAnnotation.wiringMode(),
+                            describeWiring(beanFactory, aiServiceAnnotation, wiredBeanNames, wiredTools, aiServiceBeanNames));
                 }
 
                 if (eventPublisher != null) {
@@ -269,37 +278,51 @@ public class AiServicesAutoConfig implements ApplicationEventPublisherAware {
                                          String annotationAttributeName,
                                          String factoryPropertyName,
                                          MutablePropertyValues propertyValues,
-                                         Map<String, Object> wiredComponents) {
-        String wiredBeanName = null;
+                                         Map<String, String> wiredBeanNames) {
         if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
             String resolvedBeanName = resolve(beanFactory, customBeanName);
             if (isNotNullOrBlank(resolvedBeanName)) {
                 propertyValues.add(factoryPropertyName, new RuntimeBeanReference(resolvedBeanName));
-                wiredBeanName = describe(beanFactory, resolvedBeanName);
+                wiredBeanNames.put(factoryPropertyName, resolvedBeanName);
             }
         } else if (aiServiceAnnotation.wiringMode() == AUTOMATIC) {
             if (beanNames.length == 1) {
                 propertyValues.add(factoryPropertyName, new RuntimeBeanReference(beanNames[0]));
-                wiredBeanName = beanNames[0];
+                wiredBeanNames.put(factoryPropertyName, beanNames[0]);
             } else if (beanNames.length > 1) {
                 throw conflict(beanType, beanNames, annotationAttributeName);
             }
         } else {
             throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
         }
-        wiredComponents.put(factoryPropertyName, wiredBeanName);
+    }
+
+    private static Map<String, Object> describeWiring(ConfigurableListableBeanFactory beanFactory,
+                                                      AiService aiServiceAnnotation,
+                                                      Map<String, String> wiredBeanNames,
+                                                      Collection<String> wiredTools,
+                                                      Set<String> aiServiceBeanNames) {
+        boolean explicit = aiServiceAnnotation.wiringMode() == EXPLICIT;
+        UnaryOperator<String> describe = explicit
+                ? beanName -> describeExplicitBean(beanFactory, beanName, aiServiceBeanNames)
+                : UnaryOperator.identity();
+        Map<String, Object> wiring = new LinkedHashMap<>();
+        wiredBeanNames.forEach((component, beanName) -> wiring.put(component, describe.apply(beanName)));
+        // automatically wired tools come from a HashSet, sort them for a stable log line
+        Stream<String> tools = wiredTools.stream().map(describe);
+        wiring.put("tools", (explicit ? tools : tools.sorted()).toList());
+        return wiring;
     }
 
     /**
      * Explicitly named beans are not validated until the AI service is instantiated,
      * so flag missing ones in the log instead of reporting them as wired.
      */
-    private static String describe(ConfigurableListableBeanFactory beanFactory, String beanName) {
-        return beanFactory.containsBean(beanName) ? beanName : beanName + " (no such bean)";
-    }
-
-    private static List<String> describeAll(ConfigurableListableBeanFactory beanFactory, List<String> beanNames) {
-        return beanNames.stream().map(beanName -> describe(beanFactory, beanName)).toList();
+    private static String describeExplicitBean(ConfigurableListableBeanFactory beanFactory,
+                                               String beanName,
+                                               Set<String> aiServiceBeanNames) {
+        boolean exists = beanFactory.containsBean(beanName) || aiServiceBeanNames.contains(beanName);
+        return exists ? beanName : beanName + " (no such bean)";
     }
 
     private static String resolve(ConfigurableListableBeanFactory beanFactory, String value) {

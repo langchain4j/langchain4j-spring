@@ -54,8 +54,8 @@ class AiServiceWithChatMemoryTest {
                             .contains("Registered @AiService bean 'aiServiceWithChatMemory' for "
                                     + AiServiceWithChatMemory.class.getName() + " using AUTOMATIC wiring mode")
                             .contains("chatModel=chatModel,")
-                            .contains("chatMemory=chatMemory")
-                            .contains("streamingChatModel=null"));
+                            .contains("chatMemory=chatMemory,")
+                            .doesNotContain("streamingChatModel"));
         }
     }
 }
