@@ -81,30 +81,30 @@ jobs:
       - name: Extract current stable SNAPSHOT version from POM property
         id: extract-stable-snapshot-version
         run: |
-          REVISION=$(mvn help:evaluate -Dexpression=langchain4j.stable.version -q -DforceStdout)
+          REVISION=$(./mvnw help:evaluate -Dexpression=langchain4j.stable.version -q -DforceStdout)
           echo "stableVersionSnapshot=$REVISION" >> $GITHUB_OUTPUT
 
       - name: Update stable versions
-        run: mvn versions:set -DnewVersion="$STABLE_VERSION" -DoldVersion=${{ steps.extract-stable-snapshot-version.outputs.stableVersionSnapshot }} -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false
+        run: ./mvnw versions:set -DnewVersion="$STABLE_VERSION" -DoldVersion=${{ steps.extract-stable-snapshot-version.outputs.stableVersionSnapshot }} -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false
 
       - name: Update stable version property
-        run: mvn versions:set-property -Dproperty=langchain4j.stable.version -DnewVersion="$STABLE_VERSION" -DgenerateBackupPoms=false
+        run: ./mvnw versions:set-property -Dproperty=langchain4j.stable.version -DnewVersion="$STABLE_VERSION" -DgenerateBackupPoms=false
 
       - name: Extract current beta SNAPSHOT version from POM property
         id: extract-beta-snapshot-version
         run: |
-          REVISION=$(mvn help:evaluate -Dexpression=langchain4j.beta.version -q -DforceStdout)
+          REVISION=$(./mvnw help:evaluate -Dexpression=langchain4j.beta.version -q -DforceStdout)
           echo "betaVersionSnapshot=$REVISION" >> $GITHUB_OUTPUT
 
       - name: Update beta versions
-        run: mvn versions:set -DnewVersion="$BETA_VERSION" -DoldVersion=${{ steps.extract-beta-snapshot-version.outputs.betaVersionSnapshot }} -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false
+        run: ./mvnw versions:set -DnewVersion="$BETA_VERSION" -DoldVersion=${{ steps.extract-beta-snapshot-version.outputs.betaVersionSnapshot }} -DgroupId=* -DartifactId=* -DgenerateBackupPoms=false
 
       - name: Update beta version property
-        run: mvn versions:set-property -Dproperty=langchain4j.beta.version -DnewVersion="$BETA_VERSION" -DgenerateBackupPoms=false
+        run: ./mvnw versions:set-property -Dproperty=langchain4j.beta.version -DnewVersion="$BETA_VERSION" -DgenerateBackupPoms=false
 
       - name: Release
         if: ${{ fromJSON(steps.phase.outputs.num) <= 1 }}
-        run: mvn -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
+        run: ./mvnw -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
