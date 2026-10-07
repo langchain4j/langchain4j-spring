@@ -14,6 +14,11 @@ import dev.langchain4j.model.openaiofficial.OpenAiOfficialEmbeddingModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialImageModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialStreamingChatModel;
 import org.junit.jupiter.api.BeforeEach;
+import dev.langchain4j.model.decision.DecisionModel;
+import dev.langchain4j.model.decision.request.DecisionRequest;
+import dev.langchain4j.model.decision.request.YesNoQuestion;
+import dev.langchain4j.model.decision.response.DecisionResponse;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialDecisionModel;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
@@ -207,6 +212,56 @@ class AutoConfigTest {
     }
 
     @Test
+    void should_provide_decision_model() {
+        WireMock.stubFor(post(urlPathEqualTo("/decisions")).willReturn(okJson(
+                """
+                {"model": "gpt-6-luna", "answers": [{"type": "predicate", "name": "spam", "probability": 0.95}],
+                 "usage": {"input_tokens": 12, "input_tokens_details": {"cached_tokens": 0, "cache_write_tokens": 0},
+                           "output_tokens": 0, "output_tokens_details": {"reasoning_tokens": 0}, "total_tokens": 12}}
+                """)));
+
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai-official.decision-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai-official.decision-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai-official.decision-model.model-name=gpt-6-luna",
+                        "langchain4j.open-ai-official.decision-model.custom-headers.X-Custom=custom-value"
+                )
+                .run(context -> {
+
+                    DecisionModel model = context.getBean(DecisionModel.class);
+                    assertThat(model).isInstanceOf(OpenAiOfficialDecisionModel.class);
+                    assertThat(context.getBean(OpenAiOfficialDecisionModel.class)).isSameAs(model);
+
+                    DecisionResponse response = model.decide(DecisionRequest.builder()
+                            .input("You won a free cruise!")
+                            .question("spam", YesNoQuestion.of("Is this message spam?"))
+                            .build());
+                    assertThat(response.yesNo("spam").probability()).isEqualTo(0.95);
+
+                    WireMock.verify(WireMock.postRequestedFor(urlPathEqualTo("/decisions"))
+                            .withHeader("Authorization", equalTo("Bearer " + API_KEY))
+                            .withHeader("X-Custom", equalTo("custom-value"))
+                            .withRequestBody(matchingJsonPath("$.model", equalTo("gpt-6-luna"))));
+                });
+    }
+
+    @Test
+    void should_not_create_decision_model_when_user_provides_own_bean() {
+        OpenAiOfficialDecisionModel customModel = mock(OpenAiOfficialDecisionModel.class);
+        contextRunner
+                .withBean(OpenAiOfficialDecisionModel.class, () -> customModel)
+                .withPropertyValues(
+                        "langchain4j.open-ai-official.decision-model.api-key=test-key",
+                        "langchain4j.open-ai-official.decision-model.model-name=gpt-6-luna"
+                )
+                .run(context -> {
+                    assertThat(context).hasSingleBean(OpenAiOfficialDecisionModel.class);
+                    assertThat(context.getBean(OpenAiOfficialDecisionModel.class)).isSameAs(customModel);
+                });
+    }
+
+    @Test
     void should_provide_image_model() {
         WireMock.stubFor(post(urlPathEqualTo(IMAGE_GENERATIONS_PATH)).willReturn(okJson(IMAGE_RESPONSE)));
 
@@ -238,6 +293,7 @@ class AutoConfigTest {
             assertThat(context).doesNotHaveBean(OpenAiOfficialStreamingChatModel.class);
             assertThat(context).doesNotHaveBean(OpenAiOfficialEmbeddingModel.class);
             assertThat(context).doesNotHaveBean(OpenAiOfficialImageModel.class);
+            assertThat(context).doesNotHaveBean(OpenAiOfficialDecisionModel.class);
         });
     }
 
