@@ -25,7 +25,7 @@ jobs:
           gpg-passphrase: GPG_PASSPHRASE
 
       - name: release
-        run: mvn -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
+        run: ./mvnw -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
