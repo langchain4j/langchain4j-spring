@@ -64,7 +64,7 @@
         <project.build.outputTimestamp>2026-10-02T12:49:17Z</project.build.outputTimestamp>
         <spring.boot3.version>3.5.13</spring.boot3.version>
         <spring.boot4.version>4.0.5</spring.boot4.version>
-        <tinylog.version>2.7.0</tinylog.version>
+        <tinylog.version>2.8.1</tinylog.version>
         <wiremock.version>3.10.0</wiremock.version>
     </properties>
 
