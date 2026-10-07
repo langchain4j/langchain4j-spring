@@ -144,7 +144,7 @@ jobs:
         id: compliance
         run: |
           set -o pipefail
-          mvn -U -B -P compliance org.honton.chas:license-maven-plugin:compliance 2>&1 | tee maven-output.log
+          mvn -U -B -s .mvn/ci-settings.xml -P compliance org.honton.chas:license-maven-plugin:compliance 2>&1 | tee maven-output.log
 
       - name: Surface compliance errors
         if: failure() && steps.compliance.outcome == 'failure'
