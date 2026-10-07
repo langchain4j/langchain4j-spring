@@ -29,6 +29,27 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      # Temporary dependency for PR 218: validate against the pending core PR, not a published artifact.
+      # Remove these two steps once langchain4j/langchain4j#4426 is merged and its snapshot is published.
+      - name: Check out the pinned DocumentDB dependency
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 218
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          repository: SandraAhlgrimm/langchain4j
+          ref: aa1011e4fe08f31224c2ff5018f2d9672678e09f
+          path: target/ci-dependencies/langchain4j
+          persist-credentials: false
+          sparse-checkout: |
+            .mvn
+            langchain4j-parent
+            langchain4j-azure-documentdb
+
+      - name: Install the unpublished DocumentDB module
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 218
+        # Build only this module; keep the published core and BOM dependencies used by the other starters.
+        # The normal Spring clean build below also removes this temporary source checkout.
+        run: mvn -U -B -ntp -f target/ci-dependencies/langchain4j/langchain4j-azure-documentdb/pom.xml install
+
       # No provider API keys are set here on purpose. The starters are covered by mock-based tests that need
       # no credentials, so this build behaves the same for a pull request from a fork as it does for main.
       # The few tests that do need a real provider are guarded by @EnabledIfEnvironmentVariable and therefore

@@ -33,6 +33,12 @@ This development branch uses `1.22.0-beta32-SNAPSHOT` with core `1.22.0-SNAPSHOT
 build and install the matching core and Spring reactor snapshots locally until they are published.
 The dependency example does not imply that these artifacts are already available as a release.
 
+For [this draft PR's CI](https://github.com/langchain4j/langchain4j-spring/pull/218) only, the Java
+matrix builds and installs the DocumentDB module from the SHA-pinned core change in
+[langchain4j/langchain4j#4426](https://github.com/langchain4j/langchain4j/pull/4426) before running
+the normal Spring build. This does not publish artifacts, replace the published core/BOM dependencies,
+or disable tests. Remove the temporary bootstrap once the core change is merged and its snapshot is published.
+
 ### Configuration
 
 Configure the store in `application.properties`, using environment variables for connection details:
