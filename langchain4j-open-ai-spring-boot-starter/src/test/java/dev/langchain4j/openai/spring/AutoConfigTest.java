@@ -19,6 +19,11 @@ import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.model.openai.*;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.BeforeEach;
+import dev.langchain4j.model.decision.DecisionModel;
+import dev.langchain4j.model.decision.request.DecisionRequest;
+import dev.langchain4j.model.decision.request.YesNoQuestion;
+import dev.langchain4j.model.decision.response.DecisionResponse;
+import dev.langchain4j.model.openai.OpenAiDecisionModel;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
@@ -458,6 +463,45 @@ class AutoConfigTest {
                             .withRequestBody(
                                     matchingJsonPath("$.input[0]", equalTo("He wants to kill them."))));
                 });
+    }
+
+    @Test
+    void should_provide_decision_model() {
+        WireMock.stubFor(post(urlEqualTo("/v1/decisions")).willReturn(okJson(
+                """
+                {"model": "gpt-6-luna", "answers": [{"type": "predicate", "name": "spam", "probability": 0.95}],
+                 "usage": {"input_tokens": 12, "input_tokens_details": {"cached_tokens": 0, "cache_write_tokens": 0},
+                           "output_tokens": 0, "output_tokens_details": {"reasoning_tokens": 0}, "total_tokens": 12}}
+                """)));
+
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.decision-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.decision-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.decision-model.model-name=gpt-6-luna"
+                )
+                .run(context -> {
+
+                    DecisionModel model = context.getBean(DecisionModel.class);
+                    assertThat(model).isInstanceOf(OpenAiDecisionModel.class);
+                    assertThat(context.getBean(OpenAiDecisionModel.class)).isSameAs(model);
+
+                    DecisionResponse response = model.decide(DecisionRequest.builder()
+                            .input("You won a free cruise!")
+                            .question("spam", YesNoQuestion.of("Is this message spam?"))
+                            .build());
+                    assertThat(response.yesNo("spam").probability()).isEqualTo(0.95);
+
+                    WireMock.verify(WireMock.postRequestedFor(urlEqualTo("/v1/decisions"))
+                            .withHeader("Authorization", equalTo("Bearer " + API_KEY))
+                            .withRequestBody(matchingJsonPath("$.model", equalTo("gpt-6-luna")))
+                            .withRequestBody(matchingJsonPath("$.questions[0].type", equalTo("predicate"))));
+                });
+    }
+
+    @Test
+    void should_not_provide_decision_model_without_api_key() {
+        contextRunner.run(context -> assertThat(context).doesNotHaveBean(DecisionModel.class));
     }
 
     @Test

@@ -21,6 +21,8 @@ public class AnthropicChatModelProperties {
     ToolChoice toolChoice;
     Boolean cacheSystemMessages;
     Boolean cacheTools;
+    Boolean cacheAutomatically;
+    String cacheTtl;
     String thinkingType;
     Integer thinkingBudgetTokens;
     Boolean returnThinking;
@@ -133,6 +135,22 @@ public class AnthropicChatModelProperties {
 
     public void setCacheTools(Boolean cacheTools) {
         this.cacheTools = cacheTools;
+    }
+
+    public Boolean getCacheAutomatically() {
+        return cacheAutomatically;
+    }
+
+    public void setCacheAutomatically(Boolean cacheAutomatically) {
+        this.cacheAutomatically = cacheAutomatically;
+    }
+
+    public String getCacheTtl() {
+        return cacheTtl;
+    }
+
+    public void setCacheTtl(String cacheTtl) {
+        this.cacheTtl = cacheTtl;
     }
 
     public String getThinkingType() {
