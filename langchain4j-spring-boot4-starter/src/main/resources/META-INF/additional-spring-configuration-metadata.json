@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "langchain4j.executor.use-spring-task-executor",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "Whether LangChain4j runs the work it moves off the calling thread (for example blocking tools or retrieval in asynchronous and reactive AI Service calls) on the application's AsyncTaskExecutor instead of its own default executor. Enable it to have context such as tracing spans, MDC and the security context follow that work, which happens when the Spring executor is configured with a TaskDecorator that propagates it. The setting is process-wide: it changes the executor of every LangChain4j usage in the JVM."
+    }
+  ]
+}
