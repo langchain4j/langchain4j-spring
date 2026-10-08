@@ -18,7 +18,7 @@ class AiServiceWithPlaceholderTest {
             .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class));
 
     @Test
-    void should_resolve_model_name_from_placeholder() {
+    void should_resolve_chat_model_bean_name_from_placeholder() {
         contextRunner
                 .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
                 .withPropertyValues(
@@ -33,7 +33,7 @@ class AiServiceWithPlaceholderTest {
     }
 
     @Test
-    void should_resolve_model_name_from_placeholder_with_default_value() {
+    void should_resolve_chat_model_bean_name_from_placeholder_with_default_value() {
         contextRunner
                 .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
                 .withPropertyValues(
@@ -64,7 +64,7 @@ class AiServiceWithPlaceholderTest {
     }
 
     @Test
-    void should_resolve_tool_name_from_placeholder() {
+    void should_resolve_tool_bean_name_from_placeholder() {
         contextRunner
                 .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
                 .withPropertyValues(
@@ -90,6 +90,39 @@ class AiServiceWithPlaceholderTest {
                 )
                 .run(context -> {
                     AiServiceWithPlaceholderTools aiService = context.getBean(AiServiceWithPlaceholderTools.class);
+                    String response = aiService.chat("Hello");
+                    assertThat(response).isEqualTo("ConfiguredModelResponse");
+                    assertThat(toolNamesSentToModel(context))
+                            .containsExactlyInAnyOrder("helperTool", "secondHelperTool");
+                });
+    }
+
+    @Test
+    void should_wire_no_tools_when_placeholder_resolves_to_empty_value() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                        "my.tool.name="
+                )
+                .run(context -> {
+                    AiServiceWithPlaceholderTools aiService = context.getBean(AiServiceWithPlaceholderTools.class);
+                    String response = aiService.chat("Hello");
+                    assertThat(response).isEqualTo("ConfiguredModelResponse");
+                    assertThat(toolNamesSentToModel(context)).isEmpty();
+                });
+    }
+
+    @Test
+    void should_resolve_multiple_tool_names_from_comma_separated_literal() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                        "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                )
+                .run(context -> {
+                    AiServiceWithCommaSeparatedTools aiService = context.getBean(AiServiceWithCommaSeparatedTools.class);
                     String response = aiService.chat("Hello");
                     assertThat(response).isEqualTo("ConfiguredModelResponse");
                     assertThat(toolNamesSentToModel(context))
