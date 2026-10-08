@@ -6,7 +6,7 @@
 
     <groupId>dev.langchain4j</groupId>
     <artifactId>langchain4j-spring</artifactId>
-    <version>1.22.0-beta32</version>
+    <version>1.23.0-beta33-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>langchain4j-spring parent POM</name>
@@ -54,14 +54,14 @@
     </modules>
 
     <properties>
-        <langchain4j.stable.version>1.22.0</langchain4j.stable.version>
-        <langchain4j.beta.version>1.22.0-beta32</langchain4j.beta.version>
+        <langchain4j.stable.version>1.23.0-SNAPSHOT</langchain4j.stable.version>
+        <langchain4j.beta.version>1.23.0-beta33-SNAPSHOT</langchain4j.beta.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <!-- JDK 23+ disables classpath annotation processor discovery unless explicitly enabled. -->
         <maven.compiler.proc>full</maven.compiler.proc>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.outputTimestamp>2026-10-07T21:49:22Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-10-08T08:54:16Z</project.build.outputTimestamp>
         <spring.boot3.version>3.5.13</spring.boot3.version>
         <spring.boot4.version>4.0.5</spring.boot4.version>
         <tinylog.version>2.8.1</tinylog.version>
