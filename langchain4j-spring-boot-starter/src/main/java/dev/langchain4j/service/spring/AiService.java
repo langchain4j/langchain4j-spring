@@ -52,7 +52,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * - {@link #toolArgumentsErrorHandler()}
  * - {@link #tools()}
  * </pre>
- * Property placeholders (e.g., {@code "${my.chat-model.name}"}) are also supported for these attributes.
+ * Property placeholders (e.g., {@code "${my-app.chat-model-bean}"}) are also supported for these attributes.
+ * A placeholder must resolve to a bean name (e.g., {@code "openAiChatModel"}),
+ * not to the name of an LLM model (e.g., {@code "gpt-4o-mini"}).
+ * A placeholder that resolves to an empty value is treated as if the attribute was not set.
  * <p>
  * See more information about AI Services <a href="https://docs.langchain4j.dev/tutorials/ai-services">here</a>
  * and in the Javadoc of {@link AiServices}.
@@ -72,14 +75,14 @@ public @interface AiService {
     /**
      * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
      * this attribute specifies the name of a {@link ChatModel} bean (or a property placeholder
-     * such as {@code "${my.chat-model.name}"}) that should be used by this AI Service.
+     * such as {@code "${my-app.chat-model-bean}"}) that should be used by this AI Service.
      */
     String chatModel() default "";
 
     /**
      * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
      * this attribute specifies the name of a {@link StreamingChatModel} bean (or a property placeholder
-     * such as {@code "${my.streaming-chat-model.name}"}) that should be used by this AI Service.
+     * such as {@code "${my-app.streaming-chat-model-bean}"}) that should be used by this AI Service.
      */
     String streamingChatModel() default "";
 
@@ -142,7 +145,9 @@ public @interface AiService {
     /**
      * When the {@link #wiringMode()} is set to {@link AiServiceWiringMode#EXPLICIT},
      * this attribute specifies the names of beans containing methods annotated with {@link Tool} that should be used by this AI Service.
-     * Property placeholders (such as {@code "${my.tool.names}"}) and comma-separated bean names are also supported.
+     * Each element can be a bean name, a comma-separated list of bean names,
+     * or a property placeholder (such as {@code "${my-app.tool-beans}"}) that resolves to either of them
+     * (e.g., {@code my-app.tool-beans=bookingTools,weatherTools}).
      */
     String[] tools() default {};
 }
