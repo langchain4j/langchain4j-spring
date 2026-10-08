@@ -9,7 +9,8 @@ import java.util.List;
 
 /**
  * {@link SpringRestClient} builds its own request factory so that it can apply the configured timeouts, which
- * means a factory set on a {@link org.springframework.web.client.RestClient.Builder} is not used. Subclasses pin
+ * means a factory set on a {@link org.springframework.web.client.RestClient.Builder} is not used when
+ * timeouts are configured. Subclasses pin
  * one factory each through {@link SpringRestClientBuilder#clientHttpRequestFactoryBuilder}, so that every client
  * Spring can pick is actually covered - each reports a read timeout with a different exception underneath.
  */

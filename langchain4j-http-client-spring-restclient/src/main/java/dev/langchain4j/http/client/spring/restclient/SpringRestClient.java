@@ -40,23 +40,30 @@ public class SpringRestClient implements HttpClient {
 
         RestClient.Builder restClientBuilder = getOrDefault(builder.restClientBuilder(), RestClient::builder);
 
-        ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.defaults();
-        if (builder.connectTimeout() != null) {
-            settings = settings.withConnectTimeout(builder.connectTimeout());
+        // The request factory is only built when this builder carries configuration that can only be applied to
+        // a factory it builds itself: a pinned clientHttpRequestFactoryBuilder, or timeouts, which Spring offers
+        // no other way to apply. Otherwise the requestFactory of the supplied RestClient.Builder is used as-is,
+        // so it is no longer silently replaced by one detected from the classpath.
+        ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = builder.clientHttpRequestFactoryBuilder();
+        if (requestFactoryBuilder == null
+                && (builder.connectTimeout() != null || builder.readTimeout() != null || builder.restClientBuilder() == null)) {
+            requestFactoryBuilder = ClientHttpRequestFactoryBuilder.detect();
         }
-        if (builder.readTimeout() != null) {
-            settings = settings.withReadTimeout(builder.readTimeout());
+        if (requestFactoryBuilder != null) {
+            ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.defaults();
+            if (builder.connectTimeout() != null) {
+                settings = settings.withConnectTimeout(builder.connectTimeout());
+            }
+            if (builder.readTimeout() != null) {
+                settings = settings.withReadTimeout(builder.readTimeout());
+            }
+            if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
+                requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
+            }
+            restClientBuilder = restClientBuilder.requestFactory(requestFactoryBuilder.build(settings));
         }
-        ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = getOrDefault(
-                builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect);
-        if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
-            requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
-        }
-        ClientHttpRequestFactory clientHttpRequestFactory = requestFactoryBuilder.build(settings);
 
-        this.delegate = restClientBuilder
-                .requestFactory(clientHttpRequestFactory)
-                .build();
+        this.delegate = restClientBuilder.build();
 
         this.streamingRequestExecutor = getOrDefault(builder.streamingRequestExecutor(), () -> {
             if (builder.createDefaultStreamingRequestExecutor()) {
