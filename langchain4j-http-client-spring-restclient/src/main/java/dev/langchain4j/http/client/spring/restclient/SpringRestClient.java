@@ -6,6 +6,7 @@ import dev.langchain4j.http.client.FormDataFile;
 import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
+import dev.langchain4j.http.client.sse.HttpStreamingEvent;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
 import dev.langchain4j.http.client.sse.ServerSentEventParser;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
@@ -17,6 +18,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
@@ -26,15 +28,27 @@ import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.net.http.HttpTimeoutException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 
 import static dev.langchain4j.http.client.sse.ServerSentEventListenerUtils.ignoringExceptions;
+import static dev.langchain4j.internal.AsyncNotSupported.failedFuture;
+import static dev.langchain4j.internal.AsyncNotSupported.failingPublisher;
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static dev.langchain4j.internal.Utils.isNullOrBlank;
 
 public class SpringRestClient implements HttpClient {
 
+    private static final boolean WEBFLUX_PRESENT = ClassUtils.isPresent(
+            "org.springframework.web.reactive.function.client.WebClient", SpringRestClient.class.getClassLoader());
+
+    private static final String WEBFLUX_MISSING = "Non-blocking calls (for example AI Service methods returning"
+            + " CompletableFuture, Flow.Publisher, Mono or Flux<AiServiceStreamingEvent>) need spring-webflux on the"
+            + " classpath when they are sent with SpringRestClient. %s() is not available without it.";
+
     private final RestClient delegate;
     private final AsyncTaskExecutor streamingRequestExecutor;
+    private final WebClientDelegate webClientDelegate;
 
     public SpringRestClient(SpringRestClientBuilder builder) {
 
@@ -57,6 +71,8 @@ public class SpringRestClient implements HttpClient {
         this.delegate = restClientBuilder
                 .requestFactory(clientHttpRequestFactory)
                 .build();
+
+        this.webClientDelegate = WEBFLUX_PRESENT ? new WebClientDelegate(builder) : null;
 
         this.streamingRequestExecutor = getOrDefault(builder.streamingRequestExecutor(), () -> {
             if (builder.createDefaultStreamingRequestExecutor()) {
@@ -142,6 +158,38 @@ public class SpringRestClient implements HttpClient {
         });
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The request is sent with Spring's {@code WebClient}, so this needs {@code spring-webflux} on the classpath;
+     * without it, the returned future fails with an {@link dev.langchain4j.exception.AsyncNotSupportedException}.
+     * The connector is chosen by {@link SpringRestClientBuilder#clientHttpConnectorBuilder}, and the response body
+     * is read in full, without a size limit, as for {@link #execute(HttpRequest)}.
+     */
+    @Override
+    public CompletableFuture<SuccessfulHttpResponse> executeAsync(HttpRequest request) {
+        if (webClientDelegate == null) {
+            return failedFuture(WEBFLUX_MISSING.formatted("executeAsync"));
+        }
+        return webClientDelegate.executeAsync(request);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The request is sent with Spring's {@code WebClient}, so this needs {@code spring-webflux} on the classpath;
+     * without it, the publisher fails with an {@link dev.langchain4j.exception.AsyncNotSupportedException}.
+     * Events are delivered as they arrive: the body is parsed incrementally as each chunk is received, and no thread
+     * is held for the lifetime of the stream. Cancelling the subscription aborts the request.
+     */
+    @Override
+    public Flow.Publisher<HttpStreamingEvent> stream(HttpRequest request, ServerSentEventParser parser) {
+        if (webClientDelegate == null) {
+            return failingPublisher(WEBFLUX_MISSING.formatted("stream"));
+        }
+        return webClientDelegate.stream(request, parser);
+    }
+
     private RestClient.RequestBodySpec toSpringRestClientRequest(HttpRequest request) {
         RestClient.RequestBodySpec requestBodySpec = delegate
                 .method(org.springframework.http.HttpMethod.valueOf(request.method().name()))
@@ -208,7 +256,7 @@ public class SpringRestClient implements HttpClient {
      * streamed request body to retry the request with credentials. When the body is there it is the most useful
      * thing a caller can be given, and when it is not, anything is better than an exception with no message.
      */
-    private static String errorMessage(String body, String fallback) {
+    static String errorMessage(String body, String fallback) {
         return isNullOrBlank(body) ? fallback : body;
     }
 
