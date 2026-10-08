@@ -17,15 +17,7 @@ class OpenAiStubs {
 
     static final String CHAT_COMPLETIONS_PATH = "/v1/chat/completions";
 
-    private static final String CHAT_COMPLETION = """
-            {
-              "id": "chatcmpl-1",
-              "created": 1700000000,
-              "model": "gpt-4o-mini",
-              "choices": [{"index": 0, "message": {"role": "assistant", "content": "Berlin"}, "finish_reason": "stop"}],
-              "usage": {"prompt_tokens": 10, "completion_tokens": 1, "total_tokens": 11}
-            }
-            """;
+    private static final String CHAT_COMPLETION = chatCompletion("Berlin");
 
     private static final String CHAT_COMPLETION_CHUNKS = chunk("{\"content\":\"Ber\"}", null)
             + chunk("{\"content\":\"lin\"}", null)
@@ -55,6 +47,18 @@ class OpenAiStubs {
                 "langchain4j.open-ai.streaming-chat-model.api-key=test-api-key",
                 "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini"
         };
+    }
+
+    static String chatCompletion(String content) {
+        return """
+                {
+                  "id": "chatcmpl-1",
+                  "created": 1700000000,
+                  "model": "gpt-4o-mini",
+                  "choices": [{"index": 0, "message": {"role": "assistant", "content": "%s"}, "finish_reason": "stop"}],
+                  "usage": {"prompt_tokens": 10, "completion_tokens": 1, "total_tokens": 11}
+                }
+                """.formatted(content);
     }
 
     private static String chunk(String delta, String finishReason) {

@@ -58,6 +58,11 @@
             <artifactId>spring-boot-starter-webclient</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>context-propagation</artifactId>
+        </dependency>
+
         <!-- test dependencies -->
 
         <dependency>
