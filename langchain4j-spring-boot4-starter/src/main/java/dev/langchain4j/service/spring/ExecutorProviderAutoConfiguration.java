@@ -39,16 +39,16 @@ import org.springframework.core.task.AsyncTaskExecutor;
  */
 @Configuration
 @ConditionalOnProperty(name = "langchain4j.executor.use-spring-task-executor", havingValue = "true")
-public class ExecutorProviderAutoConfig {
+public class ExecutorProviderAutoConfiguration {
 
-    private static final Logger log = LoggerFactory.getLogger(ExecutorProviderAutoConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(ExecutorProviderAutoConfiguration.class);
 
     private final ObjectProvider<AsyncTaskExecutor> applicationTaskExecutor;
     private final ObjectProvider<AsyncTaskExecutor> taskExecutors;
     private ExecutorProvider installed;
     private ExecutorProvider previous;
 
-    public ExecutorProviderAutoConfig(
+    public ExecutorProviderAutoConfiguration(
             @Qualifier(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)
             ObjectProvider<AsyncTaskExecutor> applicationTaskExecutor,
             ObjectProvider<AsyncTaskExecutor> taskExecutors) {

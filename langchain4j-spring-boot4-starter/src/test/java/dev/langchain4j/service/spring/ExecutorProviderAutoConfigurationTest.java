@@ -3,7 +3,7 @@ package dev.langchain4j.service.spring;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.langchain4j.spi.ExecutorProvider;
-import dev.langchain4j.spring.LangChain4jAutoConfig;
+import dev.langchain4j.spring.LangChain4jAutoConfiguration;
 import java.util.concurrent.Executor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -14,11 +14,11 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-class ExecutorProviderAutoConfigTest {
+class ExecutorProviderAutoConfigurationTest {
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(TaskExecutionAutoConfiguration.class))
-            .withUserConfiguration(ExecutorProviderAutoConfig.class);
+            .withUserConfiguration(ExecutorProviderAutoConfiguration.class);
 
     @Test
     void does_nothing_unless_the_property_is_set() {
@@ -42,8 +42,8 @@ class ExecutorProviderAutoConfigTest {
     void prefers_the_application_task_executor_over_the_streaming_executors_of_the_provider_starters() {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(
-                        dev.langchain4j.openai.spring.AutoConfig.class, TaskExecutionAutoConfiguration.class))
-                .withUserConfiguration(ExecutorProviderAutoConfig.class)
+                        dev.langchain4j.openai.spring.OpenAiAutoConfiguration.class, TaskExecutionAutoConfiguration.class))
+                .withUserConfiguration(ExecutorProviderAutoConfiguration.class)
                 .withPropertyValues(
                         "langchain4j.open-ai.streaming-chat-model.api-key=test-api-key",
                         "langchain4j.open-ai.streaming-chat-model.model-name=test-model",
@@ -60,7 +60,7 @@ class ExecutorProviderAutoConfigTest {
         ThreadPoolTaskExecutor applicationExecutor = new ThreadPoolTaskExecutor();
 
         new ApplicationContextRunner()
-                .withUserConfiguration(ExecutorProviderAutoConfig.class)
+                .withUserConfiguration(ExecutorProviderAutoConfiguration.class)
                 .withBean("myExecutor", AsyncTaskExecutor.class, () -> applicationExecutor)
                 .withPropertyValues("langchain4j.executor.use-spring-task-executor=true")
                 .run(context -> assertThat(ExecutorProvider.get().executor()).isSameAs(applicationExecutor));
@@ -69,7 +69,7 @@ class ExecutorProviderAutoConfigTest {
     @Test
     void is_applied_by_the_LangChain4j_auto_configuration() {
         new ApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(LangChain4jAutoConfig.class, TaskExecutionAutoConfiguration.class))
+                .withConfiguration(AutoConfigurations.of(LangChain4jAutoConfiguration.class, TaskExecutionAutoConfiguration.class))
                 // the AI Service scanner of that configuration needs a base package; this one contains no AI Services
                 .withInitializer(context -> AutoConfigurationPackages.register(
                         (BeanDefinitionRegistry) context.getBeanFactory(), "dev.langchain4j.service.spring.none"))
@@ -100,7 +100,7 @@ class ExecutorProviderAutoConfigTest {
         ExecutorProvider.set(applicationProvider);
         try {
             new ApplicationContextRunner()
-                    .withUserConfiguration(ExecutorProviderAutoConfig.class)
+                    .withUserConfiguration(ExecutorProviderAutoConfiguration.class)
                     .withPropertyValues("langchain4j.executor.use-spring-task-executor=true")
                     .run(context -> assertThat(ExecutorProvider.get()).isSameAs(applicationProvider));
 
