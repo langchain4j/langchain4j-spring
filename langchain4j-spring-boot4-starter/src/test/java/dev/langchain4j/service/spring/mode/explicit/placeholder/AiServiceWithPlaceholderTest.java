@@ -2,6 +2,7 @@ package dev.langchain4j.service.spring.mode.explicit.placeholder;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -140,8 +141,26 @@ class AiServiceWithPlaceholderTest {
                 .run(context -> {
                     assertThat(context).hasFailed();
                     assertThat(context.getStartupFailure())
-                            .isInstanceOf(IllegalArgumentException.class)
+                            .isInstanceOf(IllegalConfigurationException.class)
+                            .hasMessageContaining("Cannot resolve the 'chatModel' attribute of @AiService on ")
                             .hasMessageContaining("Could not resolve placeholder 'my.chat-model.name'");
+                });
+    }
+
+    @Test
+    void should_fail_when_tools_placeholder_cannot_be_resolved() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME
+                )
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure())
+                            .isInstanceOf(IllegalConfigurationException.class)
+                            .hasMessageContaining("Cannot resolve the 'tools' attribute of @AiService on "
+                                    + AiServiceWithPlaceholderTools.class.getName())
+                            .hasMessageContaining("Could not resolve placeholder 'my.tool.name'");
                 });
     }
 
