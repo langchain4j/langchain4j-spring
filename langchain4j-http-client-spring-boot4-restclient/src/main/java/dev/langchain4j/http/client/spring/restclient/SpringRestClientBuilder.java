@@ -56,7 +56,8 @@ public class SpringRestClientBuilder implements HttpClientBuilder {
      * Sets the {@code WebClient.Builder} used for the non-blocking methods,
      * {@link SpringRestClient#executeAsync(dev.langchain4j.http.client.HttpRequest)} and
      * {@link SpringRestClient#stream(dev.langchain4j.http.client.HttpRequest, dev.langchain4j.http.client.sse.ServerSentEventParser)},
-     * wrapped in a {@link WebClientBuilderHolder}. The blocking methods always use {@link RestClient}.
+     * wrapped in a {@link WebClientBuilderHolder}: {@code webClientBuilder(WebClientBuilderHolder.of(WebClient.builder()))}.
+     * The blocking methods always use {@link RestClient}.
      * <p>
      * When not set, {@code WebClient.builder()} is used. The given builder is copied, so it is not modified. Its
      * filters, default headers and observation settings apply, but its connector is not used: the timeouts

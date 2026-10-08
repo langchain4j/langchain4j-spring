@@ -1,5 +1,6 @@
 package dev.langchain4j.openai.spring;
 
+import dev.langchain4j.http.client.spring.restclient.WebClientBuilderHolder;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilder;
 import org.junit.jupiter.api.Test;
@@ -82,6 +83,10 @@ class WebClientBuilderWiringTest {
 
                     assertThat(context).hasNotFailed();
                     assertThat(context.getBeansOfType(HttpClientBuilder.class)).hasSize(8);
+                    // the application's builders are ambiguous, so neither of them is used
+                    assertThat(context.getBean(WebClientBuilderHolder.class).webClientBuilder())
+                            .isNotSameAs(context.getBean("firstWebClientBuilder"))
+                            .isNotSameAs(context.getBean("secondWebClientBuilder"));
                 });
     }
 }

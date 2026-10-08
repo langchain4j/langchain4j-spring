@@ -46,8 +46,10 @@ public class SpringRestClient implements HttpClient {
             "org.springframework.web.reactive.function.client.WebClient", SpringRestClient.class.getClassLoader());
 
     private static final String WEBFLUX_MISSING = "Non-blocking calls (for example AI Service methods returning"
-            + " CompletableFuture, Flow.Publisher, Mono or Flux<AiServiceStreamingEvent>) need spring-webflux on the"
-            + " classpath when they are sent with SpringRestClient. %s() is not available without it.";
+            + " CompletableFuture, Flow.Publisher, Mono or Flux<AiServiceStreamingEvent>) need Spring's WebClient"
+            + " (spring-webflux) on the classpath when they are sent with SpringRestClient: add the"
+            + " org.springframework.boot:spring-boot-starter-webclient dependency. See"
+            + " https://docs.langchain4j.dev/tutorials/spring-boot-integration. %s() is not available without it.";
 
     private final RestClient delegate;
     private final AsyncTaskExecutor streamingRequestExecutor;

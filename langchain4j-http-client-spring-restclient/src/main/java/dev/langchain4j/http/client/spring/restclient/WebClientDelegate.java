@@ -16,6 +16,8 @@ import org.springframework.boot.http.client.reactive.HttpComponentsClientHttpCon
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractors;
@@ -118,6 +120,7 @@ class WebClientDelegate {
                     ServerSentEventParser.Incremental incremental = parser.incremental();
                     Flux<ServerSentEvent> serverSentEvents = response.bodyToFlux(DataBuffer.class)
                             .concatMapIterable(buffer -> feed(incremental, buffer))
+                            .doOnDiscard(DataBuffer.class, DataBufferUtils::release)
                             .concatWith(Flux.defer(() -> Flux.fromIterable(incremental.flush())));
                     return Flux.<HttpStreamingEvent>just(new HttpResponseReceived(toSuccessfulHttpResponse(response, null)))
                             .concatWith(serverSentEvents);
@@ -174,7 +177,11 @@ class WebClientDelegate {
                 .defaultIfEmpty("")
                 .flatMap(body -> Mono.error(new HttpException(
                         response.statusCode().value(),
-                        SpringRestClient.errorMessage(body, response.statusCode().toString()))));
+                        SpringRestClient.errorMessage(body, statusText(response.statusCode())))));
+    }
+
+    private static String statusText(HttpStatusCode statusCode) {
+        return statusCode instanceof HttpStatus status ? status.getReasonPhrase() : String.valueOf(statusCode.value());
     }
 
     /**

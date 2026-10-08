@@ -1,5 +1,12 @@
 package dev.langchain4j.http.client.spring.restclient;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import dev.langchain4j.http.client.sse.ServerSentEventListener;
+import dev.langchain4j.http.client.sse.ServerSentEventParser;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import dev.langchain4j.exception.HttpException;
@@ -261,6 +268,87 @@ class SpringRestClientNonBlockingIT {
         // when-then
         assertThatThrownBy(() -> collect(client(connector, Duration.ofMillis(300)).stream(request)))
                 .isExactlyInstanceOf(TimeoutException.class);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("connectors")
+    void should_fail_with_status_text_when_error_body_is_empty(String name, ClientHttpConnectorBuilder<?> connector) {
+
+        // given
+        wireMockServer.stubFor(post(urlEqualTo("/endpoint")).willReturn(aResponse().withStatus(400)));
+
+        HttpRequest request = HttpRequest.builder().method(POST).url(url("/endpoint")).body("{}").build();
+
+        // when-then: the same message as on the blocking path
+        assertThatThrownBy(() -> client(connector, null).executeAsync(request).get(10, SECONDS))
+                .isInstanceOf(ExecutionException.class)
+                .cause()
+                .isExactlyInstanceOf(HttpException.class)
+                .hasMessage("Bad Request");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("connectors")
+    void should_stream_with_a_custom_parser(String name, ClientHttpConnectorBuilder<?> connector) {
+
+        // given: newline-delimited JSON, as Ollama streams it, sent in small chunks that split lines; the last line
+        // has no trailing newline
+        wireMockServer.stubFor(post(urlEqualTo("/ndjson")).willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/x-ndjson")
+                .withBody("{\"text\":\"Hel\"}\n{\"text\":\"lo\"}\n{\"done\":true}")
+                .withChunkedDribbleDelay(10, 200)));
+
+        HttpRequest request = HttpRequest.builder().method(POST).url(url("/ndjson")).body("{}").build();
+
+        // when
+        List<HttpStreamingEvent> events = collect(client(connector, null).stream(request, new LineParser()));
+
+        // then
+        assertThat(events.subList(1, events.size()))
+                .extracting(event -> ((ServerSentEvent) event).data())
+                .containsExactly("{\"text\":\"Hel\"}", "{\"text\":\"lo\"}", "{\"done\":true}");
+    }
+
+    /**
+     * Emits every line as an event, like the parsers of providers that stream newline-delimited JSON.
+     */
+    private static class LineParser implements ServerSentEventParser {
+
+        @Override
+        public void parse(InputStream httpResponseBody, ServerSentEventListener listener) {
+            throw new UnsupportedOperationException("only the incremental parser is used by non-blocking streams");
+        }
+
+        @Override
+        public Incremental incremental() {
+            return new Incremental() {
+
+                private final ByteArrayOutputStream line = new ByteArrayOutputStream();
+
+                @Override
+                public List<ServerSentEvent> feed(ByteBuffer bytes) {
+                    List<ServerSentEvent> events = new ArrayList<>();
+                    while (bytes.hasRemaining()) {
+                        byte b = bytes.get();
+                        if (b == '\n') {
+                            events.add(new ServerSentEvent(null, line.toString(StandardCharsets.UTF_8)));
+                            line.reset();
+                        } else {
+                            line.write(b);
+                        }
+                    }
+                    return events;
+                }
+
+                @Override
+                public List<ServerSentEvent> flush() {
+                    return line.size() == 0
+                            ? List.of()
+                            : List.of(new ServerSentEvent(null, line.toString(StandardCharsets.UTF_8)));
+                }
+            };
+        }
     }
 
     private static List<HttpStreamingEvent> collect(Flow.Publisher<HttpStreamingEvent> publisher) {

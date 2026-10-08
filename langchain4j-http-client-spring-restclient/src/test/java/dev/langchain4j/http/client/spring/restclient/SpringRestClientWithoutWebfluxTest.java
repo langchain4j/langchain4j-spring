@@ -54,7 +54,7 @@ class SpringRestClientWithoutWebfluxTest {
                 .isInstanceOf(ExecutionException.class)
                 .cause()
                 .isExactlyInstanceOf(AsyncNotSupportedException.class)
-                .hasMessageContaining("spring-webflux");
+                .hasMessageContaining("org.springframework:spring-webflux");
 
         // when
         CompletableFuture<Throwable> streamError = new CompletableFuture<>();
@@ -84,7 +84,7 @@ class SpringRestClientWithoutWebfluxTest {
         // then
         assertThat(streamError.get(5, SECONDS))
                 .isExactlyInstanceOf(AsyncNotSupportedException.class)
-                .hasMessageContaining("spring-webflux");
+                .hasMessageContaining("org.springframework:spring-webflux");
     }
 
     @Test
