@@ -24,7 +24,11 @@ import static dev.langchain4j.store.embedding.azure.cosmos.mongo.vcore.spring.Az
  * </p>
  *
  * @see AzureCosmosDbMongoVCoreEmbeddingStoreProperties
+ * @deprecated Azure Cosmos DB for MongoDB vCore has been renamed to Azure DocumentDB.
+ * Use {@code dev.langchain4j.store.embedding.azure.documentdb.spring.AzureDocumentDbEmbeddingStoreAutoConfiguration}
+ * from {@code langchain4j-azure-documentdb-spring-boot4-starter} instead, with properties under {@code langchain4j.azure.documentdb}.
  */
+@Deprecated(forRemoval = true)
 @AutoConfiguration
 @EnableConfigurationProperties(AzureCosmosDbMongoVCoreEmbeddingStoreProperties.class)
 @ConditionalOnProperty(prefix = PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
