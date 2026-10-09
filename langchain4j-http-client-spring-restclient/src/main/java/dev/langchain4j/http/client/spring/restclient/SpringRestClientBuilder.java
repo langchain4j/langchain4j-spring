@@ -38,8 +38,10 @@ public class SpringRestClientBuilder implements HttpClientBuilder {
      * picks one by looking at what is on the classpath, which means the underlying HTTP client depends on the
      * dependencies of the application. Set this to pin a specific client.
      * <p>
-     * Note that the request factory of a {@link #restClientBuilder(RestClient.Builder)} is not used: the timeouts
-     * configured on this builder have to be applied to the factory, so it is always built here.
+     * Note that the timeouts configured on this builder can only be applied to a request factory built here, so
+     * when a {@link #connectTimeout(Duration)} or a {@link #readTimeout(Duration)} is set, the request factory of
+     * the {@link #restClientBuilder(RestClient.Builder)} is ignored. Without them, and without this method being
+     * called, the request factory of the supplied {@link RestClient.Builder} is used as-is.
      */
     public SpringRestClientBuilder clientHttpRequestFactoryBuilder(
             ClientHttpRequestFactoryBuilder<?> clientHttpRequestFactoryBuilder) {
