@@ -5,6 +5,7 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -69,7 +70,9 @@ class AiServiceWithPlaceholderToolErrorHandlersTest {
                 .run(context -> {
                     assertThat(context).hasFailed();
                     assertThat(context.getStartupFailure())
-                            .isInstanceOf(IllegalArgumentException.class)
+                            .isInstanceOf(IllegalConfigurationException.class)
+                            .hasMessageContaining("Cannot resolve the 'toolArgumentsErrorHandler' attribute of @AiService on "
+                                    + AiServiceWithPlaceholderToolErrorHandlers.class.getName())
                             .hasMessageContaining("Could not resolve placeholder 'my.tool-arguments-error-handler.name'");
                 });
     }

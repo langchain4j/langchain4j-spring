@@ -103,6 +103,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
 
                 addBeanReference(
                         beanFactory,
+                        aiServiceClass,
                         ChatModel.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.chatModel(),
@@ -114,6 +115,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
 
                 addBeanReference(
                         beanFactory,
+                        aiServiceClass,
                         StreamingChatModel.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.streamingChatModel(),
@@ -125,6 +127,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
 
                 addBeanReference(
                         beanFactory,
+                        aiServiceClass,
                         ChatMemory.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.chatMemory(),
@@ -136,6 +139,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
 
                 addBeanReference(
                         beanFactory,
+                        aiServiceClass,
                         ChatMemoryProvider.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.chatMemoryProvider(),
@@ -147,6 +151,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
 
                 addBeanReference(
                         beanFactory,
+                        aiServiceClass,
                         ContentRetriever.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.contentRetriever(),
@@ -158,6 +163,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
 
                 addBeanReference(
                         beanFactory,
+                        aiServiceClass,
                         RetrievalAugmentor.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.retrievalAugmentor(),
@@ -169,6 +175,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
 
                 addBeanReference(
                         beanFactory,
+                        aiServiceClass,
                         ModerationModel.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.moderationModel(),
@@ -180,6 +187,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
 
                 addBeanReference(
                         beanFactory,
+                        aiServiceClass,
                         ToolProvider.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.toolProvider(),
@@ -191,6 +199,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
 
                 addBeanReference(
                         beanFactory,
+                        aiServiceClass,
                         ToolExecutionErrorHandler.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.toolExecutionErrorHandler(),
@@ -202,6 +211,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
 
                 addBeanReference(
                         beanFactory,
+                        aiServiceClass,
                         ToolArgumentsErrorHandler.class,
                         aiServiceAnnotation,
                         aiServiceAnnotation.toolArgumentsErrorHandler(),
@@ -214,7 +224,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
                     List<String> resolvedTools = new ArrayList<>();
                     for (String toolBeanName : aiServiceAnnotation.tools()) {
-                        String resolved = resolve(beanFactory, toolBeanName);
+                        String resolved = resolve(beanFactory, toolBeanName, aiServiceClass, "tools");
                         if (isNotNullOrBlank(resolved)) {
                             for (String singleBeanName : resolved.split(",")) {
                                 String trimmed = singleBeanName.trim();
@@ -243,6 +253,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
     }
 
     private static void addBeanReference(ConfigurableListableBeanFactory beanFactory,
+                                         Class<?> aiServiceClass,
                                          Class<?> beanType,
                                          AiService aiServiceAnnotation,
                                          String customBeanName,
@@ -251,7 +262,7 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                                          String factoryPropertyName,
                                          MutablePropertyValues propertyValues) {
         if (aiServiceAnnotation.wiringMode() == EXPLICIT) {
-            String resolvedBeanName = resolve(beanFactory, customBeanName);
+            String resolvedBeanName = resolve(beanFactory, customBeanName, aiServiceClass, annotationAttributeName);
             if (isNotNullOrBlank(resolvedBeanName)) {
                 propertyValues.add(factoryPropertyName, new RuntimeBeanReference(resolvedBeanName));
             }
@@ -266,11 +277,22 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
         }
     }
 
-    private static String resolve(ConfigurableListableBeanFactory beanFactory, String value) {
+    private static String resolve(ConfigurableListableBeanFactory beanFactory,
+                                  String value,
+                                  Class<?> aiServiceClass,
+                                  String attributeName) {
         if (isNullOrBlank(value)) {
             return value;
         }
-        return beanFactory.resolveEmbeddedValue(value);
+        try {
+            return beanFactory.resolveEmbeddedValue(value);
+        } catch (IllegalArgumentException e) {
+            IllegalConfigurationException exception = illegalConfiguration(
+                    "Cannot resolve the '%s' attribute of @AiService on %s: %s",
+                    attributeName, aiServiceClass.getName(), e.getMessage());
+            exception.initCause(e);
+            throw exception;
+        }
     }
 
     private static IllegalConfigurationException conflict(Class<?> beanType, Object[] beanNames, String attributeName) {

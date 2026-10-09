@@ -2,6 +2,7 @@ package dev.langchain4j.mistralai.spring;
 
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
+import dev.langchain4j.http.client.spring.restclient.WebClientBuilderHolder;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiEmbeddingModel;
@@ -17,10 +18,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.http.client.reactive.ClientHttpConnectorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.ContextPropagatingTaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.client.RestClient;
 
 import static dev.langchain4j.mistralai.spring.MistralAiProperties.PREFIX;
@@ -85,9 +89,14 @@ public class MistralAiAutoConfiguration {
     @Bean(CHAT_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
     @ConditionalOnMissingBean(name = CHAT_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder mistralAiChatModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
+    HttpClientBuilder mistralAiChatModelHttpClientBuilder(
+            ObjectProvider<RestClient.Builder> restClientBuilder,
+            ObjectProvider<WebClientBuilderHolder> webClientBuilder,
+            ObjectProvider<ClientHttpConnectorBuilder<?>> clientHttpConnectorBuilder) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                .webClientBuilder(webClientBuilder.getIfAvailable())
+                .clientHttpConnectorBuilder(clientHttpConnectorBuilder.getIfUnique())
                 // executor is not needed for no-streaming MistralAiChatModel
                 .createDefaultStreamingRequestExecutor(false);
     }
@@ -131,9 +140,13 @@ public class MistralAiAutoConfiguration {
     @ConditionalOnMissingBean(name = STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder mistralAiStreamingChatModelHttpClientBuilder(
             ObjectProvider<RestClient.Builder> restClientBuilder,
+            ObjectProvider<WebClientBuilderHolder> webClientBuilder,
+            ObjectProvider<ClientHttpConnectorBuilder<?>> clientHttpConnectorBuilder,
             @Qualifier(STREAMING_CHAT_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                .webClientBuilder(webClientBuilder.getIfAvailable())
+                .clientHttpConnectorBuilder(clientHttpConnectorBuilder.getIfUnique())
                 .streamingRequestExecutor(executor);
     }
 
@@ -181,9 +194,14 @@ public class MistralAiAutoConfiguration {
     @Bean(EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")
     @ConditionalOnMissingBean(name = EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder mistralAiEmbeddingModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
+    HttpClientBuilder mistralAiEmbeddingModelHttpClientBuilder(
+            ObjectProvider<RestClient.Builder> restClientBuilder,
+            ObjectProvider<WebClientBuilderHolder> webClientBuilder,
+            ObjectProvider<ClientHttpConnectorBuilder<?>> clientHttpConnectorBuilder) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                .webClientBuilder(webClientBuilder.getIfAvailable())
+                .clientHttpConnectorBuilder(clientHttpConnectorBuilder.getIfUnique())
                 // executor is not needed for no-streaming MistralAiEmbeddingModel
                 .createDefaultStreamingRequestExecutor(false);
     }
@@ -215,9 +233,14 @@ public class MistralAiAutoConfiguration {
     @Bean(FIM_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".fim-model.api-key")
     @ConditionalOnMissingBean(name = FIM_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder mistralAiFimModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
+    HttpClientBuilder mistralAiFimModelHttpClientBuilder(
+            ObjectProvider<RestClient.Builder> restClientBuilder,
+            ObjectProvider<WebClientBuilderHolder> webClientBuilder,
+            ObjectProvider<ClientHttpConnectorBuilder<?>> clientHttpConnectorBuilder) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                .webClientBuilder(webClientBuilder.getIfAvailable())
+                .clientHttpConnectorBuilder(clientHttpConnectorBuilder.getIfUnique())
                 // executor is not needed for no-streaming MistralAiFimModel
                 .createDefaultStreamingRequestExecutor(false);
     }
@@ -250,9 +273,13 @@ public class MistralAiAutoConfiguration {
     @ConditionalOnMissingBean(name = STREAMING_FIM_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder mistralAiStreamingFimModelHttpClientBuilder(
             ObjectProvider<RestClient.Builder> restClientBuilder,
+            ObjectProvider<WebClientBuilderHolder> webClientBuilder,
+            ObjectProvider<ClientHttpConnectorBuilder<?>> clientHttpConnectorBuilder,
             @Qualifier(STREAMING_FIM_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                .webClientBuilder(webClientBuilder.getIfAvailable())
+                .clientHttpConnectorBuilder(clientHttpConnectorBuilder.getIfUnique())
                 .streamingRequestExecutor(executor);
     }
 
@@ -305,10 +332,26 @@ public class MistralAiAutoConfiguration {
     @Bean(MODERATION_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".moderation-model.api-key")
     @ConditionalOnMissingBean(name = MODERATION_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder mistralAiModerationModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
+    HttpClientBuilder mistralAiModerationModelHttpClientBuilder(
+            ObjectProvider<RestClient.Builder> restClientBuilder,
+            ObjectProvider<WebClientBuilderHolder> webClientBuilder,
+            ObjectProvider<ClientHttpConnectorBuilder<?>> clientHttpConnectorBuilder) {
         return SpringRestClient.builder()
                 .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+                .webClientBuilder(webClientBuilder.getIfAvailable())
+                .clientHttpConnectorBuilder(clientHttpConnectorBuilder.getIfUnique())
                 // executor is not needed for no-streaming MistralAiModerationModel
                 .createDefaultStreamingRequestExecutor(false);
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(WebClient.class)
+    static class WebClientConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean
+        WebClientBuilderHolder langchain4jWebClientBuilderHolder(ObjectProvider<WebClient.Builder> webClientBuilder) {
+            return WebClientBuilderHolder.of(webClientBuilder.getIfUnique(WebClient::builder));
+        }
     }
 }

@@ -25,7 +25,10 @@ public record OpenAiProperties(
     OpenAiModerationModelProperties moderationModel,
 
     @NestedConfigurationProperty
-    OpenAiImageModelProperties imageModel
+    OpenAiImageModelProperties imageModel,
+
+    @NestedConfigurationProperty
+    OpenAiDecisionModelProperties decisionModel
 ) {
     static final String PREFIX = "langchain4j.open-ai";
 

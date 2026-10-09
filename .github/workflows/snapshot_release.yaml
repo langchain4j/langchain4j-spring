@@ -35,7 +35,7 @@ jobs:
       - name: Check the version is a SNAPSHOT
         id: snapshot-check
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           case "$VERSION" in
             *-SNAPSHOT)
               echo "proceed=true" >> "$GITHUB_OUTPUT"
@@ -56,10 +56,10 @@ jobs:
         id: core-check
         if: steps.snapshot-check.outputs.proceed == 'true'
         run: |
-          CORE_VERSION=$(mvn help:evaluate -Dexpression=langchain4j.stable.version -q -DforceStdout)
+          CORE_VERSION=$(./mvnw help:evaluate -Dexpression=langchain4j.stable.version -q -DforceStdout)
           case "$CORE_VERSION" in
             *-SNAPSHOT)
-              if mvn -B -U -q dependency:get -Dartifact="dev.langchain4j:langchain4j-bom:$CORE_VERSION:pom" >/dev/null 2>&1; then
+              if ./mvnw -B -U -q dependency:get -Dartifact="dev.langchain4j:langchain4j-bom:$CORE_VERSION:pom" >/dev/null 2>&1; then
                 echo "proceed=true" >> "$GITHUB_OUTPUT"
                 echo "langchain4j-bom $CORE_VERSION is available."
               else
@@ -78,4 +78,4 @@ jobs:
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-        run: mvn -B -U --fail-at-end -DskipTests -DskipITs clean deploy
+        run: ./mvnw -B -U --fail-at-end -DskipTests -DskipITs clean deploy

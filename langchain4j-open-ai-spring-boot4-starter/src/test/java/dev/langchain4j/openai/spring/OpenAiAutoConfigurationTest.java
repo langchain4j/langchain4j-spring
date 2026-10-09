@@ -5,11 +5,17 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import dev.langchain4j.http.client.HttpClientBuilderLoader;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
+import dev.langchain4j.http.client.spring.restclient.WebClientBuilderHolder;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatModelStreamingEvent;
+import dev.langchain4j.model.chat.response.CompleteResponse;
+import dev.langchain4j.model.chat.response.PartialResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
@@ -19,16 +25,27 @@ import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.model.openai.*;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.BeforeEach;
+import dev.langchain4j.model.decision.DecisionModel;
+import dev.langchain4j.model.decision.request.DecisionRequest;
+import dev.langchain4j.model.decision.request.YesNoQuestion;
+import dev.langchain4j.model.decision.response.DecisionResponse;
+import dev.langchain4j.model.openai.OpenAiDecisionModel;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.adapter.JdkFlowAdapter;
+import reactor.core.publisher.Flux;
 
+import java.time.Duration;
+import java.util.List;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -213,6 +230,106 @@ class OpenAiAutoConfigurationTest {
                     inOrder.verify(listener2).onResponse(any());
                     inOrder.verify(listener1).onResponse(any());
                     inOrder.verifyNoMoreInteractions();
+                });
+    }
+
+    @Test
+    void should_provide_chat_model_that_supports_non_blocking_calls() throws Exception {
+        WireMock.stubFor(post(urlEqualTo(CHAT_COMPLETIONS_PATH)).willReturn(okJson(CHAT_COMPLETION_RESPONSE)));
+
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini"
+                )
+                .run(context -> {
+
+                    ChatModel model = context.getBean(ChatModel.class);
+
+                    ChatRequest chatRequest = ChatRequest.builder()
+                            .messages(UserMessage.from("What is the capital of Germany?"))
+                            .build();
+                    ChatResponse chatResponse = model.chatAsync(chatRequest).get(30, SECONDS);
+
+                    assertThat(chatResponse.aiMessage().text()).contains("Berlin");
+                });
+    }
+
+    @Test
+    void should_send_non_blocking_calls_with_the_application_web_client_builder() throws Exception {
+        WireMock.stubFor(post(urlEqualTo(CHAT_COMPLETIONS_PATH)).willReturn(okJson(CHAT_COMPLETION_RESPONSE)));
+
+        contextRunner
+                .withBean(WebClient.Builder.class, () -> WebClient.builder().defaultHeader("X-Application", "my-app"))
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini"
+                )
+                .run(context -> {
+
+                    ChatModel model = context.getBean(ChatModel.class);
+
+                    ChatRequest chatRequest = ChatRequest.builder()
+                            .messages(UserMessage.from("What is the capital of Germany?"))
+                            .build();
+                    model.chatAsync(chatRequest).get(30, SECONDS);
+
+                    WireMock.verify(WireMock.postRequestedFor(urlEqualTo(CHAT_COMPLETIONS_PATH))
+                            .withHeader("X-Application", equalTo("my-app")));
+                });
+    }
+
+    @Test
+    void should_not_create_web_client_builder_holder_when_webflux_is_missing() {
+        WireMock.stubFor(post(urlEqualTo(CHAT_COMPLETIONS_PATH)).willReturn(okJson(CHAT_COMPLETION_RESPONSE)));
+
+        contextRunner
+                .withClassLoader(new FilteredClassLoader(WebClient.class))
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini"
+                )
+                .run(context -> {
+
+                    assertThat(context).doesNotHaveBean(WebClientBuilderHolder.class);
+
+                    assertThat(context.getBean(ChatModel.class).chat("What is the capital of Germany?"))
+                            .contains("Berlin");
+                });
+    }
+
+    @Test
+    void should_provide_streaming_chat_model_that_supports_reactive_calls() throws Exception {
+        stubSse(CHAT_COMPLETIONS_PATH, sseChunks("Ber", "lin"), 4, 200);
+
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.streaming-chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini"
+                )
+                .run(context -> {
+
+                    StreamingChatModel model = context.getBean(StreamingChatModel.class);
+
+                    ChatRequest chatRequest = ChatRequest.builder()
+                            .messages(UserMessage.from("What is the capital of Germany?"))
+                            .build();
+                    List<ChatModelStreamingEvent> events = Flux.from(
+                                    JdkFlowAdapter.flowPublisherToFlux(model.chat(chatRequest)))
+                            .collectList()
+                            .block(Duration.ofSeconds(30));
+
+                    assertThat(events)
+                            .filteredOn(PartialResponse.class::isInstance)
+                            .extracting(event -> ((PartialResponse) event).text())
+                            .containsExactly("Ber", "lin");
+                    assertThat(events.get(events.size() - 1))
+                            .isInstanceOfSatisfying(CompleteResponse.class, complete ->
+                                    assertThat(complete.chatResponse().aiMessage().text()).isEqualTo("Berlin"));
                 });
     }
 
@@ -458,6 +575,45 @@ class OpenAiAutoConfigurationTest {
                             .withRequestBody(
                                     matchingJsonPath("$.input[0]", equalTo("He wants to kill them."))));
                 });
+    }
+
+    @Test
+    void should_provide_decision_model() {
+        WireMock.stubFor(post(urlEqualTo("/v1/decisions")).willReturn(okJson(
+                """
+                {"model": "gpt-6-luna", "answers": [{"type": "predicate", "name": "spam", "probability": 0.95}],
+                 "usage": {"input_tokens": 12, "input_tokens_details": {"cached_tokens": 0, "cache_write_tokens": 0},
+                           "output_tokens": 0, "output_tokens_details": {"reasoning_tokens": 0}, "total_tokens": 12}}
+                """)));
+
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.decision-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.decision-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.decision-model.model-name=gpt-6-luna"
+                )
+                .run(context -> {
+
+                    DecisionModel model = context.getBean(DecisionModel.class);
+                    assertThat(model).isInstanceOf(OpenAiDecisionModel.class);
+                    assertThat(context.getBean(OpenAiDecisionModel.class)).isSameAs(model);
+
+                    DecisionResponse response = model.decide(DecisionRequest.builder()
+                            .input("You won a free cruise!")
+                            .question("spam", YesNoQuestion.of("Is this message spam?"))
+                            .build());
+                    assertThat(response.yesNo("spam").probability()).isEqualTo(0.95);
+
+                    WireMock.verify(WireMock.postRequestedFor(urlEqualTo("/v1/decisions"))
+                            .withHeader("Authorization", equalTo("Bearer " + API_KEY))
+                            .withRequestBody(matchingJsonPath("$.model", equalTo("gpt-6-luna")))
+                            .withRequestBody(matchingJsonPath("$.questions[0].type", equalTo("predicate"))));
+                });
+    }
+
+    @Test
+    void should_not_provide_decision_model_without_api_key() {
+        contextRunner.run(context -> assertThat(context).doesNotHaveBean(DecisionModel.class));
     }
 
     @Test
