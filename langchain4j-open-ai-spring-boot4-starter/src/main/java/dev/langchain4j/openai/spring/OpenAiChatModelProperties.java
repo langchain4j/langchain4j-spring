@@ -32,6 +32,8 @@ record OpenAiChatModelProperties(
         Map<String, String> metadata,
         String serviceTier,
         String reasoningEffort,
+        Boolean sendThinking,
+        String sendThinkingFieldName,
         Boolean returnThinking,
         Duration timeout,
         Integer maxRetries,
