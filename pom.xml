@@ -38,6 +38,8 @@
         <module>langchain4j-azure-cosmos-mongo-vcore-spring-boot4-starter</module>
         <module>langchain4j-azure-cosmos-nosql-spring-boot-starter</module>
         <module>langchain4j-azure-cosmos-nosql-spring-boot4-starter</module>
+        <module>langchain4j-azure-documentdb-spring-boot-starter</module>
+        <module>langchain4j-azure-documentdb-spring-boot4-starter</module>
         <module>langchain4j-voyage-ai-spring-boot-starter</module>
         <module>langchain4j-voyage-ai-spring-boot4-starter</module>
         <module>langchain4j-google-ai-gemini-spring-boot-starter</module>
