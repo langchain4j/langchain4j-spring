@@ -202,18 +202,25 @@ class AzureDocumentDbEmbeddingStoreAutoConfigurationTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "connection-string, connectionString",
-            "database-name, databaseName and collectionName",
-            "collection-name, databaseName and collectionName",
-            "kind, kind cannot be null"
+    @CsvSource(quoteCharacter = '"', value = {
+            "connection-string, 'langchain4j.azure.documentdb.connection-string'",
+            "database-name, 'langchain4j.azure.documentdb.database-name' must be set",
+            "collection-name, 'langchain4j.azure.documentdb.collection-name' must be set",
+            "kind, 'langchain4j.azure.documentdb.kind' must be set"
     })
     void should_fail_when_required_properties_are_missing(String property, String message) {
         assertFailure(withoutProperty(property), IllegalArgumentException.class, message);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "ivf", "VECTOR_HNSW", "vector-diskann"})
+    @ValueSource(strings = {"database-name", "collection-name", "kind"})
+    void should_fail_when_required_properties_are_blank(String property) {
+        assertFailure(withoutProperty(property).withPropertyValues(PREFIX + "." + property + "= "),
+                IllegalArgumentException.class, "'" + PREFIX + "." + property + "' must be set");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"ivf", "VECTOR_HNSW", "vector-diskann"})
     void should_reject_unsupported_kind(String kind) {
         assertFailure(configuredRunner.withPropertyValues(PREFIX + ".kind=" + kind),
                 IllegalArgumentException.class, "This vector index type is not supported");
@@ -357,6 +364,35 @@ class AzureDocumentDbEmbeddingStoreAutoConfigurationTest {
         verify(mongoClient, never()).close();
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"", " "})
+    void should_use_mongo_client_bean_when_connection_string_is_blank(String connectionString) {
+        existingCollection();
+        withoutProperty("connection-string")
+                .withPropertyValues(PREFIX + ".connection-string=" + connectionString)
+                .withBean(MongoClient.class, () -> mongoClient, definition -> definition.setDestroyMethodName(""))
+                .run(context -> assertThat(context).hasSingleBean(AzureDocumentDbEmbeddingStore.class));
+        clients.verifyNoInteractions();
+        verify(mongoClient, never()).close();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void should_register_the_store_under_the_same_bean_name_on_both_client_paths(boolean withMongoClientBean) {
+        ApplicationContextRunner runner;
+        if (withMongoClientBean) {
+            existingCollection();
+            runner = withoutProperty("connection-string")
+                    .withBean(MongoClient.class, () -> mongoClient, definition -> definition.setDestroyMethodName(""));
+        } else {
+            ownedClient();
+            runner = configuredRunner;
+        }
+        runner.run(context -> assertThat(context)
+                .hasSingleBean(AzureDocumentDbEmbeddingStore.class)
+                .hasBean("azureDocumentDbEmbeddingStore"));
+    }
+
     @Test
     void should_prefer_connection_string_over_a_mongo_client_bean() {
         ownedClient();
@@ -487,7 +523,8 @@ class AzureDocumentDbEmbeddingStoreAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasFailed();
                     assertThat(context.getStartupFailure()).hasRootCauseInstanceOf(IllegalArgumentException.class)
-                            .hasStackTraceContaining("connectionString");
+                            .hasStackTraceContaining("'langchain4j.azure.documentdb.connection-string'")
+                            .hasStackTraceContaining("auto-configured by Spring Boot is not used");
                 });
         clients.verifyNoInteractions();
     }
@@ -521,7 +558,7 @@ class AzureDocumentDbEmbeddingStoreAutoConfigurationTest {
                         "langchain4j.azure.cosmos-mongo-vcore.database-name=database",
                         "langchain4j.azure.cosmos-mongo-vcore.collection-name=embeddings",
                         "langchain4j.azure.cosmos-mongo-vcore.kind=vector-ivf"),
-                IllegalArgumentException.class, "kind cannot be null");
+                IllegalArgumentException.class, "'langchain4j.azure.documentdb.connection-string'");
     }
 
     @Test

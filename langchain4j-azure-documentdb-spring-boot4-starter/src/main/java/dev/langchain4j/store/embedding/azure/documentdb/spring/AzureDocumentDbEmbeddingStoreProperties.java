@@ -13,8 +13,8 @@ public class AzureDocumentDbEmbeddingStoreProperties {
     static final String PREFIX = "langchain4j.azure.documentdb";
 
     /**
-     * MongoDB connection string for Azure DocumentDB. Required unless a MongoClient bean is provided.
-     * When set, it takes precedence over a MongoClient bean.
+     * MongoDB connection string for Azure DocumentDB. Required unless you define your own MongoClient bean
+     * (the MongoClient auto-configured by Spring Boot is not used). When set, it takes precedence over a MongoClient bean.
      */
     private String connectionString;
 
@@ -29,7 +29,8 @@ public class AzureDocumentDbEmbeddingStoreProperties {
     private String collectionName;
 
     /**
-     * Vector index name. Defaults to defaultIndexAzureCosmos for migration compatibility.
+     * Vector index name. Defaults to defaultIndexAzureCosmos, the name used by the former
+     * Azure Cosmos DB for MongoDB vCore integration, so existing indexes keep working.
      */
     private String indexName;
 

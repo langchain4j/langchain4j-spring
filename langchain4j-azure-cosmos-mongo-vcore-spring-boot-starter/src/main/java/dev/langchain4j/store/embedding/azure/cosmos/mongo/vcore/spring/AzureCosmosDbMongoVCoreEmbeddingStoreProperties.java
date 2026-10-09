@@ -1,6 +1,7 @@
 package dev.langchain4j.store.embedding.azure.cosmos.mongo.vcore.spring;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 
 /**
  * Configuration properties for Azure Cosmos DB for MongoDB vCore Embedding Store.
@@ -89,6 +90,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
      */
     private Integer efSearch;
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.connection-string")
     public String getConnectionString() {
         return connectionString;
     }
@@ -97,6 +100,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.connectionString = connectionString;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.database-name")
     public String getDatabaseName() {
         return databaseName;
     }
@@ -105,6 +110,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.databaseName = databaseName;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.collection-name")
     public String getCollectionName() {
         return collectionName;
     }
@@ -113,6 +120,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.collectionName = collectionName;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.index-name")
     public String getIndexName() {
         return indexName;
     }
@@ -121,6 +130,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.indexName = indexName;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.application-name")
     public String getApplicationName() {
         return applicationName;
     }
@@ -129,6 +140,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.applicationName = applicationName;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.create-index")
     public Boolean getCreateIndex() {
         return createIndex;
     }
@@ -137,6 +150,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.createIndex = createIndex;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.kind")
     public String getKind() {
         return kind;
     }
@@ -145,6 +160,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.kind = kind;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.num-lists")
     public Integer getNumLists() {
         return numLists;
     }
@@ -153,6 +170,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.numLists = numLists;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.dimensions")
     public Integer getDimensions() {
         return dimensions;
     }
@@ -161,6 +180,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.dimensions = dimensions;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.m")
     public Integer getM() {
         return m;
     }
@@ -169,6 +190,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.m = m;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.ef-construction")
     public Integer getEfConstruction() {
         return efConstruction;
     }
@@ -177,6 +200,8 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
         this.efConstruction = efConstruction;
     }
 
+    @DeprecatedConfigurationProperty(reason = "Azure Cosmos DB for MongoDB vCore was renamed to Azure DocumentDB",
+            replacement = "langchain4j.azure.documentdb.ef-search")
     public Integer getEfSearch() {
         return efSearch;
     }
