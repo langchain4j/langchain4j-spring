@@ -5,11 +5,17 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import dev.langchain4j.http.client.HttpClientBuilderLoader;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
+import dev.langchain4j.http.client.spring.restclient.WebClientBuilderHolder;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatModelStreamingEvent;
+import dev.langchain4j.model.chat.response.CompleteResponse;
+import dev.langchain4j.model.chat.response.PartialResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.image.ImageModel;
@@ -28,12 +34,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.adapter.JdkFlowAdapter;
+import reactor.core.publisher.Flux;
 
+import java.time.Duration;
+import java.util.List;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -218,6 +230,106 @@ class OpenAiAutoConfigurationTest {
                     inOrder.verify(listener2).onResponse(any());
                     inOrder.verify(listener1).onResponse(any());
                     inOrder.verifyNoMoreInteractions();
+                });
+    }
+
+    @Test
+    void should_provide_chat_model_that_supports_non_blocking_calls() throws Exception {
+        WireMock.stubFor(post(urlEqualTo(CHAT_COMPLETIONS_PATH)).willReturn(okJson(CHAT_COMPLETION_RESPONSE)));
+
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini"
+                )
+                .run(context -> {
+
+                    ChatModel model = context.getBean(ChatModel.class);
+
+                    ChatRequest chatRequest = ChatRequest.builder()
+                            .messages(UserMessage.from("What is the capital of Germany?"))
+                            .build();
+                    ChatResponse chatResponse = model.chatAsync(chatRequest).get(30, SECONDS);
+
+                    assertThat(chatResponse.aiMessage().text()).contains("Berlin");
+                });
+    }
+
+    @Test
+    void should_send_non_blocking_calls_with_the_application_web_client_builder() throws Exception {
+        WireMock.stubFor(post(urlEqualTo(CHAT_COMPLETIONS_PATH)).willReturn(okJson(CHAT_COMPLETION_RESPONSE)));
+
+        contextRunner
+                .withBean(WebClient.Builder.class, () -> WebClient.builder().defaultHeader("X-Application", "my-app"))
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini"
+                )
+                .run(context -> {
+
+                    ChatModel model = context.getBean(ChatModel.class);
+
+                    ChatRequest chatRequest = ChatRequest.builder()
+                            .messages(UserMessage.from("What is the capital of Germany?"))
+                            .build();
+                    model.chatAsync(chatRequest).get(30, SECONDS);
+
+                    WireMock.verify(WireMock.postRequestedFor(urlEqualTo(CHAT_COMPLETIONS_PATH))
+                            .withHeader("X-Application", equalTo("my-app")));
+                });
+    }
+
+    @Test
+    void should_not_create_web_client_builder_holder_when_webflux_is_missing() {
+        WireMock.stubFor(post(urlEqualTo(CHAT_COMPLETIONS_PATH)).willReturn(okJson(CHAT_COMPLETION_RESPONSE)));
+
+        contextRunner
+                .withClassLoader(new FilteredClassLoader(WebClient.class))
+                .withPropertyValues(
+                        "langchain4j.open-ai.chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini"
+                )
+                .run(context -> {
+
+                    assertThat(context).doesNotHaveBean(WebClientBuilderHolder.class);
+
+                    assertThat(context.getBean(ChatModel.class).chat("What is the capital of Germany?"))
+                            .contains("Berlin");
+                });
+    }
+
+    @Test
+    void should_provide_streaming_chat_model_that_supports_reactive_calls() throws Exception {
+        stubSse(CHAT_COMPLETIONS_PATH, sseChunks("Ber", "lin"), 4, 200);
+
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.streaming-chat-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.streaming-chat-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.streaming-chat-model.model-name=gpt-4o-mini"
+                )
+                .run(context -> {
+
+                    StreamingChatModel model = context.getBean(StreamingChatModel.class);
+
+                    ChatRequest chatRequest = ChatRequest.builder()
+                            .messages(UserMessage.from("What is the capital of Germany?"))
+                            .build();
+                    List<ChatModelStreamingEvent> events = Flux.from(
+                                    JdkFlowAdapter.flowPublisherToFlux(model.chat(chatRequest)))
+                            .collectList()
+                            .block(Duration.ofSeconds(30));
+
+                    assertThat(events)
+                            .filteredOn(PartialResponse.class::isInstance)
+                            .extracting(event -> ((PartialResponse) event).text())
+                            .containsExactly("Ber", "lin");
+                    assertThat(events.get(events.size() - 1))
+                            .isInstanceOfSatisfying(CompleteResponse.class, complete ->
+                                    assertThat(complete.chatResponse().aiMessage().text()).isEqualTo("Berlin"));
                 });
     }
 
