@@ -14,7 +14,7 @@ public class AzureDocumentDbEmbeddingStoreProperties {
 
     /**
      * MongoDB connection string for Azure DocumentDB. Required unless a MongoClient bean is provided.
-     * A user-provided MongoClient takes precedence.
+     * When set, it takes precedence over a MongoClient bean.
      */
     private String connectionString;
 

@@ -344,27 +344,34 @@ class AzureDocumentDbEmbeddingStoreAutoConfigurationTest {
         verifyNoInteractions(otherClient);
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
-    void should_use_caller_client_without_owning_it(boolean hasConnectionString) {
+    @Test
+    void should_use_caller_client_without_owning_it() {
         existingCollection();
-        ApplicationContextRunner runner = withoutProperty("connection-string")
-                .withBean(MongoClient.class, () -> mongoClient, definition -> definition.setDestroyMethodName(""));
-        if (hasConnectionString) {
-            runner = runner.withPropertyValues(PREFIX + ".connection-string=not-used");
-        }
-        runner.run(context -> {
-            assertThat(context).hasSingleBean(AzureDocumentDbEmbeddingStore.class);
-            context.getBean(AzureDocumentDbEmbeddingStore.class).close();
-        });
+        withoutProperty("connection-string")
+                .withBean(MongoClient.class, () -> mongoClient, definition -> definition.setDestroyMethodName(""))
+                .run(context -> {
+                    assertThat(context).hasSingleBean(AzureDocumentDbEmbeddingStore.class);
+                    context.getBean(AzureDocumentDbEmbeddingStore.class).close();
+                });
         clients.verifyNoInteractions();
         verify(mongoClient, never()).close();
     }
 
     @Test
+    void should_prefer_connection_string_over_a_mongo_client_bean() {
+        ownedClient();
+        configuredRunner.withBean(MongoClient.class, () -> otherClient, definition -> definition.setDestroyMethodName(""))
+                .run(context -> assertThat(context).hasSingleBean(AzureDocumentDbEmbeddingStore.class));
+        assertThat(createdSettings().getClusterSettings().getHosts())
+                .containsExactly(new ServerAddress("documentdb.invalid", 27017));
+        verify(mongoClient).close();
+        verifyNoInteractions(otherClient);
+    }
+
+    @Test
     void should_use_primary_mongo_client() {
         existingCollection();
-        configuredRunner.withBean("first", MongoClient.class, () -> mongoClient, definition -> {
+        withoutProperty("connection-string").withBean("first", MongoClient.class, () -> mongoClient, definition -> {
                     definition.setPrimary(true);
                     definition.setDestroyMethodName("");
                 })
@@ -377,7 +384,7 @@ class AzureDocumentDbEmbeddingStoreAutoConfigurationTest {
 
     @Test
     void should_reject_ambiguous_mongo_clients() {
-        assertFailure(configuredRunner
+        assertFailure(withoutProperty("connection-string")
                         .withBean("first", MongoClient.class, () -> mongoClient, definition -> definition.setDestroyMethodName(""))
                         .withBean("second", MongoClient.class, () -> otherClient, definition -> definition.setDestroyMethodName("")),
                 NoUniqueBeanDefinitionException.class, "MongoClient");
@@ -489,7 +496,7 @@ class AzureDocumentDbEmbeddingStoreAutoConfigurationTest {
     void should_discover_starter_with_a_user_mongo_client() {
         existingCollection();
         new ApplicationContextRunner().withUserConfiguration(TestApplication.class)
-                .withPropertyValues(PROPERTIES)
+                .withPropertyValues(Arrays.copyOfRange(PROPERTIES, 1, PROPERTIES.length))
                 .withBean(MongoClient.class, () -> mongoClient, definition -> definition.setDestroyMethodName(""))
                 .run(context -> assertThat(context).hasSingleBean(AzureDocumentDbEmbeddingStore.class));
         clients.verifyNoInteractions();

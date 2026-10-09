@@ -5,19 +5,23 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.azure.documentdb.AzureDocumentDbEmbeddingStore;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 
 import static dev.langchain4j.store.embedding.azure.documentdb.spring.AzureDocumentDbEmbeddingStoreProperties.PREFIX;
 
 /**
  * Auto-configuration for {@link AzureDocumentDbEmbeddingStore}.
  * <p>
- * A user-provided {@link MongoClient} takes precedence over the connection string.
+ * When {@code langchain4j.azure.documentdb.connection-string} is set, the store creates and owns its own client.
+ * Otherwise, a user-provided {@link MongoClient} bean is used.
  * This configuration runs before Spring Boot's MongoDB auto-configuration so that
  * its default client does not override the DocumentDB connection properties.
  * </p>
@@ -34,7 +38,8 @@ import static dev.langchain4j.store.embedding.azure.documentdb.spring.AzureDocum
 public class AzureDocumentDbEmbeddingStoreAutoConfiguration {
 
     @Bean(destroyMethod = "close")
-    @ConditionalOnMissingBean({AzureDocumentDbEmbeddingStore.class, MongoClient.class})
+    @Conditional(ConnectionStringConfiguredOrNoMongoClient.class)
+    @ConditionalOnMissingBean
     public AzureDocumentDbEmbeddingStore azureDocumentDbEmbeddingStore(
             AzureDocumentDbEmbeddingStoreProperties properties,
             ObjectProvider<EmbeddingModel> embeddingModelProvider) {
@@ -43,6 +48,7 @@ public class AzureDocumentDbEmbeddingStoreAutoConfiguration {
 
     @Bean(destroyMethod = "close")
     @ConditionalOnBean(MongoClient.class)
+    @Conditional(ConnectionStringNotConfigured.class)
     @ConditionalOnMissingBean
     public AzureDocumentDbEmbeddingStore azureDocumentDbEmbeddingStoreWithMongoClient(
             AzureDocumentDbEmbeddingStoreProperties properties,
@@ -83,5 +89,31 @@ public class AzureDocumentDbEmbeddingStoreAutoConfiguration {
         }
 
         return builder.dimensions(dimensions).build();
+    }
+
+    static class ConnectionStringConfiguredOrNoMongoClient extends AnyNestedCondition {
+
+        ConnectionStringConfiguredOrNoMongoClient() {
+            super(ConfigurationPhase.REGISTER_BEAN);
+        }
+
+        @ConditionalOnProperty(prefix = PREFIX, name = "connection-string")
+        static class ConnectionStringConfigured {
+        }
+
+        @ConditionalOnMissingBean(MongoClient.class)
+        static class NoMongoClient {
+        }
+    }
+
+    static class ConnectionStringNotConfigured extends NoneNestedConditions {
+
+        ConnectionStringNotConfigured() {
+            super(ConfigurationPhase.REGISTER_BEAN);
+        }
+
+        @ConditionalOnProperty(prefix = PREFIX, name = "connection-string")
+        static class ConnectionStringConfigured {
+        }
     }
 }
