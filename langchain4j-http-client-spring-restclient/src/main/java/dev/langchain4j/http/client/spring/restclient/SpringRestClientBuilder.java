@@ -38,6 +38,12 @@ public class SpringRestClientBuilder implements HttpClientBuilder {
      * picks one by looking at what is on the classpath, which means the underlying HTTP client depends on the
      * dependencies of the application. Set this to pin a specific client.
      * <p>
+     * When not set and Spring picks the JDK {@code HttpClient}, plain {@code http://} requests are sent over HTTP/1.1,
+     * and {@code https://} requests use HTTP/2 when the server supports it. HTTP/2 over plain HTTP would require an
+     * {@code Upgrade: h2c} request, which many servers do not handle correctly (for example, they ignore the request
+     * body). When set, the given builder is used as is: the JDK client defaults to HTTP/2, so to use HTTP/1.1 with it,
+     * set {@code ClientHttpRequestFactoryBuilder.jdk().withHttpClientCustomizer(builder -> builder.version(HttpClient.Version.HTTP_1_1))}.
+     * <p>
      * Note that the request factory of a {@link #restClientBuilder(RestClient.Builder)} is not used: the timeouts
      * configured on this builder have to be applied to the factory, so it is always built here.
      */
@@ -83,6 +89,11 @@ public class SpringRestClientBuilder implements HttpClientBuilder {
      * which are sent with Spring's {@code WebClient} and therefore need {@code spring-webflux} on the classpath.
      * When not set, Spring picks a connector by looking at what is on the classpath (Reactor Netty, Jetty, Apache
      * HttpComponents, or the JDK client as a fallback). Set this to pin a specific client.
+     * <p>
+     * The HTTP version is chosen as described in {@link #clientHttpRequestFactoryBuilder(ClientHttpRequestFactoryBuilder)}:
+     * when not set and Spring picks the JDK client, plain {@code http://} requests are sent over HTTP/1.1. When set,
+     * the given builder is used as is; to use HTTP/1.1 with the JDK client, set
+     * {@code ClientHttpConnectorBuilder.jdk().withHttpClientCustomizer(builder -> builder.version(HttpClient.Version.HTTP_1_1))}.
      */
     @Experimental
     public SpringRestClientBuilder clientHttpConnectorBuilder(ClientHttpConnectorBuilder<?> clientHttpConnectorBuilder) {

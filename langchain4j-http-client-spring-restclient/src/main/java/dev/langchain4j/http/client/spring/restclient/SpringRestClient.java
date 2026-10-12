@@ -12,6 +12,7 @@ import dev.langchain4j.http.client.sse.ServerSentEventParser;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.JdkClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -21,6 +22,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
@@ -30,6 +32,7 @@ import java.net.http.HttpTimeoutException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
+import java.util.function.Supplier;
 
 import static dev.langchain4j.http.client.sse.ServerSentEventListenerUtils.ignoringExceptions;
 import static dev.langchain4j.internal.AsyncNotSupported.failedFuture;
@@ -64,12 +67,8 @@ public class SpringRestClient implements HttpClient {
         if (builder.readTimeout() != null) {
             settings = settings.withReadTimeout(builder.readTimeout());
         }
-        ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = getOrDefault(
-                builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect);
-        if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
-            requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
-        }
-        ClientHttpRequestFactory clientHttpRequestFactory = requestFactoryBuilder.build(settings);
+        ClientHttpRequestFactory clientHttpRequestFactory = createRequestFactory(
+                builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect, settings);
 
         this.delegate = restClientBuilder
                 .requestFactory(clientHttpRequestFactory)
@@ -84,6 +83,31 @@ public class SpringRestClient implements HttpClient {
                 return null;
             }
         });
+    }
+
+    static ClientHttpRequestFactory createRequestFactory(ClientHttpRequestFactoryBuilder<?> customBuilder,
+                                                         Supplier<ClientHttpRequestFactoryBuilder<?>> detect,
+                                                         ClientHttpRequestFactorySettings settings) {
+        ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = getOrDefault(customBuilder, detect);
+        if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
+            requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
+        }
+        ClientHttpRequestFactory requestFactory = requestFactoryBuilder.build(settings);
+        if (customBuilder == null && requestFactoryBuilder instanceof JdkClientHttpRequestFactoryBuilder jdkBuilder) {
+            Supplier<ClientHttpRequestFactory> http11RequestFactory = SingletonSupplier.of(() -> jdkBuilder
+                    .withHttpClientCustomizer(httpClientBuilder -> httpClientBuilder.version(java.net.http.HttpClient.Version.HTTP_1_1))
+                    .build(settings));
+            requestFactory = http11ForPlainHttp(requestFactory, http11RequestFactory);
+        }
+        return requestFactory;
+    }
+
+    static ClientHttpRequestFactory http11ForPlainHttp(ClientHttpRequestFactory requestFactory,
+                                                       Supplier<ClientHttpRequestFactory> http11RequestFactory) {
+        // HTTP/2 over plain HTTP means an "Upgrade: h2c" request, which many servers mishandle (e.g. drop the body)
+        return (uri, method) -> "http".equalsIgnoreCase(uri.getScheme())
+                ? http11RequestFactory.get().createRequest(uri, method)
+                : requestFactory.createRequest(uri, method);
     }
 
     private static AsyncTaskExecutor createDefaultStreamingRequestExecutor() {

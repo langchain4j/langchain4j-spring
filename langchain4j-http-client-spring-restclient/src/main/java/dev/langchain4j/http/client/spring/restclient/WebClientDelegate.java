@@ -13,13 +13,16 @@ import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
 import org.springframework.boot.http.client.reactive.ClientHttpConnectorBuilder;
 import org.springframework.boot.http.client.reactive.ClientHttpConnectorSettings;
 import org.springframework.boot.http.client.reactive.HttpComponentsClientHttpConnectorBuilder;
+import org.springframework.boot.http.client.reactive.JdkClientHttpConnectorBuilder;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -36,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
+import java.util.function.Supplier;
 
 import static dev.langchain4j.internal.Utils.getOrDefault;
 
@@ -48,7 +52,7 @@ import static dev.langchain4j.internal.Utils.getOrDefault;
 class WebClientDelegate {
 
     private final WebClient.Builder webClientBuilder;
-    private final ClientHttpConnectorBuilder<?> connectorBuilder;
+    private final ClientHttpConnectorBuilder<?> customConnectorBuilder;
     private final ClientHttpConnectorSettings settings;
 
     private volatile WebClient webClient;
@@ -64,12 +68,7 @@ class WebClientDelegate {
         }
         this.settings = settings;
 
-        ClientHttpConnectorBuilder<?> connectorBuilder = getOrDefault(
-                builder.clientHttpConnectorBuilder(), ClientHttpConnectorBuilder::detect);
-        if (connectorBuilder instanceof HttpComponentsClientHttpConnectorBuilder httpComponentsBuilder) {
-            connectorBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpAsyncClientBuilder::disableAutomaticRetries);
-        }
-        this.connectorBuilder = connectorBuilder;
+        this.customConnectorBuilder = builder.clientHttpConnectorBuilder();
 
         this.webClientBuilder = builder.webClientBuilder() == null
                 ? WebClient.builder()
@@ -87,13 +86,38 @@ class WebClientDelegate {
                 result = webClient;
                 if (result == null) {
                     result = webClientBuilder
-                            .clientConnector(connectorBuilder.build(settings))
+                            .clientConnector(createConnector(customConnectorBuilder, ClientHttpConnectorBuilder::detect, settings))
                             .build();
                     webClient = result;
                 }
             }
         }
         return result;
+    }
+
+    static ClientHttpConnector createConnector(ClientHttpConnectorBuilder<?> customBuilder,
+                                               Supplier<ClientHttpConnectorBuilder<?>> detect,
+                                               ClientHttpConnectorSettings settings) {
+        ClientHttpConnectorBuilder<?> connectorBuilder = getOrDefault(customBuilder, detect);
+        if (connectorBuilder instanceof HttpComponentsClientHttpConnectorBuilder httpComponentsBuilder) {
+            connectorBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpAsyncClientBuilder::disableAutomaticRetries);
+        }
+        ClientHttpConnector connector = connectorBuilder.build(settings);
+        if (customBuilder == null && connectorBuilder instanceof JdkClientHttpConnectorBuilder jdkBuilder) {
+            Supplier<ClientHttpConnector> http11Connector = SingletonSupplier.of(() -> jdkBuilder
+                    .withHttpClientCustomizer(httpClientBuilder -> httpClientBuilder.version(java.net.http.HttpClient.Version.HTTP_1_1))
+                    .build(settings));
+            connector = http11ForPlainHttp(connector, http11Connector);
+        }
+        return connector;
+    }
+
+    static ClientHttpConnector http11ForPlainHttp(ClientHttpConnector connector,
+                                                  Supplier<ClientHttpConnector> http11Connector) {
+        // HTTP/2 over plain HTTP means an "Upgrade: h2c" request, which many servers mishandle (e.g. drop the body)
+        return (method, uri, requestCallback) -> "http".equalsIgnoreCase(uri.getScheme())
+                ? http11Connector.get().connect(method, uri, requestCallback)
+                : connector.connect(method, uri, requestCallback);
     }
 
     CompletableFuture<SuccessfulHttpResponse> executeAsync(HttpRequest request) {
