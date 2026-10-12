@@ -7,19 +7,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.HttpClientSettings;
+import org.springframework.boot.http.client.reactive.ClientHttpConnectorBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.time.Duration;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.net.http.HttpClient.Version.HTTP_2;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -74,7 +81,8 @@ class SpringRestClientHttpVersionTest {
 
         // given
         ClientHttpRequestFactory requestFactory = SpringRestClient.createRequestFactory(
-                ClientHttpRequestFactoryBuilder.jdk(), ClientHttpRequestFactoryBuilder::detect,
+                ClientHttpRequestFactoryBuilder.jdk().withHttpClientCustomizer(builder -> builder.version(HTTP_2)),
+                ClientHttpRequestFactoryBuilder::detect,
                 HttpClientSettings.defaults());
 
         // when
@@ -109,6 +117,64 @@ class SpringRestClientHttpVersionTest {
                 .isSameAs(http11Request);
     }
 
+    @Test
+    void should_not_request_h2c_upgrade_for_plain_http_when_jdk_connector_is_detected() throws Exception {
+
+        // given
+        ClientHttpConnector connector = WebClientDelegate.createConnector(
+                null, ClientHttpConnectorBuilder::jdk, HttpClientSettings.defaults());
+
+        // when
+        post(connector);
+
+        // then
+        Headers headers = requestHeaders.get(5, SECONDS);
+        assertThat(headers.containsKey("Upgrade")).isFalse();
+        assertThat(headers.containsKey("HTTP2-Settings")).isFalse();
+        assertThat(requestBody.get(5, SECONDS)).isEqualTo(BODY);
+    }
+
+    @Test
+    void should_keep_http_version_of_custom_jdk_connector_builder() throws Exception {
+
+        // given
+        ClientHttpConnector connector = WebClientDelegate.createConnector(
+                ClientHttpConnectorBuilder.jdk().withHttpClientCustomizer(builder -> builder.version(HTTP_2)),
+                ClientHttpConnectorBuilder::detect,
+                HttpClientSettings.defaults());
+
+        // when
+        post(connector);
+
+        // then
+        assertThat(requestHeaders.get(5, SECONDS).getFirst("Upgrade")).isEqualTo("h2c");
+    }
+
+    @Test
+    void should_route_only_plain_http_to_http_1_1_connector() {
+
+        // given
+        Mono<ClientHttpResponse> defaultResponse = Mono.empty();
+        Mono<ClientHttpResponse> http11Response = Mono.empty();
+        AtomicInteger http11ConnectorCreations = new AtomicInteger();
+        ClientHttpConnector connector = WebClientDelegate.http11ForPlainHttp(
+                (method, uri, requestCallback) -> defaultResponse,
+                () -> {
+                    http11ConnectorCreations.incrementAndGet();
+                    return (method, uri, requestCallback) -> http11Response;
+                });
+
+        // when-then
+        assertThat(connector.connect(HttpMethod.POST, URI.create("https://localhost/endpoint"), request -> Mono.empty()))
+                .isSameAs(defaultResponse);
+        assertThat(http11ConnectorCreations).hasValue(0);
+
+        assertThat(connector.connect(HttpMethod.POST, URI.create("http://localhost/endpoint"), request -> Mono.empty()))
+                .isSameAs(http11Response);
+        assertThat(connector.connect(HttpMethod.POST, URI.create("HTTP://localhost/endpoint"), request -> Mono.empty()))
+                .isSameAs(http11Response);
+    }
+
     private void post(ClientHttpRequestFactory requestFactory) {
         RestClient.builder()
                 .requestFactory(requestFactory)
@@ -119,5 +185,18 @@ class SpringRestClientHttpVersionTest {
                 .body(BODY)
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    private void post(ClientHttpConnector connector) {
+        WebClient.builder()
+                .clientConnector(connector)
+                .build()
+                .post()
+                .uri("http://localhost:" + server.getAddress().getPort() + "/endpoint")
+                .header("Content-Type", "application/json")
+                .bodyValue(BODY)
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(5));
     }
 }
