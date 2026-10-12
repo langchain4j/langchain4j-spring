@@ -3,10 +3,10 @@ name: snapshot_release
 on:
   repository_dispatch:
     types: [ trigger-snapshot-release ]
+  # Started by the core repo's snapshot run (nightly, and after a release) instead of on every push: the
+  # job runs in the "snapshot" environment, which holds the Maven Central credentials and needs a
+  # maintainer's approval, so nothing that lands on main can use them without it.
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 permissions:
   contents: read
@@ -48,8 +48,8 @@ jobs:
               ;;
           esac
 
-      # A version bump pushes to main here and in the core repo moments apart, so this
-      # push-triggered run can start before the core repo has published the SNAPSHOT it depends on
+      # A version bump pushes to main here and in the core repo moments apart, so a run started by
+      # hand can start before the core repo has published the SNAPSHOT it depends on
       # (that is the "Non-resolvable import POM: langchain4j-bom" failure). The core repo dispatches
       # trigger-snapshot-release once its own snapshot is published, so skip rather than fail:
       # that dispatch runs this again with the dependency in place.
