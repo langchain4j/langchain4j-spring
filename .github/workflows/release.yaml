@@ -43,7 +43,18 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    environment: release
+
     steps:
+      # The environment's branch rule only checks the branch this workflow runs on (main for dispatches),
+      # not the branch it checks out, so the branch input is checked here.
+      - name: Check the branch to release from
+        run: |
+          case "$BRANCH" in
+            main|release/*) ;;
+            *) echo "Releases can only be made from main or release/*, not '$BRANCH'"; exit 1 ;;
+          esac
+
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ env.BRANCH }}
