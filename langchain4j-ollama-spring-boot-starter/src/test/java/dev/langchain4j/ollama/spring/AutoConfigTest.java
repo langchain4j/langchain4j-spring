@@ -1,21 +1,17 @@
 package dev.langchain4j.ollama.spring;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.langchain4j.exception.HttpException;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import dev.langchain4j.exception.InternalServerException;
-import dev.langchain4j.http.client.HttpClient;
-import dev.langchain4j.http.client.HttpClientBuilder;
-import dev.langchain4j.http.client.HttpRequest;
-import dev.langchain4j.http.client.SuccessfulHttpResponse;
-import dev.langchain4j.http.client.sse.ServerSentEventListener;
-import dev.langchain4j.http.client.sse.ServerSentEventParser;
+import dev.langchain4j.exception.TimeoutException;
 import dev.langchain4j.model.decision.DecisionModel;
 import dev.langchain4j.model.decision.listener.DecisionModelListener;
 import dev.langchain4j.model.decision.request.DecisionRequest;
 import dev.langchain4j.model.decision.request.YesNoQuestion;
 import dev.langchain4j.model.decision.response.DecisionResponse;
 import dev.langchain4j.model.ollama.OllamaDecisionModel;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -24,17 +20,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
+@WireMockTest
 class AutoConfigTest {
+
+    private static final String SYSTEM_ONE_PATH = "/v1/systemone";
 
     private static final String DECISION_RESPONSE = """
             {"model": "nimble", "answers": {"spam": {"type": "noul", "noul": 0.95}},
@@ -46,19 +49,23 @@ class AutoConfigTest {
             .question("spam", YesNoQuestion.of("Is this message spam?"))
             .build();
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private String baseUrl;
 
-    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+    ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AutoConfig.class));
+
+    @BeforeEach
+    void setUp(WireMockRuntimeInfo wireMock) {
+        baseUrl = wireMock.getHttpBaseUrl();
+    }
 
     @Test
     void should_provide_decision_model() {
-        RecordingHttpClientBuilder httpClientBuilder = new RecordingHttpClientBuilder(200, DECISION_RESPONSE);
+        WireMock.stubFor(post(urlEqualTo(SYSTEM_ONE_PATH)).willReturn(okJson(DECISION_RESPONSE)));
 
         contextRunner
-                .withBean("ollamaDecisionModelHttpClientBuilder", HttpClientBuilder.class, () -> httpClientBuilder)
                 .withPropertyValues(
-                        "langchain4j.ollama.decision-model.base-url=http://localhost:11434",
+                        "langchain4j.ollama.decision-model.base-url=" + baseUrl,
                         "langchain4j.ollama.decision-model.model-name=nimble"
                 )
                 .run(context -> {
@@ -70,50 +77,49 @@ class AutoConfigTest {
                     DecisionResponse response = model.decide(DECISION_REQUEST);
                     assertThat(response.yesNo("spam").probability()).isEqualTo(0.95);
 
-                    HttpRequest request = httpClientBuilder.requests.get(0);
-                    assertThat(request.url()).isEqualTo("http://localhost:11434/v1/systemone");
-                    assertThat(OBJECT_MAPPER.readTree(request.body()).get("model").asText()).isEqualTo("nimble");
+                    DecisionResponse asyncResponse = model.decideAsync(DECISION_REQUEST).get(10, SECONDS);
+                    assertThat(asyncResponse.yesNo("spam").probability()).isEqualTo(0.95);
+
+                    WireMock.verify(2, postRequestedFor(urlEqualTo(SYSTEM_ONE_PATH))
+                            .withRequestBody(matchingJsonPath("$.model", equalTo("nimble")))
+                            .withRequestBody(matchingJsonPath("$.questions.spam.type", equalTo("noul"))));
                 });
     }
 
     @Test
     void should_bind_all_decision_model_properties() {
-        RecordingHttpClientBuilder httpClientBuilder = new RecordingHttpClientBuilder(200, DECISION_RESPONSE);
+        WireMock.stubFor(post(urlEqualTo(SYSTEM_ONE_PATH)).willReturn(okJson(DECISION_RESPONSE)));
 
         contextRunner
-                .withBean("ollamaDecisionModelHttpClientBuilder", HttpClientBuilder.class, () -> httpClientBuilder)
                 .withPropertyValues(
-                        "langchain4j.ollama.decision-model.base-url=http://localhost:11434",
+                        "langchain4j.ollama.decision-model.base-url=" + baseUrl,
                         "langchain4j.ollama.decision-model.model-name=nimble",
-                        "langchain4j.ollama.decision-model.timeout=PT42S",
+                        "langchain4j.ollama.decision-model.timeout=PT30S",
+                        "langchain4j.ollama.decision-model.max-retries=1",
                         "langchain4j.ollama.decision-model.keep-alive=300",
-                        "langchain4j.ollama.decision-model.custom-headers.X-Custom=custom-value",
-                        "langchain4j.ollama.decision-model.custom-parameters.custom_parameter=custom-parameter-value",
                         "langchain4j.ollama.decision-model.log-requests=true",
-                        "langchain4j.ollama.decision-model.log-responses=true"
+                        "langchain4j.ollama.decision-model.log-responses=true",
+                        "langchain4j.ollama.decision-model.custom-headers.X-Custom=custom-value",
+                        "langchain4j.ollama.decision-model.custom-parameters.custom-key=custom-value"
                 )
                 .run(context -> {
                     context.getBean(DecisionModel.class).decide(DECISION_REQUEST);
 
-                    assertThat(httpClientBuilder.connectTimeout).isEqualTo(Duration.ofSeconds(42));
-                    assertThat(httpClientBuilder.readTimeout).isEqualTo(Duration.ofSeconds(42));
-
-                    HttpRequest request = httpClientBuilder.requests.get(0);
-                    assertThat(request.headers()).containsEntry("X-Custom", List.of("custom-value"));
-                    JsonNode body = OBJECT_MAPPER.readTree(request.body());
-                    assertThat(body.get("keep_alive").asInt()).isEqualTo(300);
-                    assertThat(body.get("custom_parameter").asText()).isEqualTo("custom-parameter-value");
+                    WireMock.verify(postRequestedFor(urlEqualTo(SYSTEM_ONE_PATH))
+                            .withHeader("X-Custom", equalTo("custom-value"))
+                            .withRequestBody(matchingJsonPath("$.model", equalTo("nimble")))
+                            .withRequestBody(matchingJsonPath("$.keep_alive", equalTo("300")))
+                            .withRequestBody(matchingJsonPath("$.custom-key", equalTo("custom-value"))));
                 });
     }
 
     @Test
     void should_bind_max_retries() {
-        RecordingHttpClientBuilder httpClientBuilder = new RecordingHttpClientBuilder(500, "server error");
+        WireMock.stubFor(post(urlEqualTo(SYSTEM_ONE_PATH)).willReturn(aResponse().withStatus(500)));
 
         contextRunner
-                .withBean("ollamaDecisionModelHttpClientBuilder", HttpClientBuilder.class, () -> httpClientBuilder)
                 .withPropertyValues(
-                        "langchain4j.ollama.decision-model.base-url=http://localhost:11434",
+                        "langchain4j.ollama.decision-model.base-url=" + baseUrl,
                         "langchain4j.ollama.decision-model.model-name=nimble",
                         "langchain4j.ollama.decision-model.max-retries=0"
                 )
@@ -122,18 +128,37 @@ class AutoConfigTest {
 
                     assertThatThrownBy(() -> model.decide(DECISION_REQUEST))
                             .isInstanceOf(InternalServerException.class);
-                    assertThat(httpClientBuilder.requests).hasSize(1);
+                    WireMock.verify(1, postRequestedFor(urlEqualTo(SYSTEM_ONE_PATH)));
+                });
+    }
+
+    @Test
+    void should_bind_timeout() {
+        WireMock.stubFor(post(urlEqualTo(SYSTEM_ONE_PATH))
+                .willReturn(okJson(DECISION_RESPONSE).withFixedDelay(2_000)));
+
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.ollama.decision-model.base-url=" + baseUrl,
+                        "langchain4j.ollama.decision-model.model-name=nimble",
+                        "langchain4j.ollama.decision-model.timeout=PT0.2S",
+                        "langchain4j.ollama.decision-model.max-retries=0"
+                )
+                .run(context -> {
+                    DecisionModel model = context.getBean(DecisionModel.class);
+
+                    assertThatThrownBy(() -> model.decide(DECISION_REQUEST))
+                            .isInstanceOf(TimeoutException.class);
                 });
     }
 
     @Test
     void should_provide_decision_model_with_listeners() {
-        RecordingHttpClientBuilder httpClientBuilder = new RecordingHttpClientBuilder(200, DECISION_RESPONSE);
+        WireMock.stubFor(post(urlEqualTo(SYSTEM_ONE_PATH)).willReturn(okJson(DECISION_RESPONSE)));
 
         contextRunner
-                .withBean("ollamaDecisionModelHttpClientBuilder", HttpClientBuilder.class, () -> httpClientBuilder)
                 .withPropertyValues(
-                        "langchain4j.ollama.decision-model.base-url=http://localhost:11434",
+                        "langchain4j.ollama.decision-model.base-url=" + baseUrl,
                         "langchain4j.ollama.decision-model.model-name=nimble"
                 )
                 .withUserConfiguration(ListenerConfig.class)
@@ -173,65 +198,6 @@ class AutoConfigTest {
         @Order(1)
         DecisionModelListener listener2() {
             return mock(DecisionModelListener.class);
-        }
-    }
-
-    static class RecordingHttpClientBuilder implements HttpClientBuilder {
-
-        private final int statusCode;
-        private final String responseBody;
-        private final List<HttpRequest> requests = new CopyOnWriteArrayList<>();
-        private Duration connectTimeout;
-        private Duration readTimeout;
-
-        RecordingHttpClientBuilder(int statusCode, String responseBody) {
-            this.statusCode = statusCode;
-            this.responseBody = responseBody;
-        }
-
-        @Override
-        public Duration connectTimeout() {
-            return connectTimeout;
-        }
-
-        @Override
-        public HttpClientBuilder connectTimeout(Duration timeout) {
-            this.connectTimeout = timeout;
-            return this;
-        }
-
-        @Override
-        public Duration readTimeout() {
-            return readTimeout;
-        }
-
-        @Override
-        public HttpClientBuilder readTimeout(Duration timeout) {
-            this.readTimeout = timeout;
-            return this;
-        }
-
-        @Override
-        public HttpClient build() {
-            return new HttpClient() {
-
-                @Override
-                public SuccessfulHttpResponse execute(HttpRequest request) {
-                    requests.add(request);
-                    if (statusCode != 200) {
-                        throw new HttpException(statusCode, responseBody);
-                    }
-                    return SuccessfulHttpResponse.builder()
-                            .statusCode(statusCode)
-                            .body(responseBody)
-                            .build();
-                }
-
-                @Override
-                public void execute(HttpRequest request, ServerSentEventParser parser, ServerSentEventListener listener) {
-                    throw new UnsupportedOperationException();
-                }
-            };
         }
     }
 }
