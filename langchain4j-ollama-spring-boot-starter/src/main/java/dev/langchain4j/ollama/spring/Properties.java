@@ -23,6 +23,9 @@ public class Properties {
     @NestedConfigurationProperty
     EmbeddingModelProperties embeddingModel;
 
+    @NestedConfigurationProperty
+    DecisionModelProperties decisionModel;
+
     public ChatModelProperties getChatModel() {
         return chatModel;
     }
@@ -61,5 +64,13 @@ public class Properties {
 
     public void setEmbeddingModel(EmbeddingModelProperties embeddingModel) {
         this.embeddingModel = embeddingModel;
+    }
+
+    public DecisionModelProperties getDecisionModel() {
+        return decisionModel;
+    }
+
+    public void setDecisionModel(DecisionModelProperties decisionModel) {
+        this.decisionModel = decisionModel;
     }
 }
