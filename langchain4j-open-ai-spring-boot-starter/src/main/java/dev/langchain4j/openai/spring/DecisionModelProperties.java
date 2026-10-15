@@ -14,6 +14,7 @@ record DecisionModelProperties(
         Boolean logRequests,
         Boolean logResponses,
         Map<String, String> customHeaders,
-        Map<String, String> customQueryParams
+        Map<String, String> customQueryParams,
+        Map<String, Object> customParameters
 ) {
 }
