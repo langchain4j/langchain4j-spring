@@ -22,14 +22,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.ExecResult;
+import org.testcontainers.ollama.OllamaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
 import static dev.langchain4j.model.chat.Capability.RESPONSE_FORMAT_JSON_SCHEMA;
-import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,15 +44,26 @@ class AutoConfigIT {
     private static final String EMBEDDING_MODEL_NAME = "all-minilm";
     private static final int EMBEDDING_MODEL_DIMENSION = 384;
 
-    static GenericContainer<?> ollama;
+    static OllamaContainer ollama;
 
     @BeforeAll
-    static void beforeAll() throws IOException, InterruptedException {
+    static void beforeAll() {
         if (isNullOrEmpty(OLLAMA_BASE_URL)) {
-            ollama = new GenericContainer<>(OLLAMA_IMAGE).withExposedPorts(11434);
+            ollama = new OllamaContainer(DockerImageName.parse(OLLAMA_IMAGE));
             ollama.start();
-            ollama.execInContainer("ollama", "pull", MODEL_NAME);
-            ollama.execInContainer("ollama", "pull", EMBEDDING_MODEL_NAME);
+            pullModel(ollama, MODEL_NAME);
+            pullModel(ollama, EMBEDDING_MODEL_NAME);
+        }
+    }
+
+    private static void pullModel(OllamaContainer ollama, String modelName) {
+        try {
+            ExecResult result = ollama.execInContainer("ollama", "pull", modelName);
+            assertThat(result.getExitCode())
+                    .as("ollama pull %s: %s", modelName, result.getStderr())
+                    .isZero();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Error pulling model " + modelName, e);
         }
     }
 
@@ -64,7 +76,7 @@ class AutoConfigIT {
 
     private static String baseUrl() {
         if (isNullOrEmpty(OLLAMA_BASE_URL)) {
-            return format("http://%s:%s", ollama.getHost(), ollama.getFirstMappedPort());
+            return ollama.getEndpoint();
         } else {
             return OLLAMA_BASE_URL;
         }
