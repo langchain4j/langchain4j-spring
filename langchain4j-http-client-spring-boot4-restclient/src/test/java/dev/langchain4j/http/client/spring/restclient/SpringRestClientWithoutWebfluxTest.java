@@ -5,6 +5,8 @@ import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.sse.HttpStreamingEvent;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +36,8 @@ class SpringRestClientWithoutWebfluxTest {
         // spring-webflux is optional. Spring introspects the declared methods and fields of a bean's class (for
         // example SpringRestClientBuilder, which the starters declare as beans), and that loads every type they
         // mention: a webflux type here would make every application without spring-webflux fail to start.
-        Stream.of(SpringRestClient.class, SpringRestClientBuilder.class, SpringRestClientBuilderFactory.class)
+        Stream.of(SpringRestClient.class, SpringRestClientBuilder.class, SpringRestClientBuilderFactory.class,
+                        SpringRestClientBuilders.class)
                 .forEach(type -> assertThat(signatureTypes(type))
                         .as("types in the signatures of %s", type.getSimpleName())
                         .noneMatch(SpringRestClientWithoutWebfluxTest::isWebfluxType));
@@ -85,6 +88,22 @@ class SpringRestClientWithoutWebfluxTest {
         assertThat(streamError.get(5, SECONDS))
                 .isExactlyInstanceOf(AsyncNotSupportedException.class)
                 .hasMessageContaining("org.springframework.boot:spring-boot-starter-webclient");
+    }
+
+    @Test
+    void should_create_a_builder_from_spring_boot_beans_without_webflux() throws Exception {
+
+        // given: SpringRestClientBuilders loaded by a class loader that cannot see spring-webflux or Reactor
+        ClassLoader classLoader = new WithoutWebfluxClassLoader(SpringRestClientWithoutWebfluxTest.class.getClassLoader());
+        Class<?> buildersClass = classLoader.loadClass(SpringRestClientBuilders.class.getName());
+
+        // when
+        Object builder = buildersClass.getMethod("fromSpringBoot", ListableBeanFactory.class)
+                .invoke(null, new DefaultListableBeanFactory());
+
+        // then
+        assertThat(builder.getClass().getMethod("restClientBuilder").invoke(builder)).isNotNull();
+        assertThat(builder.getClass().getMethod("webClientBuilder").invoke(builder)).isNull();
     }
 
     @Test

@@ -42,7 +42,7 @@ import static dev.langchain4j.internal.Utils.isNullOrBlank;
 
 public class SpringRestClient implements HttpClient {
 
-    private static final boolean WEBFLUX_PRESENT = ClassUtils.isPresent(
+    static final boolean WEBFLUX_PRESENT = ClassUtils.isPresent(
             "org.springframework.web.reactive.function.client.WebClient", SpringRestClient.class.getClassLoader());
 
     private static final String WEBFLUX_MISSING = "Non-blocking calls (for example AI Service methods returning"
@@ -60,7 +60,8 @@ public class SpringRestClient implements HttpClient {
 
         RestClient.Builder restClientBuilder = getOrDefault(builder.restClientBuilder(), RestClient::builder);
 
-        ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.defaults();
+        ClientHttpRequestFactorySettings settings = getOrDefault(
+                builder.clientHttpRequestFactorySettings(), ClientHttpRequestFactorySettings::defaults);
         if (builder.connectTimeout() != null) {
             settings = settings.withConnectTimeout(builder.connectTimeout());
         }
@@ -70,7 +71,7 @@ public class SpringRestClient implements HttpClient {
         ClientHttpRequestFactory clientHttpRequestFactory = createRequestFactory(
                 builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect, settings);
 
-        this.delegate = restClientBuilder
+        this.delegate = restClientBuilder.clone()
                 .requestFactory(clientHttpRequestFactory)
                 .build();
 
@@ -93,7 +94,7 @@ public class SpringRestClient implements HttpClient {
             requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
         }
         ClientHttpRequestFactory requestFactory = requestFactoryBuilder.build(settings);
-        if (customBuilder == null && requestFactoryBuilder instanceof JdkClientHttpRequestFactoryBuilder jdkBuilder) {
+        if (requestFactoryBuilder instanceof JdkClientHttpRequestFactoryBuilder jdkBuilder) {
             Supplier<ClientHttpRequestFactory> http11RequestFactory = SingletonSupplier.of(() -> jdkBuilder
                     .withHttpClientCustomizer(httpClientBuilder -> httpClientBuilder.version(java.net.http.HttpClient.Version.HTTP_1_1))
                     .build(settings));

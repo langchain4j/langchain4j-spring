@@ -1,6 +1,5 @@
 package dev.langchain4j.mistralai.spring;
 
-import dev.langchain4j.http.client.spring.restclient.WebClientBuilderHolder;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilder;
 import org.junit.jupiter.api.Test;
@@ -8,6 +7,12 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.http.client.reactive.ClientHttpConnectorBuilder;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.boot.autoconfigure.http.client.HttpClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.http.client.reactive.ClientHttpConnectorAutoConfiguration;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
+import org.springframework.boot.http.client.HttpRedirects;
+import org.springframework.boot.http.client.reactive.ClientHttpConnectorSettings;
 
 import java.util.Map;
 
@@ -69,6 +74,32 @@ class WebClientBuilderWiringTest {
     }
 
     @Test
+    void should_build_every_model_http_client_with_the_http_client_settings_configured_in_spring_boot() {
+        contextRunner
+                .withConfiguration(AutoConfigurations.of(
+                        HttpClientAutoConfiguration.class,
+                        ClientHttpConnectorAutoConfiguration.class))
+                .withPropertyValues(
+                        "spring.http.client.redirects=dont-follow",
+                        "spring.http.reactiveclient.redirects=dont-follow")
+                .run(context -> assertThat(context.getBeansOfType(HttpClientBuilder.class).values())
+                        .hasSize(6)
+                        .allSatisfy(httpClientBuilder -> {
+                            SpringRestClientBuilder springRestClientBuilder = (SpringRestClientBuilder) httpClientBuilder;
+                            assertThat(springRestClientBuilder.clientHttpRequestFactoryBuilder())
+                                    .isSameAs(context.getBean(ClientHttpRequestFactoryBuilder.class));
+                            assertThat(springRestClientBuilder.clientHttpRequestFactorySettings())
+                                    .isSameAs(context.getBean(ClientHttpRequestFactorySettings.class))
+                                    .extracting(ClientHttpRequestFactorySettings::redirects)
+                                    .isEqualTo(ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW);
+                            assertThat(springRestClientBuilder.clientHttpConnectorSettings())
+                                    .isSameAs(context.getBean(ClientHttpConnectorSettings.class))
+                                    .extracting(ClientHttpConnectorSettings::redirects)
+                                    .isEqualTo(HttpRedirects.DONT_FOLLOW);
+                        }));
+    }
+
+    @Test
     void should_start_when_the_application_has_several_web_client_builders() {
         contextRunner
                 .withBean("firstWebClientBuilder", WebClient.Builder.class, WebClient::builder)
@@ -78,9 +109,10 @@ class WebClientBuilderWiringTest {
                     assertThat(context).hasNotFailed();
                     assertThat(context.getBeansOfType(HttpClientBuilder.class)).hasSize(6);
                     // the application's builders are ambiguous, so neither of them is used
-                    assertThat(context.getBean(WebClientBuilderHolder.class).webClientBuilder())
-                            .isNotSameAs(context.getBean("firstWebClientBuilder"))
-                            .isNotSameAs(context.getBean("secondWebClientBuilder"));
+                    assertThat(context.getBeansOfType(HttpClientBuilder.class).values()).allSatisfy(httpClientBuilder ->
+                            assertThat(((SpringRestClientBuilder) httpClientBuilder).webClientBuilder().webClientBuilder())
+                                    .isNotSameAs(context.getBean("firstWebClientBuilder"))
+                                    .isNotSameAs(context.getBean("secondWebClientBuilder")));
                 });
     }
 }

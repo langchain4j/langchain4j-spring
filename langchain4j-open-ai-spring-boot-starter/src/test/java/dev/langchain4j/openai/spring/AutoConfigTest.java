@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import dev.langchain4j.http.client.HttpClientBuilderLoader;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
-import dev.langchain4j.http.client.spring.restclient.WebClientBuilderHolder;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
@@ -282,7 +281,7 @@ class AutoConfigTest {
     }
 
     @Test
-    void should_not_create_web_client_builder_holder_when_webflux_is_missing() {
+    void should_serve_blocking_calls_when_webflux_is_missing() {
         WireMock.stubFor(post(urlEqualTo(CHAT_COMPLETIONS_PATH)).willReturn(okJson(CHAT_COMPLETION_RESPONSE)));
 
         contextRunner
@@ -293,8 +292,6 @@ class AutoConfigTest {
                         "langchain4j.open-ai.chat-model.model-name=gpt-4o-mini"
                 )
                 .run(context -> {
-
-                    assertThat(context).doesNotHaveBean(WebClientBuilderHolder.class);
 
                     assertThat(context.getBean(ChatModel.class).chat("What is the capital of Germany?"))
                             .contains("Berlin");

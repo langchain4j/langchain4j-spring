@@ -12,21 +12,32 @@ import dev.langchain4j.service.AiServiceStreamingEvent.FinalResponseEvent;
 import dev.langchain4j.service.AiServiceStreamingEvent.PartialResponseEvent;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilder;
-import dev.langchain4j.http.client.spring.restclient.WebClientBuilderHolder;
 import org.springframework.boot.http.client.reactive.JdkClientHttpConnectorBuilder;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.any;
+import static com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
+import static com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class WithWebClientIT {
+
+    private static final String REDIRECTED_MESSAGE = "Where is the capital of Germany now?";
+    private static final String REDIRECT_TARGET_PATH = "/v1/redirected";
 
     @RegisterExtension
     static WireMockExtension wireMock = WireMockExtension.newInstance()
@@ -65,8 +76,8 @@ class WithWebClientIT {
     void should_build_non_blocking_requests_from_the_application_web_client_builder() throws Exception {
         try (ConfigurableApplicationContext context = start(new SpringApplicationBuilder(TestApplication.class))) {
 
-            assertThat(context.getBean(WebClientBuilderHolder.class).webClientBuilder())
-                    .isInstanceOf(WebClient.Builder.class);
+            assertThat(context.getBeansOfType(HttpClientBuilder.class).values()).allSatisfy(httpClientBuilder ->
+                    assertThat(((SpringRestClientBuilder) httpClientBuilder).webClientBuilder()).isNotNull());
 
             assertNonBlockingCallsWork(context.getBean(Assistant.class));
             assertNonBlockingRequestsWereBuiltFromTheApplicationWebClientBuilder();
@@ -84,6 +95,73 @@ class WithWebClientIT {
                             assertThat(((SpringRestClientBuilder) httpClientBuilder).clientHttpConnectorBuilder())
                                     .isInstanceOf(JdkClientHttpConnectorBuilder.class));
         }
+    }
+
+    @Test
+    void should_send_every_kind_of_call_with_the_http_client_settings_configured_in_spring_boot() {
+        stubRedirect();
+        try (ConfigurableApplicationContext context = start(new SpringApplicationBuilder(TestApplication.class),
+                "spring.http.client.redirects=dont-follow",
+                "spring.http.reactiveclient.redirects=dont-follow")) {
+
+            Assistant assistant = context.getBean(Assistant.class);
+
+            assertThatThrownBy(() -> assistant.chat(REDIRECTED_MESSAGE));
+            assertRedirectWasNotFollowed();
+
+            assertThatThrownBy(() -> assistant.chatFlux(REDIRECTED_MESSAGE).collectList().block(Duration.ofSeconds(10)));
+            assertRedirectWasNotFollowed();
+
+            assertThatThrownBy(() -> assistant.chatAsync(REDIRECTED_MESSAGE).get(10, SECONDS));
+            assertRedirectWasNotFollowed();
+
+            assertThatThrownBy(() -> assistant.chatMono(REDIRECTED_MESSAGE).block(Duration.ofSeconds(10)));
+            assertRedirectWasNotFollowed();
+
+            assertThatThrownBy(() -> assistant.chatEvents(REDIRECTED_MESSAGE).collectList().block(Duration.ofSeconds(10)));
+            assertRedirectWasNotFollowed();
+        }
+    }
+
+    @Test
+    void should_follow_redirects_without_http_client_settings() throws Exception {
+        stubRedirect();
+        try (ConfigurableApplicationContext context = start(new SpringApplicationBuilder(TestApplication.class))) {
+
+            Assistant assistant = context.getBean(Assistant.class);
+            assertThat(assistant.chat(REDIRECTED_MESSAGE)).isEqualTo("Redirected");
+            assertThat(assistant.chatFlux(REDIRECTED_MESSAGE).collectList().block(Duration.ofSeconds(10)))
+                    .containsExactly("Redi", "rected");
+            assertThat(assistant.chatAsync(REDIRECTED_MESSAGE).get(10, SECONDS)).isEqualTo("Redirected");
+            assertThat(assistant.chatMono(REDIRECTED_MESSAGE).block(Duration.ofSeconds(10))).isEqualTo("Redirected");
+            assertThat(assistant.chatEvents(REDIRECTED_MESSAGE).collectList().block(Duration.ofSeconds(10)))
+                    .filteredOn(PartialResponseEvent.class::isInstance)
+                    .extracting(event -> ((PartialResponseEvent) event).partialResponse().text())
+                    .containsExactly("Redi", "rected");
+        }
+    }
+
+    private static void assertRedirectWasNotFollowed() {
+        wireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo(OpenAiStubs.CHAT_COMPLETIONS_PATH))
+                .withRequestBody(containing(REDIRECTED_MESSAGE)));
+        wireMock.verify(0, anyRequestedFor(urlEqualTo(REDIRECT_TARGET_PATH)));
+        wireMock.resetRequests();
+    }
+
+    private static void stubRedirect() {
+        wireMock.stubFor(post(urlEqualTo(OpenAiStubs.CHAT_COMPLETIONS_PATH))
+                .withRequestBody(containing(REDIRECTED_MESSAGE))
+                .atPriority(0)
+                .willReturn(aResponse().withStatus(307).withHeader("Location", REDIRECT_TARGET_PATH)));
+        wireMock.stubFor(any(urlEqualTo(REDIRECT_TARGET_PATH))
+                .withRequestBody(matchingJsonPath("$.stream", equalTo("true")))
+                .atPriority(0)
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "text/event-stream")
+                        .withBody(OpenAiStubs.chatCompletionChunks("Redi", "rected"))));
+        wireMock.stubFor(any(urlEqualTo(REDIRECT_TARGET_PATH))
+                .atPriority(1)
+                .willReturn(okJson(OpenAiStubs.chatCompletion("Redirected"))));
     }
 
     private static void assertNonBlockingCallsWork(Assistant assistant) throws Exception {

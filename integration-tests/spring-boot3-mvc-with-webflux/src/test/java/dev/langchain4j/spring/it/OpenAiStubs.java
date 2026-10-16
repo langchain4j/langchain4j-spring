@@ -19,10 +19,7 @@ class OpenAiStubs {
 
     private static final String CHAT_COMPLETION = chatCompletion("Berlin");
 
-    private static final String CHAT_COMPLETION_CHUNKS = chunk("{\"content\":\"Ber\"}", null)
-            + chunk("{\"content\":\"lin\"}", null)
-            + chunk("{}", "\"stop\"")
-            + "data: [DONE]\n\n";
+    private static final String CHAT_COMPLETION_CHUNKS = chatCompletionChunks("Ber", "lin");
 
     static void stub(WireMockExtension wireMock) {
         wireMock.stubFor(post(urlEqualTo(CHAT_COMPLETIONS_PATH))
@@ -59,6 +56,13 @@ class OpenAiStubs {
                   "usage": {"prompt_tokens": 10, "completion_tokens": 1, "total_tokens": 11}
                 }
                 """.formatted(content);
+    }
+
+    static String chatCompletionChunks(String first, String second) {
+        return chunk("{\"content\":\"" + first + "\"}", null)
+                + chunk("{\"content\":\"" + second + "\"}", null)
+                + chunk("{}", "\"stop\"")
+                + "data: [DONE]\n\n";
     }
 
     private static String chunk(String delta, String finishReason) {
