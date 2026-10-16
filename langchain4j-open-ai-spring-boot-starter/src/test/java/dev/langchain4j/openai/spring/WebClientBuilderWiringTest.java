@@ -1,17 +1,38 @@
 package dev.langchain4j.openai.spring;
 
-import dev.langchain4j.http.client.spring.restclient.WebClientBuilderHolder;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilders;
+import org.slf4j.LoggerFactory;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.http.client.reactive.ClientHttpConnectorBuilder;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.boot.autoconfigure.http.client.HttpClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.http.client.reactive.ClientHttpConnectorAutoConfiguration;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
+import org.springframework.boot.http.client.HttpRedirects;
+import org.springframework.boot.http.client.reactive.ClientHttpConnectorSettings;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpServer;
+import dev.langchain4j.http.client.HttpRequest;
 
 import java.util.Map;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static dev.langchain4j.http.client.HttpMethod.POST;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 class WebClientBuilderWiringTest {
 
@@ -75,18 +96,133 @@ class WebClientBuilderWiringTest {
     }
 
     @Test
-    void should_start_when_the_application_has_several_web_client_builders() {
+    void should_build_every_model_http_client_with_the_http_client_settings_configured_in_spring_boot() {
         contextRunner
-                .withBean("firstWebClientBuilder", WebClient.Builder.class, WebClient::builder)
-                .withBean("secondWebClientBuilder", WebClient.Builder.class, WebClient::builder)
-                .run(context -> {
+                .withConfiguration(AutoConfigurations.of(
+                        HttpClientAutoConfiguration.class,
+                        ClientHttpConnectorAutoConfiguration.class))
+                .withPropertyValues(
+                        "spring.http.client.redirects=dont-follow",
+                        "spring.http.reactiveclient.redirects=dont-follow")
+                .run(context -> assertThat(context.getBeansOfType(HttpClientBuilder.class).values())
+                        .hasSize(8)
+                        .allSatisfy(httpClientBuilder -> {
+                            SpringRestClientBuilder springRestClientBuilder = (SpringRestClientBuilder) httpClientBuilder;
+                            assertThat(springRestClientBuilder.clientHttpRequestFactoryBuilder())
+                                    .isSameAs(context.getBean(ClientHttpRequestFactoryBuilder.class));
+                            assertThat(springRestClientBuilder.clientHttpRequestFactorySettings())
+                                    .isSameAs(context.getBean(ClientHttpRequestFactorySettings.class))
+                                    .extracting(ClientHttpRequestFactorySettings::redirects)
+                                    .isEqualTo(ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW);
+                            assertThat(springRestClientBuilder.clientHttpConnectorSettings())
+                                    .isSameAs(context.getBean(ClientHttpConnectorSettings.class))
+                                    .extracting(ClientHttpConnectorSettings::redirects)
+                                    .isEqualTo(HttpRedirects.DONT_FOLLOW);
+                        }));
+    }
 
-                    assertThat(context).hasNotFailed();
-                    assertThat(context.getBeansOfType(HttpClientBuilder.class)).hasSize(8);
-                    // the application's builders are ambiguous, so neither of them is used
-                    assertThat(context.getBean(WebClientBuilderHolder.class).webClientBuilder())
-                            .isNotSameAs(context.getBean("firstWebClientBuilder"))
-                            .isNotSameAs(context.getBean("secondWebClientBuilder"));
-                });
+    @Test
+    void should_send_plain_http_requests_over_http_1_1_with_the_jdk_client_configured_in_spring_boot() throws Exception {
+        CompletableFuture<Headers> requestHeaders = new CompletableFuture<>();
+        HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+        server.createContext("/", exchange -> {
+            requestHeaders.complete(exchange.getRequestHeaders());
+            exchange.getRequestBody().readAllBytes();
+            byte[] response = "{}".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, response.length);
+            try (OutputStream out = exchange.getResponseBody()) {
+                out.write(response);
+            }
+        });
+        server.start();
+        try {
+            contextRunner
+                    .withConfiguration(AutoConfigurations.of(HttpClientAutoConfiguration.class))
+                    .withPropertyValues("spring.http.client.factory=jdk")
+                    .run(context -> {
+                        HttpClientBuilder httpClientBuilder =
+                                context.getBean("openAiChatModelHttpClientBuilder", HttpClientBuilder.class);
+
+                        httpClientBuilder.build().execute(HttpRequest.builder()
+                                .method(POST)
+                                .url("http://localhost:" + server.getAddress().getPort() + "/")
+                                .body("{}")
+                                .build());
+
+                        // HTTP/2 over plain HTTP would send an "Upgrade: h2c" request, which many servers mishandle
+                        assertThat(requestHeaders.get(5, SECONDS).containsKey("Upgrade")).isFalse();
+                    });
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void should_warn_and_use_none_of_several_http_client_settings_when_none_of_them_is_primary() {
+        Logger logger = (Logger) LoggerFactory.getLogger(SpringRestClientBuilders.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            contextRunner
+                    .withBean("firstSettings", ClientHttpRequestFactorySettings.class, ClientHttpRequestFactorySettings::defaults)
+                    .withBean("secondSettings", ClientHttpRequestFactorySettings.class, ClientHttpRequestFactorySettings::defaults)
+                    .run(context -> {
+
+                        assertThat(context.getBeansOfType(HttpClientBuilder.class).values()).allSatisfy(httpClientBuilder ->
+                                assertThat(((SpringRestClientBuilder) httpClientBuilder).clientHttpRequestFactorySettings()).isNull());
+
+                        assertThat(appender.list)
+                                .filteredOn(event -> event.getLevel() == Level.WARN)
+                                .extracting(ILoggingEvent::getFormattedMessage)
+                                .isNotEmpty()
+                                .allSatisfy(message -> assertThat(message)
+                                        .contains(ClientHttpRequestFactorySettings.class.getName())
+                                        .contains("firstSettings, secondSettings"));
+                    });
+        } finally {
+            logger.detachAppender(appender);
+        }
+    }
+
+    @Test
+    void should_warn_and_use_none_of_several_builders_when_none_of_them_is_primary() {
+        Logger logger = (Logger) LoggerFactory.getLogger(SpringRestClientBuilders.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            contextRunner
+                    .withBean("firstRestClientBuilder", RestClient.Builder.class, RestClient::builder)
+                    .withBean("secondRestClientBuilder", RestClient.Builder.class, RestClient::builder)
+                    .withBean("firstWebClientBuilder", WebClient.Builder.class, WebClient::builder)
+                    .withBean("secondWebClientBuilder", WebClient.Builder.class, WebClient::builder)
+                    .run(context -> {
+
+                        assertThat(context).hasNotFailed();
+                        assertThat(context.getBeansOfType(HttpClientBuilder.class)).hasSize(8);
+                        assertThat(context.getBeansOfType(HttpClientBuilder.class).values()).allSatisfy(httpClientBuilder -> {
+                            SpringRestClientBuilder springRestClientBuilder = (SpringRestClientBuilder) httpClientBuilder;
+                            assertThat(springRestClientBuilder.restClientBuilder())
+                                    .isNotSameAs(context.getBean("firstRestClientBuilder"))
+                                    .isNotSameAs(context.getBean("secondRestClientBuilder"));
+                            assertThat(springRestClientBuilder.webClientBuilder().webClientBuilder())
+                                    .isNotSameAs(context.getBean("firstWebClientBuilder"))
+                                    .isNotSameAs(context.getBean("secondWebClientBuilder"));
+                        });
+
+                        assertThat(appender.list)
+                                .filteredOn(event -> event.getLevel() == Level.WARN)
+                                .extracting(ILoggingEvent::getFormattedMessage)
+                                .anySatisfy(message -> assertThat(message)
+                                        .contains(RestClient.Builder.class.getName())
+                                        .contains("firstRestClientBuilder, secondRestClientBuilder"))
+                                .anySatisfy(message -> assertThat(message)
+                                        .contains(WebClient.Builder.class.getName())
+                                        .contains("firstWebClientBuilder, secondWebClientBuilder"));
+                    });
+        } finally {
+            logger.detachAppender(appender);
+        }
     }
 }

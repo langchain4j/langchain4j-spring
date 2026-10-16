@@ -2,13 +2,14 @@ package dev.langchain4j.spring.it;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.junit.jupiter.api.BeforeEach;
+import dev.langchain4j.http.client.HttpClientBuilder;
+import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import dev.langchain4j.exception.AsyncNotSupportedException;
-import dev.langchain4j.http.client.spring.restclient.WebClientBuilderHolder;
 import org.springframework.util.ClassUtils;
 
 import java.time.Duration;
@@ -54,7 +55,8 @@ class WithoutWebClientIT {
         try (ConfigurableApplicationContext context = start(application)) {
 
             assertThat(application.application().getWebApplicationType()).isEqualTo(WebApplicationType.SERVLET);
-            assertThat(context.getBeanNamesForType(WebClientBuilderHolder.class)).isEmpty();
+            assertThat(context.getBeansOfType(HttpClientBuilder.class).values()).allSatisfy(httpClientBuilder ->
+                    assertThat(((SpringRestClientBuilder) httpClientBuilder).webClientBuilder()).isNull());
 
             Assistant assistant = context.getBean(Assistant.class);
             assertThat(assistant.chat("What is the capital of Germany?")).isEqualTo("Berlin");

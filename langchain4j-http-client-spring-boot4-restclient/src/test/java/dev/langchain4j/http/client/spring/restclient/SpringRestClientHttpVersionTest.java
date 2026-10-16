@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.net.http.HttpClient.Version.HTTP_2;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -77,11 +76,11 @@ class SpringRestClientHttpVersionTest {
     }
 
     @Test
-    void should_keep_http_version_of_custom_jdk_request_factory_builder() throws Exception {
+    void should_not_request_h2c_upgrade_for_plain_http_when_jdk_request_factory_builder_is_given() throws Exception {
 
         // given
         ClientHttpRequestFactory requestFactory = SpringRestClient.createRequestFactory(
-                ClientHttpRequestFactoryBuilder.jdk().withHttpClientCustomizer(builder -> builder.version(HTTP_2)),
+                ClientHttpRequestFactoryBuilder.jdk(),
                 ClientHttpRequestFactoryBuilder::detect,
                 HttpClientSettings.defaults());
 
@@ -89,7 +88,10 @@ class SpringRestClientHttpVersionTest {
         post(requestFactory);
 
         // then
-        assertThat(requestHeaders.get(5, SECONDS).getFirst("Upgrade")).isEqualTo("h2c");
+        Headers headers = requestHeaders.get(5, SECONDS);
+        assertThat(headers.containsKey("Upgrade")).isFalse();
+        assertThat(headers.containsKey("HTTP2-Settings")).isFalse();
+        assertThat(requestBody.get(5, SECONDS)).isEqualTo(BODY);
     }
 
     @Test
@@ -135,11 +137,11 @@ class SpringRestClientHttpVersionTest {
     }
 
     @Test
-    void should_keep_http_version_of_custom_jdk_connector_builder() throws Exception {
+    void should_not_request_h2c_upgrade_for_plain_http_when_jdk_connector_builder_is_given() throws Exception {
 
         // given
         ClientHttpConnector connector = WebClientDelegate.createConnector(
-                ClientHttpConnectorBuilder.jdk().withHttpClientCustomizer(builder -> builder.version(HTTP_2)),
+                ClientHttpConnectorBuilder.jdk(),
                 ClientHttpConnectorBuilder::detect,
                 HttpClientSettings.defaults());
 
@@ -147,7 +149,10 @@ class SpringRestClientHttpVersionTest {
         post(connector);
 
         // then
-        assertThat(requestHeaders.get(5, SECONDS).getFirst("Upgrade")).isEqualTo("h2c");
+        Headers headers = requestHeaders.get(5, SECONDS);
+        assertThat(headers.containsKey("Upgrade")).isFalse();
+        assertThat(headers.containsKey("HTTP2-Settings")).isFalse();
+        assertThat(requestBody.get(5, SECONDS)).isEqualTo(BODY);
     }
 
     @Test

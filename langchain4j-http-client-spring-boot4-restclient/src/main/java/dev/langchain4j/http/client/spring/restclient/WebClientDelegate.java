@@ -59,7 +59,7 @@ class WebClientDelegate {
 
     WebClientDelegate(SpringRestClientBuilder builder) {
 
-        HttpClientSettings settings = HttpClientSettings.defaults();
+        HttpClientSettings settings = getOrDefault(builder.httpClientSettings(), HttpClientSettings::defaults);
         if (builder.connectTimeout() != null) {
             settings = settings.withConnectTimeout(builder.connectTimeout());
         }
@@ -103,7 +103,7 @@ class WebClientDelegate {
             connectorBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpAsyncClientBuilder::disableAutomaticRetries);
         }
         ClientHttpConnector connector = connectorBuilder.build(settings);
-        if (customBuilder == null && connectorBuilder instanceof JdkClientHttpConnectorBuilder jdkBuilder) {
+        if (connectorBuilder instanceof JdkClientHttpConnectorBuilder jdkBuilder) {
             Supplier<ClientHttpConnector> http11Connector = SingletonSupplier.of(() -> jdkBuilder
                     .withHttpClientCustomizer(httpClientBuilder -> httpClientBuilder.version(java.net.http.HttpClient.Version.HTTP_1_1))
                     .build(settings));
@@ -121,34 +121,34 @@ class WebClientDelegate {
     }
 
     CompletableFuture<SuccessfulHttpResponse> executeAsync(HttpRequest request) {
-        return toWebClientRequest(request)
-                .exchangeToMono(response -> {
-                    if (!response.statusCode().is2xxSuccessful()) {
-                        return toHttpException(response);
-                    }
-                    return readBody(response)
-                            .map(Optional::of)
-                            .defaultIfEmpty(Optional.empty())
-                            .map(body -> toSuccessfulHttpResponse(response, body.orElse(null)));
-                })
+        return Mono.defer(() -> toWebClientRequest(request)
+                        .exchangeToMono(response -> {
+                            if (!response.statusCode().is2xxSuccessful()) {
+                                return toHttpException(response);
+                            }
+                            return readBody(response)
+                                    .map(Optional::of)
+                                    .defaultIfEmpty(Optional.empty())
+                                    .map(body -> toSuccessfulHttpResponse(response, body.orElse(null)));
+                        }))
                 .onErrorMap(SpringRestClient::isTimeout, TimeoutException::new)
                 .toFuture();
     }
 
     Flow.Publisher<HttpStreamingEvent> stream(HttpRequest request, ServerSentEventParser parser) {
-        Flux<HttpStreamingEvent> events = toWebClientRequest(request)
-                .<HttpStreamingEvent>exchangeToFlux(response -> {
-                    if (!response.statusCode().is2xxSuccessful()) {
-                        return WebClientDelegate.<HttpStreamingEvent>toHttpException(response).flux();
-                    }
-                    ServerSentEventParser.Incremental incremental = parser.incremental();
-                    Flux<ServerSentEvent> serverSentEvents = response.bodyToFlux(DataBuffer.class)
-                            .concatMapIterable(buffer -> feed(incremental, buffer))
-                            .doOnDiscard(DataBuffer.class, DataBufferUtils::release)
-                            .concatWith(Flux.defer(() -> Flux.fromIterable(incremental.flush())));
-                    return Flux.<HttpStreamingEvent>just(new HttpResponseReceived(toSuccessfulHttpResponse(response, null)))
-                            .concatWith(serverSentEvents);
-                })
+        Flux<HttpStreamingEvent> events = Flux.defer(() -> toWebClientRequest(request)
+                        .<HttpStreamingEvent>exchangeToFlux(response -> {
+                            if (!response.statusCode().is2xxSuccessful()) {
+                                return WebClientDelegate.<HttpStreamingEvent>toHttpException(response).flux();
+                            }
+                            ServerSentEventParser.Incremental incremental = parser.incremental();
+                            Flux<ServerSentEvent> serverSentEvents = response.bodyToFlux(DataBuffer.class)
+                                    .concatMapIterable(buffer -> feed(incremental, buffer))
+                                    .doOnDiscard(DataBuffer.class, DataBufferUtils::release)
+                                    .concatWith(Flux.defer(() -> Flux.fromIterable(incremental.flush())));
+                            return Flux.<HttpStreamingEvent>just(new HttpResponseReceived(toSuccessfulHttpResponse(response, null)))
+                                    .concatWith(serverSentEvents);
+                        }))
                 .onErrorMap(SpringRestClient::isTimeout, TimeoutException::new);
         return JdkFlowAdapter.publisherToFlowPublisher(events);
     }
