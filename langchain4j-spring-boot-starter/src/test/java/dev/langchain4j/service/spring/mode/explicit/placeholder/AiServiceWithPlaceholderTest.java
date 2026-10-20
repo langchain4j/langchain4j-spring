@@ -129,6 +129,30 @@ class AiServiceWithPlaceholderTest {
         }
     }
 
+    @Test
+    void should_not_flag_existing_bean_whose_name_differs_from_an_ai_service_only_by_capitalization() {
+        // the AI service is registered as "aiServiceWithPlaceholderTools"; this is a separate, valid tool bean
+        String toolBeanName = "AiServiceWithPlaceholderTools";
+        try (LogCapture logs = LogCapture.debug(AiServicesAutoConfig.class)) {
+            contextRunner
+                    .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                    .withBean(toolBeanName, AiServiceWithPlaceholderApplication.SecondTool.class,
+                            AiServiceWithPlaceholderApplication.SecondTool::new)
+                    .withPropertyValues(
+                            "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                            "my.tool.name=" + toolBeanName
+                    )
+                    .run(context -> {
+                        AiServiceWithPlaceholderTools aiService = context.getBean(AiServiceWithPlaceholderTools.class);
+                        aiService.chat("Hello");
+                        assertThat(toolNamesSentToModel(context)).containsExactly("secondHelperTool");
+                        assertThat(logs.messages())
+                                .contains("tools=[" + toolBeanName + "]")
+                                .doesNotContain("(no such bean)");
+                    });
+        }
+    }
+
     private static List<String> toolNamesSentToModel(ApplicationContext context) {
         ChatModelMock chatModel = context.getBean(
                 AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME, ChatModelMock.class);

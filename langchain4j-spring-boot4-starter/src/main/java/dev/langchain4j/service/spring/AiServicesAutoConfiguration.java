@@ -94,9 +94,13 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
             }
 
             String[] aiServices = beanFactory.getBeanNamesForAnnotation(AiService.class);
-            // AI services are re-registered under these names one by one in the loop below
+            // AI services are re-registered under lowercased names one by one in the loop below,
+            // so track the names that will exist afterwards and the original names that will be gone
             Set<String> aiServiceBeanNames = Arrays.stream(aiServices)
                     .map(AiServicesAutoConfiguration::lowercaseFirstLetter)
+                    .collect(toSet());
+            Set<String> renamedAiServiceBeanNames = Arrays.stream(aiServices)
+                    .filter(aiService -> !aiService.equals(lowercaseFirstLetter(aiService)))
                     .collect(toSet());
             for (String aiService : aiServices) {
                 Class<?> aiServiceClass = beanFactory.getType(aiService);
@@ -260,7 +264,8 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                     log.debug("Registered @AiService bean '{}' for {} using {} wiring mode, wired components: {}",
                             lowercaseFirstLetter(aiService), aiServiceClass.getName(),
                             aiServiceAnnotation.wiringMode(),
-                            describeWiring(beanFactory, aiServiceAnnotation, wiredBeanNames, wiredTools, aiServiceBeanNames));
+                            describeWiring(beanFactory, aiServiceAnnotation, wiredBeanNames, wiredTools,
+                                    aiServiceBeanNames, renamedAiServiceBeanNames));
                 }
 
                 if (eventPublisher != null) {
@@ -301,10 +306,11 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                                                       AiService aiServiceAnnotation,
                                                       Map<String, String> wiredBeanNames,
                                                       Collection<String> wiredTools,
-                                                      Set<String> aiServiceBeanNames) {
+                                                      Set<String> aiServiceBeanNames,
+                                                      Set<String> renamedAiServiceBeanNames) {
         boolean explicit = aiServiceAnnotation.wiringMode() == EXPLICIT;
         UnaryOperator<String> describe = explicit
-                ? beanName -> describeExplicitBean(beanFactory, beanName, aiServiceBeanNames)
+                ? beanName -> describeExplicitBean(beanFactory, beanName, aiServiceBeanNames, renamedAiServiceBeanNames)
                 : UnaryOperator.identity();
         Map<String, Object> wiring = new LinkedHashMap<>();
         wiredBeanNames.forEach((component, beanName) -> wiring.put(component, describe.apply(beanName)));
@@ -320,14 +326,13 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
      */
     private static String describeExplicitBean(ConfigurableListableBeanFactory beanFactory,
                                                String beanName,
-                                               Set<String> aiServiceBeanNames) {
-        // aiServiceBeanNames holds the post-registration (lowercased) names. A reference using
-        // the original (un-lowercased) name will still find the bean in the registry now, but
-        // the RuntimeBeanReference will break after re-registration — flag it as missing.
-        boolean isOriginalAiServiceName = !aiServiceBeanNames.contains(beanName)
-                && aiServiceBeanNames.contains(lowercaseFirstLetter(beanName));
-        boolean exists = !isOriginalAiServiceName
-                && (aiServiceBeanNames.contains(beanName) || beanFactory.containsBean(beanName));
+                                               Set<String> aiServiceBeanNames,
+                                               Set<String> renamedAiServiceBeanNames) {
+        // The registry is mid-way through re-registering AI services: a renamed AI service may still
+        // be found under its original name (which the RuntimeBeanReference cannot resolve later),
+        // and one not yet processed may not be found under its final name.
+        boolean exists = aiServiceBeanNames.contains(beanName)
+                || (!renamedAiServiceBeanNames.contains(beanName) && beanFactory.containsBean(beanName));
         return exists ? beanName : beanName + " (no such bean)";
     }
 
