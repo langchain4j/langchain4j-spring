@@ -321,7 +321,13 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
     private static String describeExplicitBean(ConfigurableListableBeanFactory beanFactory,
                                                String beanName,
                                                Set<String> aiServiceBeanNames) {
-        boolean exists = beanFactory.containsBean(beanName) || aiServiceBeanNames.contains(beanName);
+        // aiServiceBeanNames holds the post-registration (lowercased) names. A reference using
+        // the original (un-lowercased) name will still find the bean in the registry now, but
+        // the RuntimeBeanReference will break after re-registration — flag it as missing.
+        boolean isOriginalAiServiceName = !aiServiceBeanNames.contains(beanName)
+                && aiServiceBeanNames.contains(lowercaseFirstLetter(beanName));
+        boolean exists = !isOriginalAiServiceName
+                && (aiServiceBeanNames.contains(beanName) || beanFactory.containsBean(beanName));
         return exists ? beanName : beanName + " (no such bean)";
     }
 

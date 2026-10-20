@@ -31,9 +31,11 @@ public final class LogCapture implements AutoCloseable {
     }
 
     public String messages() {
-        return appender.list.stream()
-                .map(ILoggingEvent::getFormattedMessage)
-                .collect(joining(System.lineSeparator()));
+        synchronized (appender) {
+            return appender.list.stream()
+                    .map(ILoggingEvent::getFormattedMessage)
+                    .collect(joining(System.lineSeparator()));
+        }
     }
 
     @Override
