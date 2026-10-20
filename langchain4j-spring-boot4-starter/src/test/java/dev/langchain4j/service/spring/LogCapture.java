@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import static java.util.stream.Collectors.joining;
 
 /**
- * Captures a logger's events at DEBUG level, independently of any console appender,
+ * Captures a logger's events at a given level (DEBUG by default), independently of any console appender,
  * and restores the logger's previous level on {@link #close()}.
  */
 public final class LogCapture implements AutoCloseable {
@@ -18,16 +18,20 @@ public final class LogCapture implements AutoCloseable {
     private final Level previousLevel;
     private final ListAppender<ILoggingEvent> appender = new ListAppender<>();
 
-    private LogCapture(Class<?> loggerClass) {
+    private LogCapture(Class<?> loggerClass, Level level) {
         this.logger = (Logger) LoggerFactory.getLogger(loggerClass);
         this.previousLevel = logger.getLevel();
         appender.start();
         logger.addAppender(appender);
-        logger.setLevel(Level.DEBUG);
+        logger.setLevel(level);
     }
 
     public static LogCapture debug(Class<?> loggerClass) {
-        return new LogCapture(loggerClass);
+        return atLevel(loggerClass, Level.DEBUG);
+    }
+
+    public static LogCapture atLevel(Class<?> loggerClass, Level level) {
+        return new LogCapture(loggerClass, level);
     }
 
     public String messages() {
