@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>dev.langchain4j</groupId>
+        <artifactId>langchain4j-spring</artifactId>
+        <version>1.23.0-beta33-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>langchain4j-spring-integration-tests</artifactId>
+    <packaging>pom</packaging>
+    <name>LangChain4j Spring :: Integration tests</name>
+    <description>Applications assembled the way users assemble them, each with a different set of dependencies, to
+        test how the starters behave with and without optional dependencies. Never published.</description>
+
+    <modules>
+        <module>spring-boot3-mvc-without-webflux</module>
+        <module>spring-boot3-mvc-with-webflux</module>
+        <module>spring-boot3-non-web-with-webflux</module>
+        <module>spring-boot4-webmvc-without-webclient</module>
+        <module>spring-boot4-webmvc-with-webclient</module>
+        <module>spring-boot4-non-web-with-webclient</module>
+    </modules>
+
+    <!-- These modules are kept off Maven Central by excludeArtifacts in the root pom.xml: list every new module there. -->
+    <properties>
+        <maven.install.skip>true</maven.install.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <maven.source.skip>true</maven.source.skip>
+    </properties>
+
+</project>

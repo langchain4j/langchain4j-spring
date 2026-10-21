@@ -6,11 +6,13 @@ import dev.langchain4j.http.client.FormDataFile;
 import dev.langchain4j.http.client.HttpClient;
 import dev.langchain4j.http.client.HttpRequest;
 import dev.langchain4j.http.client.SuccessfulHttpResponse;
+import dev.langchain4j.http.client.sse.HttpStreamingEvent;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
 import dev.langchain4j.http.client.sse.ServerSentEventParser;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.JdkClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.HttpClientSettings;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -18,8 +20,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
@@ -28,38 +32,51 @@ import java.net.SocketTimeoutException;
 import java.net.http.HttpTimeoutException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static dev.langchain4j.http.client.sse.ServerSentEventListenerUtils.ignoringExceptions;
+import static dev.langchain4j.internal.AsyncNotSupported.failedFuture;
+import static dev.langchain4j.internal.AsyncNotSupported.failingPublisher;
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static dev.langchain4j.internal.Utils.isNullOrBlank;
 
 public class SpringRestClient implements HttpClient {
 
+    static final boolean WEBFLUX_PRESENT = ClassUtils.isPresent(
+            "org.springframework.web.reactive.function.client.WebClient", SpringRestClient.class.getClassLoader());
+
+    private static final String WEBFLUX_MISSING = "Non-blocking calls (for example AI Service methods returning"
+            + " CompletableFuture, Flow.Publisher, Mono or Flux<AiServiceStreamingEvent>) need Spring's WebClient"
+            + " (spring-webflux) on the classpath when they are sent with SpringRestClient: add the"
+            + " org.springframework.boot:spring-boot-starter-webclient dependency. See"
+            + " https://docs.langchain4j.dev/tutorials/spring-boot-integration. %s() is not available without it.";
+
     private final RestClient delegate;
     private final AsyncTaskExecutor streamingRequestExecutor;
+    private final WebClientDelegate webClientDelegate;
 
     public SpringRestClient(SpringRestClientBuilder builder) {
 
         RestClient.Builder restClientBuilder = getOrDefault(builder.restClientBuilder(), RestClient::builder);
 
-        HttpClientSettings settings = HttpClientSettings.defaults();
+        HttpClientSettings settings = getOrDefault(builder.httpClientSettings(), HttpClientSettings::defaults);
         if (builder.connectTimeout() != null) {
             settings = settings.withConnectTimeout(builder.connectTimeout());
         }
         if (builder.readTimeout() != null) {
             settings = settings.withReadTimeout(builder.readTimeout());
         }
-        ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = getOrDefault(
-                builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect);
-        if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
-            requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
-        }
-        ClientHttpRequestFactory clientHttpRequestFactory = requestFactoryBuilder.build(settings);
+        ClientHttpRequestFactory clientHttpRequestFactory = createRequestFactory(
+                builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect, settings);
 
-        this.delegate = restClientBuilder
+        this.delegate = restClientBuilder.clone()
                 .requestFactory(clientHttpRequestFactory)
                 .build();
+
+        this.webClientDelegate = WEBFLUX_PRESENT ? new WebClientDelegate(builder) : null;
 
         this.streamingRequestExecutor = getOrDefault(builder.streamingRequestExecutor(), () -> {
             if (Boolean.TRUE.equals(builder.createDefaultStreamingRequestExecutor())) {
@@ -68,6 +85,31 @@ public class SpringRestClient implements HttpClient {
                 return null;
             }
         });
+    }
+
+    static ClientHttpRequestFactory createRequestFactory(ClientHttpRequestFactoryBuilder<?> customBuilder,
+                                                         Supplier<ClientHttpRequestFactoryBuilder<?>> detect,
+                                                         HttpClientSettings settings) {
+        ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = getOrDefault(customBuilder, detect);
+        if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
+            requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
+        }
+        ClientHttpRequestFactory requestFactory = requestFactoryBuilder.build(settings);
+        if (requestFactoryBuilder instanceof JdkClientHttpRequestFactoryBuilder jdkBuilder) {
+            Supplier<ClientHttpRequestFactory> http11RequestFactory = SingletonSupplier.of(() -> jdkBuilder
+                    .withHttpClientCustomizer(httpClientBuilder -> httpClientBuilder.version(java.net.http.HttpClient.Version.HTTP_1_1))
+                    .build(settings));
+            requestFactory = http11ForPlainHttp(requestFactory, http11RequestFactory);
+        }
+        return requestFactory;
+    }
+
+    static ClientHttpRequestFactory http11ForPlainHttp(ClientHttpRequestFactory requestFactory,
+                                                       Supplier<ClientHttpRequestFactory> http11RequestFactory) {
+        // HTTP/2 over plain HTTP means an "Upgrade: h2c" request, which many servers mishandle (e.g. drop the body)
+        return (uri, method) -> "http".equalsIgnoreCase(uri.getScheme())
+                ? http11RequestFactory.get().createRequest(uri, method)
+                : requestFactory.createRequest(uri, method);
     }
 
     private static AsyncTaskExecutor createDefaultStreamingRequestExecutor() {
@@ -145,6 +187,38 @@ public class SpringRestClient implements HttpClient {
         });
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The request is sent with Spring's {@code WebClient}, so this needs {@code spring-webflux} on the classpath;
+     * without it, the returned future fails with an {@link dev.langchain4j.exception.AsyncNotSupportedException}.
+     * The connector is chosen by {@link SpringRestClientBuilder#clientHttpConnectorBuilder}, and the response body
+     * is read in full, without a size limit, as for {@link #execute(HttpRequest)}.
+     */
+    @Override
+    public CompletableFuture<SuccessfulHttpResponse> executeAsync(HttpRequest request) {
+        if (webClientDelegate == null) {
+            return failedFuture(WEBFLUX_MISSING.formatted("executeAsync"));
+        }
+        return webClientDelegate.executeAsync(request);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The request is sent with Spring's {@code WebClient}, so this needs {@code spring-webflux} on the classpath;
+     * without it, the publisher fails with an {@link dev.langchain4j.exception.AsyncNotSupportedException}.
+     * Events are delivered as they arrive: the body is parsed incrementally as each chunk is received, and no thread
+     * is held for the lifetime of the stream. Cancelling the subscription aborts the request.
+     */
+    @Override
+    public Flow.Publisher<HttpStreamingEvent> stream(HttpRequest request, ServerSentEventParser parser) {
+        if (webClientDelegate == null) {
+            return failingPublisher(WEBFLUX_MISSING.formatted("stream"));
+        }
+        return webClientDelegate.stream(request, parser);
+    }
+
     private RestClient.RequestBodySpec toSpringRestClientRequest(HttpRequest request) {
         RestClient.RequestBodySpec requestBodySpec = delegate
                 .method(org.springframework.http.HttpMethod.valueOf(request.method().name()))
@@ -175,7 +249,7 @@ public class SpringRestClient implements HttpClient {
         return multipart;
     }
 
-    private static Map<String, List<String>> toHeadersMap(HttpHeaders httpHeaders) {
+    static Map<String, List<String>> toHeadersMap(HttpHeaders httpHeaders) {
         return httpHeaders.headerSet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -219,7 +293,7 @@ public class SpringRestClient implements HttpClient {
      * streamed request body to retry the request with credentials. When the body is there it is the most useful
      * thing a caller can be given, and when it is not, anything is better than an exception with no message.
      */
-    private static String errorMessage(String body, String fallback) {
+    static String errorMessage(String body, String fallback) {
         return isNullOrBlank(body) ? fallback : body;
     }
 

@@ -24,6 +24,9 @@ import dev.langchain4j.model.language.StreamingLanguageModel;
 import dev.langchain4j.model.moderation.ModerationModel;
 import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.BeforeEach;
+import dev.langchain4j.model.decision.DecisionModel;
+import dev.langchain4j.model.decision.request.DecisionRequest;
+import dev.langchain4j.model.decision.request.YesNoQuestion;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -522,6 +525,47 @@ class PropertyBindingTest {
                             .withHeader("OpenAI-Project", equalTo("proj-1"))
                             .withHeader("X-Custom", equalTo("custom-value"))
                             .withRequestBody(matchingJsonPath("$.model", equalTo("omni-moderation-latest"))));
+                });
+    }
+
+    // ------------------------------------------------------------------------------------------- decision model
+
+    @Test
+    void should_bind_all_decision_model_properties() {
+        WireMock.stubFor(post(urlPathEqualTo("/v1/decisions")).willReturn(okJson(
+                """
+                {"model": "gpt-6-luna", "answers": [{"type": "predicate", "name": "spam", "probability": 0.95}],
+                 "usage": {"input_tokens": 12, "input_tokens_details": {"cached_tokens": 0, "cache_write_tokens": 0},
+                           "output_tokens": 0, "output_tokens_details": {"reasoning_tokens": 0}, "total_tokens": 12}}
+                """)));
+
+        contextRunner
+                .withPropertyValues(
+                        "langchain4j.open-ai.decision-model.base-url=" + baseUrl,
+                        "langchain4j.open-ai.decision-model.api-key=" + API_KEY,
+                        "langchain4j.open-ai.decision-model.organization-id=org-1",
+                        "langchain4j.open-ai.decision-model.project-id=proj-1",
+                        "langchain4j.open-ai.decision-model.model-name=gpt-6-luna",
+                        "langchain4j.open-ai.decision-model.timeout=PT30S",
+                        "langchain4j.open-ai.decision-model.max-retries=1",
+                        "langchain4j.open-ai.decision-model.log-requests=true",
+                        "langchain4j.open-ai.decision-model.log-responses=true",
+                        "langchain4j.open-ai.decision-model.custom-headers.X-Custom=custom-value",
+                        "langchain4j.open-ai.decision-model.custom-query-params.custom-param=param-value"
+                )
+                .run(context -> {
+                    context.getBean(DecisionModel.class).decide(DecisionRequest.builder()
+                            .input("hi")
+                            .question("spam", YesNoQuestion.of("Is this message spam?"))
+                            .build());
+
+                    WireMock.verify(postRequestedFor(urlPathEqualTo("/v1/decisions"))
+                            .withQueryParam("custom-param", equalTo("param-value"))
+                            .withHeader("Authorization", equalTo("Bearer " + API_KEY))
+                            .withHeader("OpenAI-Organization", equalTo("org-1"))
+                            .withHeader("OpenAI-Project", equalTo("proj-1"))
+                            .withHeader("X-Custom", equalTo("custom-value"))
+                            .withRequestBody(matchingJsonPath("$.model", equalTo("gpt-6-luna"))));
                 });
     }
 

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+    <!-- The license plugin resolves dependency POMs using session repositories, not project repositories. -->
+    <profiles>
+        <profile>
+            <id>central-portal-snapshots</id>
+            <repositories>
+                <repository>
+                    <id>central-portal-snapshots</id>
+                    <name>Central Portal Snapshots</name>
+                    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>central-portal-snapshots</activeProfile>
+    </activeProfiles>
+</settings>

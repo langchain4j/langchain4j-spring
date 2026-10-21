@@ -3,8 +3,6 @@ package dev.langchain4j.service.spring.mode.explicit.placeholder;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.mock.ChatModelMock;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.response.ChatResponse;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -30,12 +28,7 @@ class AiServiceWithPlaceholderApplication {
 
     @Bean("otherChatModel")
     ChatModel otherChatModel() {
-        return new ChatModel() {
-            @Override
-            public ChatResponse chat(ChatRequest chatRequest) {
-                throw new RuntimeException("should never be invoked");
-            }
-        };
+        return ChatModelMock.thatAlwaysThrowsExceptionWithMessage("should never be invoked");
     }
 
     @Component(CONFIGURED_TOOL_BEAN_NAME)

@@ -7,7 +7,7 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-spring</artifactId>
-        <version>1.22.0-beta32-SNAPSHOT</version>
+        <version>1.23.0-beta33-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>langchain4j-http-client-spring-boot4-restclient</artifactId>
@@ -41,6 +41,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-restclient</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!-- test dependencies -->
@@ -81,8 +87,26 @@
         </dependency>
 
         <dependency>
+            <groupId>io.projectreactor.tools</groupId>
+            <artifactId>blockhound</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5-reactive</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -110,5 +134,19 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <!-- SpringRestClientReactorPublisherNonBlockingIT installs BlockHound, which attaches an agent to
+                         the running JVM and redefines JDK classes. Benign for the other ITs. -->
+                    <argLine>-Djdk.attach.allowAttachSelf=true -XX:+AllowRedefinitionToAddDeleteMethods</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

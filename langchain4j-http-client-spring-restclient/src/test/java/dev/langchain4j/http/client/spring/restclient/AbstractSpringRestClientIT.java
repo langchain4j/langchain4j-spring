@@ -16,6 +16,11 @@ abstract class AbstractSpringRestClientIT extends HttpClientIT {
     protected abstract ClientHttpRequestFactoryBuilder<?> clientHttpRequestFactoryBuilder();
 
     @Override
+    protected boolean supportsExecuteAsync() {
+        return true;
+    }
+
+    @Override
     protected List<HttpClient> clients() {
         return List.of(SpringRestClient.builder()
                 .clientHttpRequestFactoryBuilder(clientHttpRequestFactoryBuilder())
