@@ -32,7 +32,7 @@ class AiServiceWithExplicitChatModelTest {
     }
 
     @Test
-    void should_log_explicitly_wired_chat_model() {
+    void should_log_explicitly_configured_chat_model() {
         try (LogCapture logs = LogCapture.debug(AiServicesAutoConfig.class)) {
             contextRunner
                     .withUserConfiguration(AiServiceWithExplicitChatModelApplication.class)

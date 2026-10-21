@@ -46,7 +46,7 @@ class AiServiceWithChatMemoryTest {
     }
 
     @Test
-    void should_log_wired_components() {
+    void should_log_configured_bean_references() {
         try (LogCapture logs = LogCapture.debug(AiServicesAutoConfiguration.class)) {
             contextRunner
                     .withUserConfiguration(AiServiceWithChatMemoryApplication.class)
