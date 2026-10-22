@@ -18,6 +18,7 @@ import dev.langchain4j.service.tool.ToolProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static dev.langchain4j.internal.Exceptions.illegalArgument;
 import static dev.langchain4j.internal.Utils.isNotNullOrBlank;
@@ -245,6 +247,12 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 registry.removeBeanDefinition(aiService);
                 registry.registerBeanDefinition(lowercaseFirstLetter(aiService), aiServiceBeanDefinition);
 
+                if (log.isDebugEnabled()) {
+                    log.debug("Registered @AiService bean '{}' for {} using {} wiring mode, configured bean references: {}",
+                            lowercaseFirstLetter(aiService), aiServiceClass.getName(), aiServiceAnnotation.wiringMode(),
+                            configuredBeanReferences(propertyValues, aiServiceAnnotation.wiringMode()));
+                }
+
                 if (eventPublisher != null) {
                     eventPublisher.publishEvent(new AiServiceRegisteredEvent(this, aiServiceClass, toolSpecifications));
                 }
@@ -275,6 +283,27 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
         } else {
             throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
         }
+    }
+
+    /**
+     * Lists the bean names referenced by the AI service's bean definition. They are not resolved here,
+     * so the referenced beans may still turn out to be missing when the AI service is created.
+     */
+    private static Map<String, Object> configuredBeanReferences(MutablePropertyValues propertyValues,
+                                                                AiServiceWiringMode wiringMode) {
+        Map<String, Object> references = new LinkedHashMap<>();
+        for (PropertyValue propertyValue : propertyValues.getPropertyValueList()) {
+            if (propertyValue.getValue() instanceof RuntimeBeanReference reference) {
+                references.put(propertyValue.getName(), reference.getBeanName());
+            } else if (propertyValue.getValue() instanceof List<?> list) {
+                Stream<String> beanNames = list.stream()
+                        .map(element -> ((RuntimeBeanReference) element).getBeanName());
+                // automatically wired tools come from a HashSet, sort them for a stable log line
+                references.put(propertyValue.getName(),
+                        (wiringMode == AUTOMATIC ? beanNames.sorted() : beanNames).toList());
+            }
+        }
+        return references;
     }
 
     private static String resolve(ConfigurableListableBeanFactory beanFactory,

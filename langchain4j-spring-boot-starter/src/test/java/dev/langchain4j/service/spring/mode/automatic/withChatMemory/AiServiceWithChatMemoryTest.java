@@ -5,6 +5,7 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.mock.ChatModelMock;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.LogCapture;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -42,5 +43,19 @@ class AiServiceWithChatMemoryTest {
                                     AiMessage.from("Your name is Klaus."),
                                     UserMessage.from("What is my name?"));
                 });
+    }
+
+    @Test
+    void should_log_configured_bean_references() {
+        try (LogCapture logs = LogCapture.debug(AiServicesAutoConfig.class)) {
+            contextRunner
+                    .withUserConfiguration(AiServiceWithChatMemoryApplication.class)
+                    .run(context -> assertThat(logs.messages())
+                            .contains("Registered @AiService bean 'aiServiceWithChatMemory' for "
+                                    + AiServiceWithChatMemory.class.getName() + " using AUTOMATIC wiring mode")
+                            .contains("chatModel=chatModel,")
+                            .contains("chatMemory=chatMemory,")
+                            .doesNotContain("streamingChatModel"));
+        }
     }
 }
