@@ -18,6 +18,6 @@ class SpringRestClientJdkTimeoutIT extends AbstractSpringRestClientTimeoutIT {
 
     @Override
     protected String[] readAsyncMessageKeywords() {
-        return new String[] {"cancelled"}; // the JDK HTTP client cancels the request rather than reporting a timeout in the message
+        return new String[] {"I/O error"}; // the JDK HTTP client cancels the request, and the cancellation message is sometimes null
     }
 }
