@@ -18,6 +18,7 @@ import dev.langchain4j.service.tool.ToolProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -245,6 +246,12 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
                 registry.removeBeanDefinition(aiService);
                 registry.registerBeanDefinition(lowercaseFirstLetter(aiService), aiServiceBeanDefinition);
 
+                if (log.isDebugEnabled()) {
+                    log.debug("Registered @AiService bean '{}' for {} using {} wiring mode, configured bean references: {}",
+                            lowercaseFirstLetter(aiService), aiServiceClass.getName(), aiServiceAnnotation.wiringMode(),
+                            configuredBeanReferences(propertyValues));
+                }
+
                 if (eventPublisher != null) {
                     eventPublisher.publishEvent(new AiServiceRegisteredEvent(this, aiServiceClass, toolSpecifications));
                 }
@@ -275,6 +282,20 @@ public class AiServicesAutoConfiguration implements ApplicationEventPublisherAwa
         } else {
             throw illegalArgument("Unknown wiring mode: " + aiServiceAnnotation.wiringMode());
         }
+    }
+
+    private static Map<String, Object> configuredBeanReferences(MutablePropertyValues propertyValues) {
+        Map<String, Object> references = new LinkedHashMap<>();
+        for (PropertyValue propertyValue : propertyValues.getPropertyValueList()) {
+            if (propertyValue.getValue() instanceof RuntimeBeanReference reference) {
+                references.put(propertyValue.getName(), reference.getBeanName());
+            } else if (propertyValue.getValue() instanceof List<?> list) {
+                references.put(propertyValue.getName(), list.stream()
+                        .map(element -> ((RuntimeBeanReference) element).getBeanName())
+                        .toList());
+            }
+        }
+        return references;
     }
 
     private static String resolve(ConfigurableListableBeanFactory beanFactory,

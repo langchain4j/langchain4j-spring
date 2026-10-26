@@ -4,7 +4,12 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.mock.ChatModelMock;
 import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.LogCapture;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.ApplicationContext;
@@ -164,11 +169,64 @@ class AiServiceWithPlaceholderTest {
                 });
     }
 
+    @Test
+    void should_log_configured_bean_references_resolved_from_placeholders() {
+        try (LogCapture logs = LogCapture.debug(AiServicesAutoConfig.class)) {
+            contextRunner
+                    .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                    .withPropertyValues(
+                            "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                            // not in alphabetical order: explicitly configured tools are logged in the configured order
+                            "my.tool.name=" + AiServiceWithPlaceholderApplication.SECOND_TOOL_BEAN_NAME + ", "
+                                    + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                    )
+                    .run(context -> assertThat(logs.messages()).contains(
+                            "Registered @AiService bean 'aiServiceWithPlaceholderTools' for "
+                                    + AiServiceWithPlaceholderTools.class.getName()
+                                    + " using EXPLICIT wiring mode, configured bean references: "
+                                    + "{chatModel=configuredChatModel, tools=[secondTool, configuredTool]}"));
+        }
+    }
+
+    @Test
+    void should_not_initialize_configured_beans_when_logging_them() {
+        try (LogCapture ignored = LogCapture.debug(AiServicesAutoConfig.class)) {
+            contextRunner
+                    .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                    .withBean(SingletonsBeforeBeanPostProcessors.class)
+                    .withPropertyValues(
+                            "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                            "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                    )
+                    .run(context -> {
+                        assertThat(context).hasNotFailed();
+                        assertThat(context.getBean(SingletonsBeforeBeanPostProcessors.class).singletonNames)
+                                .doesNotContain(
+                                        AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                                        AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME);
+                    });
+        }
+    }
+
     private static List<String> toolNamesSentToModel(ApplicationContext context) {
         ChatModelMock chatModel = context.getBean(
                 AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME, ChatModelMock.class);
         return chatModel.requests().get(0).toolSpecifications().stream()
                 .map(ToolSpecification::name)
                 .toList();
+    }
+
+    /**
+     * Bean post processors are created after all bean factory post processors, including the one
+     * registering AI services, so this records the singletons that were created before that point.
+     */
+    static class SingletonsBeforeBeanPostProcessors implements BeanPostProcessor, BeanFactoryAware {
+
+        List<String> singletonNames;
+
+        @Override
+        public void setBeanFactory(BeanFactory beanFactory) {
+            singletonNames = List.of(((ConfigurableListableBeanFactory) beanFactory).getSingletonNames());
+        }
     }
 }
