@@ -23,6 +23,9 @@ public class OllamaProperties {
     @NestedConfigurationProperty
     OllamaEmbeddingModelProperties embeddingModel;
 
+    @NestedConfigurationProperty
+    OllamaDecisionModelProperties decisionModel;
+
     public OllamaChatModelProperties getChatModel() {
         return chatModel;
     }
@@ -61,5 +64,13 @@ public class OllamaProperties {
 
     public void setEmbeddingModel(OllamaEmbeddingModelProperties embeddingModel) {
         this.embeddingModel = embeddingModel;
+    }
+
+    public OllamaDecisionModelProperties getDecisionModel() {
+        return decisionModel;
+    }
+
+    public void setDecisionModel(OllamaDecisionModelProperties decisionModel) {
+        this.decisionModel = decisionModel;
     }
 }
