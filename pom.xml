@@ -69,7 +69,7 @@
         <spring.boot4.version>4.1.1</spring.boot4.version>
         <tinylog.version>2.8.1</tinylog.version>
         <wiremock.version>3.13.2</wiremock.version>
-        <blockhound.version>1.0.17.RELEASE</blockhound.version>
+        <blockhound.version>1.0.18.RELEASE</blockhound.version>
     </properties>
 
     <dependencyManagement>
