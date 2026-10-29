@@ -21,6 +21,7 @@
         <module>integration-tests</module>
         <module>langchain4j-http-client-spring-restclient</module>
         <module>langchain4j-http-client-spring-boot4-restclient</module>
+        <module>langchain4j-chroma-spring-boot-starter</module>
 
         <module>langchain4j-anthropic-spring-boot-starter</module>
         <module>langchain4j-anthropic-spring-boot4-starter</module>
