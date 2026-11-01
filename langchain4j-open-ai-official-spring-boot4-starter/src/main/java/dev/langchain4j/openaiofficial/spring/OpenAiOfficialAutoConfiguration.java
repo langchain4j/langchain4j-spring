@@ -134,6 +134,7 @@ public class OpenAiOfficialAutoConfiguration {
                 .timeout(decisionModelProperties.timeout())
                 .maxRetries(decisionModelProperties.maxRetries())
                 .customHeaders(decisionModelProperties.customHeaders())
+                .customParameters(decisionModelProperties.customParameters())
                 .listeners(listeners.orderedStream().toList())
                 .build();
     }

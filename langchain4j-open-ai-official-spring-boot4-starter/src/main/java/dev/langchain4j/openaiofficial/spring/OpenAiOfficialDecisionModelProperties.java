@@ -10,6 +10,7 @@ record OpenAiOfficialDecisionModelProperties(
         String modelName,
         Duration timeout,
         Integer maxRetries,
-        Map<String, String> customHeaders
+        Map<String, String> customHeaders,
+        Map<String, Object> customParameters
 ) {
 }

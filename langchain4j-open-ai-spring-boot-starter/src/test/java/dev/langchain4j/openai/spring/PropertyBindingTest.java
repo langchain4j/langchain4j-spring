@@ -551,7 +551,8 @@ class PropertyBindingTest {
                         "langchain4j.open-ai.decision-model.log-requests=true",
                         "langchain4j.open-ai.decision-model.log-responses=true",
                         "langchain4j.open-ai.decision-model.custom-headers.X-Custom=custom-value",
-                        "langchain4j.open-ai.decision-model.custom-query-params.custom-param=param-value"
+                        "langchain4j.open-ai.decision-model.custom-query-params.custom-param=param-value",
+                        "langchain4j.open-ai.decision-model.custom-parameters.custom-key=custom-value"
                 )
                 .run(context -> {
                     context.getBean(DecisionModel.class).decide(DecisionRequest.builder()
@@ -565,7 +566,8 @@ class PropertyBindingTest {
                             .withHeader("OpenAI-Organization", equalTo("org-1"))
                             .withHeader("OpenAI-Project", equalTo("proj-1"))
                             .withHeader("X-Custom", equalTo("custom-value"))
-                            .withRequestBody(matchingJsonPath("$.model", equalTo("gpt-6-luna"))));
+                            .withRequestBody(matchingJsonPath("$.model", equalTo("gpt-6-luna")))
+                            .withRequestBody(matchingJsonPath("$.custom-key", equalTo("custom-value"))));
                 });
     }
 
