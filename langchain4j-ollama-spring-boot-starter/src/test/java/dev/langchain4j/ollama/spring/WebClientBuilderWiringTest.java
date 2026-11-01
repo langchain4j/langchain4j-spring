@@ -32,7 +32,9 @@ class WebClientBuilderWiringTest {
                         "langchain4j.ollama.streaming-chat-model.base-url=http://localhost:1",
                         "langchain4j.ollama.streaming-chat-model.model-name=test-model",
                         "langchain4j.ollama.streaming-language-model.base-url=http://localhost:1",
-                        "langchain4j.ollama.streaming-language-model.model-name=test-model"
+                        "langchain4j.ollama.streaming-language-model.model-name=test-model",
+                        "langchain4j.ollama.decision-model.base-url=http://localhost:1",
+                        "langchain4j.ollama.decision-model.model-name=test-model"
             );
 
     @Test
@@ -45,7 +47,7 @@ class WebClientBuilderWiringTest {
 
                     Map<String, HttpClientBuilder> httpClientBuilders = context.getBeansOfType(HttpClientBuilder.class);
 
-                    assertThat(httpClientBuilders).hasSize(5);
+                    assertThat(httpClientBuilders).hasSize(6);
                     assertThat(httpClientBuilders.values()).allSatisfy(httpClientBuilder ->
                             assertThat(((SpringRestClientBuilder) httpClientBuilder).webClientBuilder().webClientBuilder())
                                     .isSameAs(applicationWebClientBuilder));
@@ -59,7 +61,7 @@ class WebClientBuilderWiringTest {
         contextRunner
                 .withBean(ClientHttpConnectorBuilder.class, () -> applicationConnectorBuilder)
                 .run(context -> assertThat(context.getBeansOfType(HttpClientBuilder.class).values())
-                        .hasSize(5)
+                        .hasSize(6)
                         .allSatisfy(httpClientBuilder ->
                                 assertThat(((SpringRestClientBuilder) httpClientBuilder).clientHttpConnectorBuilder())
                                         .isSameAs(applicationConnectorBuilder)));
@@ -75,7 +77,7 @@ class WebClientBuilderWiringTest {
                         "spring.http.client.redirects=dont-follow",
                         "spring.http.reactiveclient.redirects=dont-follow")
                 .run(context -> assertThat(context.getBeansOfType(HttpClientBuilder.class).values())
-                        .hasSize(5)
+                        .hasSize(6)
                         .allSatisfy(httpClientBuilder -> {
                             SpringRestClientBuilder springRestClientBuilder = (SpringRestClientBuilder) httpClientBuilder;
                             assertThat(springRestClientBuilder.clientHttpRequestFactoryBuilder())
@@ -99,7 +101,7 @@ class WebClientBuilderWiringTest {
                 .run(context -> {
 
                     assertThat(context).hasNotFailed();
-                    assertThat(context.getBeansOfType(HttpClientBuilder.class)).hasSize(5);
+                    assertThat(context.getBeansOfType(HttpClientBuilder.class)).hasSize(6);
                     // the application's builders are ambiguous, so neither of them is used
                     assertThat(context.getBeansOfType(HttpClientBuilder.class).values()).allSatisfy(httpClientBuilder ->
                             assertThat(((SpringRestClientBuilder) httpClientBuilder).webClientBuilder().webClientBuilder())
