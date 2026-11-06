@@ -10,8 +10,8 @@ If you have any issues or feature requests, please submit them [here](https://gi
 
 The `langchain4j-mcp-spring-boot-starter` and
 `langchain4j-mcp-spring-boot4-starter` artifacts configure named MCP clients from
-`langchain4j.mcp.clients`. Each client uses either the `HTTP` (Streamable HTTP)
-or `STDIO` transport and is registered as `mcpClient.<name>`. When at least one
+`langchain4j.mcp.clients`. Each client uses either the `STREAMABLE_HTTP` or the
+`STDIO` transport and is registered as `mcpClient.<name>`. When at least one
 client is configured, an `McpToolProvider` is also registered unless the
 application supplies its own `ToolProvider`. Clients can be injected by name,
 for example with `@Qualifier("mcpClient.filesystem") McpClient client`.
@@ -26,9 +26,9 @@ langchain4j:
         transport: STDIO
         command: [npx, "-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
       internal-tools:
-        transport: HTTP
+        transport: STREAMABLE_HTTP
         url: https://mcp.example.com/mcp
-        headers:
+        custom-headers:
           X-Environment: internal
 ```
 

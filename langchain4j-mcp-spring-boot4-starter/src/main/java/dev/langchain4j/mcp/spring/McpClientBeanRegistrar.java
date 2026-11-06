@@ -1,15 +1,15 @@
 package dev.langchain4j.mcp.spring;
 
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import dev.langchain4j.mcp.client.DefaultMcpClient;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
 
 import java.util.Map;
 
-import static org.springframework.boot.context.properties.bind.Bindable.mapOf;
-import static org.springframework.boot.context.properties.bind.Binder.get;
+import static dev.langchain4j.mcp.spring.McpProperties.PREFIX;
 
 final class McpClientBeanRegistrar implements BeanDefinitionRegistryPostProcessor {
 
@@ -21,30 +21,19 @@ final class McpClientBeanRegistrar implements BeanDefinitionRegistryPostProcesso
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
-        McpProperties properties = get(environment)
-                .bind("langchain4j.mcp", McpProperties.class)
-                .orElseGet(McpProperties::new);
-        if (!properties.isEnabled()) {
-            return;
-        }
-
-        Map<String, McpProperties.Client> clients = get(environment)
-                .bind("langchain4j.mcp.clients", mapOf(String.class, McpProperties.Client.class))
-                .orElseGet(Map::of);
-
-        clients.forEach((name, clientProperties) -> {
+        configuredClients(environment).forEach((name, clientProperties) -> {
             String beanName = "mcpClient." + name;
             if (!registry.containsBeanDefinition(beanName)) {
-                RootBeanDefinition beanDefinition = new RootBeanDefinition(
-                        dev.langchain4j.mcp.client.DefaultMcpClient.class);
-                beanDefinition.setInstanceSupplier(() -> McpClientFactory.create(name, clientProperties));
-                beanDefinition.setDestroyMethodName("close");
-                registry.registerBeanDefinition(beanName, beanDefinition);
+                registry.registerBeanDefinition(beanName, new RootBeanDefinition(
+                        DefaultMcpClient.class, () -> McpClientFactory.create(name, clientProperties)));
             }
         });
     }
 
-    @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+    static Map<String, McpProperties.Client> configuredClients(Environment environment) {
+        McpProperties properties = Binder.get(environment)
+                .bind(PREFIX, McpProperties.class)
+                .orElseGet(McpProperties::new);
+        return properties.isEnabled() ? properties.getClients() : Map.of();
     }
 }

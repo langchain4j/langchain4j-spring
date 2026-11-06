@@ -7,8 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@ConfigurationProperties("langchain4j.mcp")
+@ConfigurationProperties(McpProperties.PREFIX)
 public class McpProperties {
+
+    static final String PREFIX = "langchain4j.mcp";
 
     private boolean enabled = true;
     private Map<String, Client> clients = new LinkedHashMap<>();
@@ -35,7 +37,7 @@ public class McpProperties {
         private String url;
         private List<String> command = new ArrayList<>();
         private Map<String, String> environment = new LinkedHashMap<>();
-        private Map<String, String> headers = new LinkedHashMap<>();
+        private Map<String, String> customHeaders = new LinkedHashMap<>();
 
         public Transport getTransport() {
             return transport;
@@ -69,17 +71,17 @@ public class McpProperties {
             this.environment = environment;
         }
 
-        public Map<String, String> getHeaders() {
-            return headers;
+        public Map<String, String> getCustomHeaders() {
+            return customHeaders;
         }
 
-        public void setHeaders(Map<String, String> headers) {
-            this.headers = headers;
+        public void setCustomHeaders(Map<String, String> customHeaders) {
+            this.customHeaders = customHeaders;
         }
     }
 
     public enum Transport {
-        HTTP,
+        STREAMABLE_HTTP,
         STDIO
     }
 }
