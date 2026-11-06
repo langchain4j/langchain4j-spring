@@ -16,6 +16,8 @@
     <modules>
         <module>langchain4j-spring-boot-starter</module>
         <module>langchain4j-spring-boot4-starter</module>
+        <module>langchain4j-mcp-spring-boot-starter</module>
+        <module>langchain4j-mcp-spring-boot4-starter</module>
         <module>langchain4j-spring-boot-tests</module>
         <module>langchain4j-spring-boot4-tests</module>
         <module>integration-tests</module>
