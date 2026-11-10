@@ -67,7 +67,7 @@ public class SpringRestClient implements HttpClient {
             settings = settings.withConnectTimeout(builder.connectTimeout());
         }
         if (builder.readTimeout() != null) {
-            settings = settings.withReadTimeout(builder.readTimeout());
+            settings = settings.withReadTimeout(builder.readTimeout().isZero() ? null : builder.readTimeout());
         }
         ClientHttpRequestFactory clientHttpRequestFactory = createRequestFactory(
                 builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect, settings);
