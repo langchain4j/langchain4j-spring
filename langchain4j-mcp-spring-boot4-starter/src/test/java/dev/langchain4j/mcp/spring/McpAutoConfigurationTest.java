@@ -4,6 +4,8 @@ import com.sun.net.httpserver.HttpServer;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.http.client.HttpClientBuilderLoader;
+import dev.langchain4j.http.client.jdk.JdkHttpClientBuilder;
 import dev.langchain4j.mcp.McpToolProvider;
 import dev.langchain4j.mcp.client.McpClient;
 import dev.langchain4j.mcp.client.McpClientListener;
@@ -48,6 +50,11 @@ class McpAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(McpAutoConfiguration.class));
+
+    @Test
+    void should_prefer_jdk_http_client_when_other_modules_discover_one() {
+        assertThat(HttpClientBuilderLoader.loadHttpClientBuilder()).isInstanceOf(JdkHttpClientBuilder.class);
+    }
 
     @Test
     void should_not_create_clients_or_tool_provider_when_no_clients_are_configured() {

@@ -4,6 +4,7 @@ import dev.langchain4j.mcp.client.McpClient;
 import dev.langchain4j.mcp.client.McpClientListener;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -19,7 +20,7 @@ import static dev.langchain4j.mcp.spring.McpProperties.PREFIX;
 final class McpClientBeanRegistrar implements BeanDefinitionRegistryPostProcessor, BeanFactoryAware {
 
     private final Environment environment;
-    private BeanFactory beanFactory;
+    private ListableBeanFactory beanFactory;
 
     McpClientBeanRegistrar(Environment environment) {
         this.environment = environment;
@@ -27,7 +28,7 @@ final class McpClientBeanRegistrar implements BeanDefinitionRegistryPostProcesso
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
+        this.beanFactory = (ListableBeanFactory) beanFactory;
     }
 
     @Override
@@ -38,7 +39,7 @@ final class McpClientBeanRegistrar implements BeanDefinitionRegistryPostProcesso
             String beanName = "mcpClient." + name;
             if (!registry.containsBeanDefinition(beanName)) {
                 registry.registerBeanDefinition(beanName, new RootBeanDefinition(
-                        McpClient.class, () -> McpClientFactory.create(name, clientProperties, listeners)));
+                        McpClient.class, () -> McpClientFactory.create(name, clientProperties, listeners, beanFactory)));
             }
         });
     }

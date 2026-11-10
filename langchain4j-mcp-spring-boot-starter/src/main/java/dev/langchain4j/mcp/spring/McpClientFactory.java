@@ -1,13 +1,21 @@
 package dev.langchain4j.mcp.spring;
 
+import dev.langchain4j.http.client.jdk.JdkHttpClient;
+import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilder;
+import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilders;
 import dev.langchain4j.mcp.client.DefaultMcpClient;
 import dev.langchain4j.mcp.client.McpClient;
 import dev.langchain4j.mcp.client.McpClientListener;
 import dev.langchain4j.mcp.client.transport.McpTransport;
 import dev.langchain4j.mcp.client.transport.http.StreamableHttpMcpTransport;
 import dev.langchain4j.mcp.client.transport.stdio.StdioMcpTransport;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.boot.http.client.HttpRedirects;
+import org.springframework.boot.http.client.reactive.ClientHttpConnectorSettings;
+import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -16,12 +24,18 @@ import static dev.langchain4j.mcp.spring.McpProperties.PREFIX;
 
 final class McpClientFactory {
 
+    private static final boolean WEBFLUX_PRESENT = ClassUtils.isPresent(
+            "org.springframework.web.reactive.function.client.WebClient", McpClientFactory.class.getClassLoader());
+
     private McpClientFactory() {
     }
 
-    static McpClient create(String name, McpProperties.Client properties, Supplier<List<McpClientListener>> listeners) {
+    static McpClient create(String name,
+                            McpProperties.Client properties,
+                            Supplier<List<McpClientListener>> listeners,
+                            ListableBeanFactory beanFactory) {
         validate(name, properties);
-        return new LazyMcpClient(name, () -> connect(name, properties, listeners.get()));
+        return new LazyMcpClient(name, () -> connect(name, properties, listeners.get(), beanFactory));
     }
 
     private static void validate(String name, McpProperties.Client properties) {
@@ -60,8 +74,11 @@ final class McpClientFactory {
         }
     }
 
-    private static McpClient connect(String name, McpProperties.Client properties, List<McpClientListener> listeners) {
-        McpTransport transport = createTransport(properties);
+    private static McpClient connect(String name,
+                                     McpProperties.Client properties,
+                                     List<McpClientListener> listeners,
+                                     ListableBeanFactory beanFactory) {
+        McpTransport transport = createTransport(properties, beanFactory);
         try {
             return DefaultMcpClient.builder()
                     .key(name)
@@ -81,9 +98,9 @@ final class McpClientFactory {
         }
     }
 
-    private static McpTransport createTransport(McpProperties.Client properties) {
+    private static McpTransport createTransport(McpProperties.Client properties, ListableBeanFactory beanFactory) {
         return switch (properties.getTransport()) {
-            case STREAMABLE_HTTP -> StreamableHttpMcpTransport.builder()
+            case STREAMABLE_HTTP -> withHttpClient(StreamableHttpMcpTransport.builder(), beanFactory)
                     .url(properties.getUrl())
                     .customHeaders(properties.getCustomHeaders())
                     .logRequests(getOrDefault(properties.getLogRequests(), false))
@@ -95,5 +112,21 @@ final class McpClientFactory {
                     .logEvents(getOrDefault(properties.getLogEvents(), false))
                     .build();
         };
+    }
+
+    private static StreamableHttpMcpTransport.Builder withHttpClient(StreamableHttpMcpTransport.Builder transport,
+                                                                     ListableBeanFactory beanFactory) {
+        if (!WEBFLUX_PRESENT) {
+            // the Spring client can stream responses, which MCP needs, only with spring-webflux
+            return transport
+                    .httpClientBuilder(JdkHttpClient.builder().streamingBackpressure(true))
+                    .timeout(Duration.ofSeconds(60));
+        }
+        // no read timeout: MCP responses and notification streams can stay idle for longer than a timeout set for the whole application
+        SpringRestClientBuilder httpClient = SpringRestClientBuilders.fromSpringBoot(beanFactory).readTimeout(Duration.ZERO);
+        // no redirects, as with the JDK client: a redirect could send the custom headers and the request to another host
+        ClientHttpConnectorSettings settings = getOrDefault(httpClient.clientHttpConnectorSettings(), ClientHttpConnectorSettings::defaults);
+        httpClient.clientHttpConnectorSettings(settings.withRedirects(HttpRedirects.DONT_FOLLOW));
+        return transport.httpClientBuilder(httpClient);
     }
 }
