@@ -184,6 +184,20 @@ class SpringRestClientSettingsIT {
     }
 
     @ParameterizedTest(name = "{0}")
+    @MethodSource("connectors")
+    void should_not_time_out_on_read_non_blocking_when_read_timeout_is_zero(
+            String name, ClientHttpConnectorBuilder<?> connector) throws Exception {
+
+        SpringRestClientBuilder builder = SpringRestClient.builder()
+                .clientHttpConnectorBuilder(connector)
+                .readTimeout(Duration.ZERO);
+
+        SuccessfulHttpResponse response = builder.build().executeAsync(request("/slow")).get(10, SECONDS);
+
+        assertThat(response.body()).isEqualTo("slow");
+    }
+
+    @ParameterizedTest(name = "{0}")
     @MethodSource("requestFactories")
     void should_apply_settings_on_blocking_streaming_calls(String name, ClientHttpRequestFactoryBuilder<?> requestFactory)
             throws Exception {
