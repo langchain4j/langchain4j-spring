@@ -4,7 +4,7 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ class AiServiceWithPlaceholderToolErrorHandlersTest {
     void should_resolve_tool_execution_error_handler_from_placeholder() {
 
         // given the tool throws, and there are two ToolExecutionErrorHandler beans
-        ChatModelMock chatModel = chatModelRequesting("{\"arg0\": \"42\"}");
+        MockChatModel chatModel = chatModelRequesting("{\"arg0\": \"42\"}");
 
         contextRunner(chatModel).run(context -> {
 
@@ -44,7 +44,7 @@ class AiServiceWithPlaceholderToolErrorHandlersTest {
 
         // given the LLM generated arguments that cannot be parsed,
         // and there are two ToolArgumentsErrorHandler beans
-        ChatModelMock chatModel = chatModelRequesting("{\"arg0\": ");
+        MockChatModel chatModel = chatModelRequesting("{\"arg0\": ");
 
         contextRunner(chatModel).run(context -> {
 
@@ -77,7 +77,7 @@ class AiServiceWithPlaceholderToolErrorHandlersTest {
                 });
     }
 
-    private static List<String> toolResults(ChatModelMock chatModel) {
+    private static List<String> toolResults(MockChatModel chatModel) {
         assertThat(chatModel.requests().get(1).messages().toString()).doesNotContain(NOT_WIRED);
         return chatModel.requests().get(1).messages().stream()
                 .filter(ToolExecutionResultMessage.class::isInstance)
@@ -86,8 +86,8 @@ class AiServiceWithPlaceholderToolErrorHandlersTest {
                 .toList();
     }
 
-    private static ChatModelMock chatModelRequesting(String toolArguments) {
-        return ChatModelMock.thatAlwaysResponds(
+    private static MockChatModel chatModelRequesting(String toolArguments) {
+        return MockChatModel.thatResponds(
                 AiMessage.from(ToolExecutionRequest.builder()
                         .id("1")
                         .name("orderStatus")

@@ -2,22 +2,17 @@ package dev.langchain4j.reactor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.response.ChatModelStreamingEvent;
-import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.chat.response.CompleteResponse;
-import dev.langchain4j.model.chat.response.PartialResponse;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
-import java.util.ArrayList;
-import java.util.concurrent.Flow;
-import org.reactivestreams.FlowAdapters;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatModelStreamingEvent;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.test.mock.MockChatModel;
+import dev.langchain4j.test.mock.MockStreamingChatModel;
 import dev.langchain4j.service.AiServiceStreamingEvent;
 import dev.langchain4j.service.AiServices;
 import java.util.List;
+import java.util.concurrent.Flow;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,7 +33,7 @@ class AiServiceWithReactorNonBlockingTest {
 
     @Test
     void should_return_a_Mono_from_the_non_blocking_path() {
-        ChatModel model = ChatModelMock.thatAlwaysResponds("Hello");
+        ChatModel model = MockChatModel.thatResponds("Hello");
 
         Assistant assistant =
                 AiServices.builder(Assistant.class).chatModel(model).build();
@@ -48,10 +43,11 @@ class AiServiceWithReactorNonBlockingTest {
 
     @Test
     void should_stream_events_as_a_Flux() {
-        StreamingChatModel model = reactiveModel("H", "e", "l", "l", "o");
+        MockStreamingChatModel model = MockStreamingChatModel.thatStreamsTokens("H", "e", "l", "l", "o");
 
-        Assistant assistant =
-                AiServices.builder(Assistant.class).streamingChatModel(model).build();
+        Assistant assistant = AiServices.builder(Assistant.class)
+                .streamingChatModel(publisherOnly(model))
+                .build();
 
         List<AiServiceStreamingEvent> events =
                 assistant.events("Hi").collectList().block();
@@ -65,6 +61,7 @@ class AiServiceWithReactorNonBlockingTest {
                         .text())
                 .reduce("", String::concat);
         assertThat(text).isEqualTo("Hello");
+        assertThat(model.requests()).hasSize(1);
     }
 
     @Test
@@ -80,31 +77,21 @@ class AiServiceWithReactorNonBlockingTest {
                 .isTrue();
     }
 
-
     /**
-     * A minimal {@link StreamingChatModel} that implements the reactive SPI, emitting one
-     * {@code PartialResponse} per token and then the terminal {@code CompleteResponse}. The shared
-     * {@code StreamingChatModelMock} only implements the handler-based API, so a non-blocking AI Service
-     * correctly refuses it with {@code AsyncNotSupportedException}.
+     * The given model with only the reactive publisher path: the handler path fails, so the test proves that a
+     * {@code Flux<AiServiceStreamingEvent>} uses the publisher path. Which path is used is what this test checks, so
+     * the wrapper is written here.
      */
-    private static StreamingChatModel reactiveModel(String... tokens) {
+    private static StreamingChatModel publisherOnly(StreamingChatModel model) {
         return new StreamingChatModel() {
-
             @Override
             public void doChat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("only the publisher path may be used");
             }
 
             @Override
             public Flow.Publisher<ChatModelStreamingEvent> doChat(ChatRequest chatRequest) {
-                List<ChatModelStreamingEvent> events = new ArrayList<>();
-                for (String token : tokens) {
-                    events.add(new PartialResponse(token));
-                }
-                events.add(new CompleteResponse(ChatResponse.builder()
-                        .aiMessage(AiMessage.from(String.join("", tokens)))
-                        .build()));
-                return FlowAdapters.toFlowPublisher(Flux.fromIterable(events));
+                return model.doChat(chatRequest);
             }
         };
     }

@@ -1,7 +1,7 @@
 package dev.langchain4j.service.spring.mode.explicit.placeholder;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.IllegalConfigurationException;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import dev.langchain4j.service.spring.LogCapture;
@@ -209,8 +209,8 @@ class AiServiceWithPlaceholderTest {
     }
 
     private static List<String> toolNamesSentToModel(ApplicationContext context) {
-        ChatModelMock chatModel = context.getBean(
-                AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME, ChatModelMock.class);
+        MockChatModel chatModel = context.getBean(
+                AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME, MockChatModel.class);
         return chatModel.requests().get(0).toolSpecifications().stream()
                 .map(ToolSpecification::name)
                 .toList();

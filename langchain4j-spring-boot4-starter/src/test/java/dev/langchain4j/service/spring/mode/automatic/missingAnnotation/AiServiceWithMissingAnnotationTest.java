@@ -1,7 +1,7 @@
 package dev.langchain4j.service.spring.mode.automatic.missingAnnotation;
 
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AiServiceWithMissingAnnotationTest {
 
-    ChatModelMock chatModel = ChatModelMock.thatAlwaysResponds("Berlin");
+    MockChatModel chatModel = MockChatModel.thatResponds("Berlin");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class))

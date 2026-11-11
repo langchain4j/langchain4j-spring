@@ -2,7 +2,7 @@ package dev.langchain4j.service.spring.mode.automatic.conflictingSyncAndStreamin
 
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.TestStreamingChatResponseHandler;
-import dev.langchain4j.model.chat.mock.StreamingChatModelMock;
+import dev.langchain4j.test.mock.MockStreamingChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AiServiceWithConflictingSyncAndStreamingModelsTest {
 
-    StreamingChatModelMock chatModel = StreamingChatModelMock.thatAlwaysStreams("Ber", "lin");
+    MockStreamingChatModel chatModel = MockStreamingChatModel.thatStreamsTokens("Ber", "lin");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class))
