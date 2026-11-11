@@ -14,6 +14,7 @@ import org.springframework.boot.http.client.reactive.ClientHttpConnectorBuilder;
 import org.springframework.boot.http.client.reactive.ClientHttpConnectorSettings;
 import org.springframework.boot.http.client.reactive.HttpComponentsClientHttpConnectorBuilder;
 import org.springframework.boot.http.client.reactive.JdkClientHttpConnectorBuilder;
+import org.springframework.boot.http.client.reactive.ReactorClientHttpConnectorBuilder;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -33,6 +34,7 @@ import reactor.core.publisher.Mono;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -103,14 +105,26 @@ class WebClientDelegate {
         if (connectorBuilder instanceof HttpComponentsClientHttpConnectorBuilder httpComponentsBuilder) {
             connectorBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpAsyncClientBuilder::disableAutomaticRetries);
         }
-        ClientHttpConnector connector = connectorBuilder.build(settings);
+        ClientHttpConnectorSettings connectorSettings = withoutZeroReadTimeout(connectorBuilder, settings);
+        ClientHttpConnector connector = connectorBuilder.build(connectorSettings);
         if (connectorBuilder instanceof JdkClientHttpConnectorBuilder jdkBuilder) {
             Supplier<ClientHttpConnector> http11Connector = SingletonSupplier.of(() -> jdkBuilder
                     .withHttpClientCustomizer(httpClientBuilder -> httpClientBuilder.version(java.net.http.HttpClient.Version.HTTP_1_1))
-                    .build(settings));
+                    .build(connectorSettings));
             connector = http11ForPlainHttp(connector, http11Connector);
         }
         return connector;
+    }
+
+    private static ClientHttpConnectorSettings withoutZeroReadTimeout(
+            ClientHttpConnectorBuilder<?> connectorBuilder, ClientHttpConnectorSettings settings) {
+        boolean noReadTimeoutByDefault = connectorBuilder instanceof ReactorClientHttpConnectorBuilder
+                || connectorBuilder instanceof JdkClientHttpConnectorBuilder;
+        if (noReadTimeoutByDefault && Duration.ZERO.equals(settings.readTimeout())) {
+            // zero means no read timeout, as when none is set; some Spring versions reject zero or time out at once
+            return settings.withReadTimeout(null);
+        }
+        return settings;
     }
 
     static ClientHttpConnector http11ForPlainHttp(ClientHttpConnector connector,

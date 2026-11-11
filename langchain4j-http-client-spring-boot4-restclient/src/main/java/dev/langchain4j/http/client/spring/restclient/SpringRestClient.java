@@ -13,6 +13,7 @@ import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.JdkClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.ReactorClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.HttpClientSettings;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -30,6 +31,7 @@ import org.springframework.web.client.RestClientResponseException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.net.http.HttpTimeoutException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -94,14 +96,26 @@ public class SpringRestClient implements HttpClient {
         if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
             requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
         }
-        ClientHttpRequestFactory requestFactory = requestFactoryBuilder.build(settings);
+        HttpClientSettings factorySettings = withoutZeroReadTimeout(requestFactoryBuilder, settings);
+        ClientHttpRequestFactory requestFactory = requestFactoryBuilder.build(factorySettings);
         if (requestFactoryBuilder instanceof JdkClientHttpRequestFactoryBuilder jdkBuilder) {
             Supplier<ClientHttpRequestFactory> http11RequestFactory = SingletonSupplier.of(() -> jdkBuilder
                     .withHttpClientCustomizer(httpClientBuilder -> httpClientBuilder.version(java.net.http.HttpClient.Version.HTTP_1_1))
-                    .build(settings));
+                    .build(factorySettings));
             requestFactory = http11ForPlainHttp(requestFactory, http11RequestFactory);
         }
         return requestFactory;
+    }
+
+    private static HttpClientSettings withoutZeroReadTimeout(
+            ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder, HttpClientSettings settings) {
+        boolean noReadTimeoutByDefault = requestFactoryBuilder instanceof ReactorClientHttpRequestFactoryBuilder
+                || requestFactoryBuilder instanceof JdkClientHttpRequestFactoryBuilder;
+        if (noReadTimeoutByDefault && Duration.ZERO.equals(settings.readTimeout())) {
+            // zero means no read timeout, as when none is set; some Spring versions reject zero or time out at once
+            return settings.withReadTimeout(null);
+        }
+        return settings;
     }
 
     static ClientHttpRequestFactory http11ForPlainHttp(ClientHttpRequestFactory requestFactory,
