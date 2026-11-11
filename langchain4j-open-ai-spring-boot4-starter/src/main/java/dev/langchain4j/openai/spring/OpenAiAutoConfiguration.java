@@ -371,6 +371,7 @@ public class OpenAiAutoConfiguration {
                 .logResponses(decisionModelProperties.logResponses())
                 .customHeaders(decisionModelProperties.customHeaders())
                 .customQueryParams(decisionModelProperties.customQueryParams())
+                .customParameters(decisionModelProperties.customParameters())
                 .listeners(listeners.orderedStream().toList())
                 .build();
     }
