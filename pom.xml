@@ -210,40 +210,6 @@
             </plugin>
 
             <plugin>
-                <groupId>io.sundr</groupId>
-                <artifactId>sundr-maven-plugin</artifactId>
-                <version>0.400.1</version>
-                <executions>
-                    <execution>
-                        <inherited>false</inherited>
-                        <goals>
-                            <goal>generate-bom</goal>
-                        </goals>
-                        <configuration>
-                            <boms>
-                                <bom>
-                                    <artifactId>langchain4j-spring-bom</artifactId>
-                                    <name>LangChain4j Spring :: BOM</name>
-                                    <description>Bill of Materials POM for getting full, complete
-                                        set of compatible versions of LangChain4j Spring modules</description>
-                                    <properties>
-                                        <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
-                                        <sonar.skip>true</sonar.skip>
-                                    </properties>
-                                    <modules>
-                                        <excludes>
-                                            <exclude>*:langchain4j-spring-boot-tests</exclude>
-                                            <exclude>*:langchain4j-spring-boot4-tests</exclude>
-                                        </excludes>
-                                    </modules>
-                                </bom>
-                            </boms>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.9.0</version>
