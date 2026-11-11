@@ -131,9 +131,12 @@ jobs:
       - name: Update beta version property
         run: ./mvnw versions:set-property -Dproperty=langchain4j.beta.version -DnewVersion="$BETA_VERSION" -DgenerateBackupPoms=false
 
+      # Maven 3.10+ only sends the 'central' server credentials to repo.maven.apache.org (the origin of the
+      # built-in 'central' repository). credentialScope=id matches them by server id, as Maven 3.9 did, so
+      # deploys to central.sonatype.com keep their credentials.
       - name: Release
         if: ${{ fromJSON(steps.phase.outputs.num) <= 1 }}
-        run: ./mvnw -B -U --fail-at-end -DskipTests -DskipITs -Psign clean deploy
+        run: ./mvnw -B -U --fail-at-end -DskipTests -DskipITs -Dmaven.repository.credentialScope=id -Psign clean deploy
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}

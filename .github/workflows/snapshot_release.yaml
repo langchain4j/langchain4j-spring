@@ -74,9 +74,12 @@ jobs:
               ;;
           esac
 
+      # Maven 3.10+ only sends the 'central' server credentials to repo.maven.apache.org (the origin of the
+      # built-in 'central' repository). credentialScope=id matches them by server id, as Maven 3.9 did, so
+      # deploys to central.sonatype.com keep their credentials.
       - name: snapshot_release
         if: steps.snapshot-check.outputs.proceed == 'true' && steps.core-check.outputs.proceed == 'true'
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-        run: ./mvnw -B -U --fail-at-end -DskipTests -DskipITs clean deploy
+        run: ./mvnw -B -U --fail-at-end -DskipTests -DskipITs -Dmaven.repository.credentialScope=id clean deploy
