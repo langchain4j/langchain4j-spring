@@ -137,3 +137,14 @@ jobs:
               | head -50
             echo '```'
           } >> $GITHUB_STEP_SUMMARY
+
+  # There is no separate BOM for the modules of this repository: users get their versions from langchain4j-bom
+  # in the langchain4j repository, so every new module has to be added there as well.
+  # On pull requests a missing module is only a warning, since it cannot be added to langchain4j-bom in the same PR.
+  main_bom_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check that langchain4j-bom lists all modules
+        run: python3 .github/scripts/check-main-bom.py ${{ github.event_name == 'pull_request' && '--warn-only' || '' }}

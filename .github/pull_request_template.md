@@ -32,4 +32,5 @@ Closes #
 ## Checklist for adding new Spring Boot starter
 <!-- Please double-check the following points and mark them like this: [X] -->
 - [ ] I have added my new starter in the root `pom.xml`
+- [ ] I have added my new starter to [`langchain4j-bom/pom.xml`](https://github.com/langchain4j/langchain4j/blob/main/langchain4j-bom/pom.xml) in the langchain4j repository (CI shows a warning on this PR until it is there)
 - [ ] I have added a `org.springframework.boot.autoconfigure.AutoConfiguration.imports` file in the `langchain4j-{integration}-spring-boot-starter/src/main/resources/META-INF/spring/` directory
