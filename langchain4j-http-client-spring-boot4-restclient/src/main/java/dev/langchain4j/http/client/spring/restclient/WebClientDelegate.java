@@ -66,7 +66,7 @@ class WebClientDelegate {
             settings = settings.withConnectTimeout(builder.connectTimeout());
         }
         if (builder.readTimeout() != null) {
-            settings = settings.withReadTimeout(builder.readTimeout().isZero() ? null : builder.readTimeout());
+            settings = settings.withReadTimeout(builder.readTimeout());
         }
         this.settings = settings;
 
