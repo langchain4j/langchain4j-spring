@@ -59,8 +59,7 @@
     <properties>
         <langchain4j.stable.version>1.24.0-SNAPSHOT</langchain4j.stable.version>
         <langchain4j.beta.version>1.24.0-beta34-SNAPSHOT</langchain4j.beta.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <!-- JDK 23+ disables classpath annotation processor discovery unless explicitly enabled. -->
         <maven.compiler.proc>full</maven.compiler.proc>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
