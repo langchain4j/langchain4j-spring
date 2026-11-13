@@ -40,7 +40,7 @@ class MockModelProxyTest {
                 MockEmbeddingModel.thatEmbeds(1f, 2f, 3f),
                 MockScoringModel.thatScores(0.5),
                 MockDecisionModel.thatAnswersYesNoQuestions(question -> 0.9),
-                MockModerationModel.thatNeverFlags());
+                MockModerationModel.thatDoesNotFlag());
     }
 
     @ParameterizedTest
