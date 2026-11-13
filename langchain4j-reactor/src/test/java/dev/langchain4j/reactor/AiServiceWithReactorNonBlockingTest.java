@@ -43,7 +43,7 @@ class AiServiceWithReactorNonBlockingTest {
 
     @Test
     void should_stream_events_as_a_Flux() {
-        MockStreamingChatModel model = MockStreamingChatModel.thatStreamsTokens("H", "e", "l", "l", "o");
+        MockStreamingChatModel model = MockStreamingChatModel.thatStreams("H", "e", "l", "l", "o");
 
         Assistant assistant = AiServices.builder(Assistant.class)
                 .streamingChatModel(publisherOnly(model))

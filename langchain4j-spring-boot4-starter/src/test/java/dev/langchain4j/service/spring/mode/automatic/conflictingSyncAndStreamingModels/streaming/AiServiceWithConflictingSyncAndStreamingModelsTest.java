@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AiServiceWithConflictingSyncAndStreamingModelsTest {
 
-    MockStreamingChatModel chatModel = MockStreamingChatModel.thatStreamsTokens("Ber", "lin");
+    MockStreamingChatModel chatModel = MockStreamingChatModel.thatStreams("Ber", "lin");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class))

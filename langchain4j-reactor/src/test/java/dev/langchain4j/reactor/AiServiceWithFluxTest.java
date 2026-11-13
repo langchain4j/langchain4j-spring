@@ -22,7 +22,7 @@ public class AiServiceWithFluxTest {
         // given
         List<String> tokens = List.of("H", "e", "l", "l", "o");
 
-        StreamingChatModel model = MockStreamingChatModel.thatStreamsTokens(tokens.toArray(String[]::new));
+        StreamingChatModel model = MockStreamingChatModel.thatStreams(tokens);
 
         Assistant assistant = AiServices.builder(Assistant.class)
                 .streamingChatModel(model)
