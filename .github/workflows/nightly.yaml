@@ -41,14 +41,11 @@ jobs:
           mvn -U -B --fail-at-end clean install 2>&1 | tee maven-output.log
         env:
           LC4J_GLOBAL_TEST_RETRY_ENABLED: true
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
           AZURE_OPENAI_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
           AZURE_SEARCH_ENDPOINT: ${{ secrets.AZURE_SEARCH_ENDPOINT }}
           AZURE_SEARCH_KEY: ${{ secrets.AZURE_SEARCH_KEY }}
-          GOOGLE_AI_GEMINI_API_KEY: ${{ secrets.GOOGLE_AI_GEMINI_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
           # No secrets exist for the environment variables below, so the integration tests guarded by them do
           # not run anywhere - not here and not in the PR build. Add the secrets to switch these tests on:
           #   AZURE_COSMOS_MONGO_VCORE_CONNECTION_STRING  langchain4j-azure-cosmos-mongo-vcore-spring-boot*-starter
@@ -127,10 +124,3 @@ jobs:
                   if len(failed_tests) > 50:
                       f.write(f'\n*... and {len(failed_tests) - 50} more*\n')
           PYEOF
-
-      - name: Upload Test Reports
-        if: always() # always run even if the previous step failed or was cancelled
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: Test-Reports
-          path: '**/target/*-reports/*'

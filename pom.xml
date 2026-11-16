@@ -140,6 +140,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.6.1</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Third-party libraries stay at info: at debug, HTTP clients print request headers,
+                             including the real API keys used by the integration tests. -->
+                        <tinylog.level>info</tinylog.level>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -199,6 +206,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>3.6.1</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- see tinylog.level in the surefire configuration above -->
+                        <tinylog.level>info</tinylog.level>
+                    </systemPropertyVariables>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
