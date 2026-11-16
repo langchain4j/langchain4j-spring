@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import java.util.Base64;
 import java.util.Optional;
 
+import static dev.langchain4j.internal.Utils.isNullOrBlank;
 import static dev.langchain4j.store.embedding.elasticsearch.spring.ElasticsearchEmbeddingStoreProperties.*;
 
 @AutoConfiguration
@@ -46,8 +47,8 @@ public class ElasticsearchEmbeddingStoreAutoConfiguration {
             caCertificate = Base64.getDecoder().decode(caCertificateAsBase64String);
         }
 
-        log.debug("create RestClient running at [{}] with api key [{}], username [{}].",
-                serverUrl, properties.getApiKey(), username);
+        log.debug("create RestClient running at [{}] with api key set [{}], username [{}].",
+                serverUrl, !isNullOrBlank(properties.getApiKey()), username);
 
         return ElasticsearchClientHelper.getClient(
                 serverUrl,
