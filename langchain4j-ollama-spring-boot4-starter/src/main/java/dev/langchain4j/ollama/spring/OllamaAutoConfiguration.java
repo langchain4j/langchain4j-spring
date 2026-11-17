@@ -3,6 +3,7 @@ package dev.langchain4j.ollama.spring;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilders;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
+import dev.langchain4j.model.decision.listener.DecisionModelListener;
 import dev.langchain4j.model.ollama.*;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -38,6 +39,8 @@ public class OllamaAutoConfiguration {
     private static final String STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR = "ollamaStreamingLanguageModelTaskExecutor";
 
     private static final String EMBEDDING_MODEL_HTTP_CLIENT_BUILDER = "ollamaEmbeddingModelHttpClientBuilder";
+
+    private static final String DECISION_MODEL_HTTP_CLIENT_BUILDER = "ollamaDecisionModelHttpClientBuilder";
 
     @Bean
     @ConditionalOnProperty(PREFIX + ".chat-model.base-url")
@@ -272,6 +275,38 @@ public class OllamaAutoConfiguration {
     HttpClientBuilder ollamaEmbeddingModelHttpClientBuilder(ListableBeanFactory beanFactory) {
         return SpringRestClientBuilders.fromSpringBoot(beanFactory)
                 // executor is not needed for no-streaming OllamaEmbeddingModel
+                .createDefaultStreamingRequestExecutor(false);
+    }
+
+    @Bean
+    @ConditionalOnProperty(PREFIX + ".decision-model.base-url")
+    OllamaDecisionModel ollamaDecisionModel(
+            @Qualifier(DECISION_MODEL_HTTP_CLIENT_BUILDER) HttpClientBuilder httpClientBuilder,
+            OllamaProperties properties,
+            ObjectProvider<DecisionModelListener> listeners
+    ) {
+        OllamaDecisionModelProperties decisionModelProperties = properties.getDecisionModel();
+        return OllamaDecisionModel.builder()
+                .httpClientBuilder(httpClientBuilder)
+                .baseUrl(decisionModelProperties.getBaseUrl())
+                .modelName(decisionModelProperties.getModelName())
+                .timeout(decisionModelProperties.getTimeout())
+                .maxRetries(decisionModelProperties.getMaxRetries())
+                .keepAlive(decisionModelProperties.getKeepAlive())
+                .customHeaders(decisionModelProperties.getCustomHeaders())
+                .customParameters(decisionModelProperties.getCustomParameters())
+                .logRequests(decisionModelProperties.getLogRequests())
+                .logResponses(decisionModelProperties.getLogResponses())
+                .listeners(listeners.orderedStream().toList())
+                .build();
+    }
+
+    @Bean(DECISION_MODEL_HTTP_CLIENT_BUILDER)
+    @ConditionalOnProperty(PREFIX + ".decision-model.base-url")
+    @ConditionalOnMissingBean(name = DECISION_MODEL_HTTP_CLIENT_BUILDER)
+    HttpClientBuilder ollamaDecisionModelHttpClientBuilder(ListableBeanFactory beanFactory) {
+        return SpringRestClientBuilders.fromSpringBoot(beanFactory)
+                // executor is not needed for no-streaming OllamaDecisionModel
                 .createDefaultStreamingRequestExecutor(false);
     }
 }
