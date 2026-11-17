@@ -225,7 +225,8 @@ class AutoConfigTest {
                         "langchain4j.open-ai-official.decision-model.base-url=" + baseUrl,
                         "langchain4j.open-ai-official.decision-model.api-key=" + API_KEY,
                         "langchain4j.open-ai-official.decision-model.model-name=gpt-6-luna",
-                        "langchain4j.open-ai-official.decision-model.custom-headers.X-Custom=custom-value"
+                        "langchain4j.open-ai-official.decision-model.custom-headers.X-Custom=custom-value",
+                        "langchain4j.open-ai-official.decision-model.custom-parameters.custom-key=custom-value"
                 )
                 .run(context -> {
 
@@ -242,7 +243,8 @@ class AutoConfigTest {
                     WireMock.verify(WireMock.postRequestedFor(urlPathEqualTo("/decisions"))
                             .withHeader("Authorization", equalTo("Bearer " + API_KEY))
                             .withHeader("X-Custom", equalTo("custom-value"))
-                            .withRequestBody(matchingJsonPath("$.model", equalTo("gpt-6-luna"))));
+                            .withRequestBody(matchingJsonPath("$.model", equalTo("gpt-6-luna")))
+                            .withRequestBody(matchingJsonPath("$.custom-key", equalTo("custom-value"))));
                 });
     }
 
