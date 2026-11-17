@@ -112,13 +112,6 @@ jobs:
                       f.write(f'\n*... and {len(failed_tests) - 50} more*\n')
           PYEOF
 
-      - name: Upload Test Reports
-        if: always() # always run even if the previous step failed or was cancelled
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: Test-Reports-jdk${{ matrix.java_version }}
-          path: '**/target/*-reports/*'
-
       - name: License Compliance
         id: compliance
         run: |
@@ -148,3 +141,12 @@ jobs:
 
       - name: Check that langchain4j-bom lists all modules
         run: python3 .github/scripts/check-main-bom.py ${{ github.event_name == 'pull_request' && '--warn-only' || '' }}
+
+  # Artifacts are not masked like job logs and summaries, and anyone can download those of a public repository
+  artifact_upload_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check that no workflow uploads artifacts
+        run: python3 .github/scripts/check-artifact-uploads.py
