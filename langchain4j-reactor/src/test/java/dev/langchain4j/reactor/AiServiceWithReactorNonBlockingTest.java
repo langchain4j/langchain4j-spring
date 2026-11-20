@@ -1,18 +1,19 @@
 package dev.langchain4j.reactor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.response.ChatModelStreamingEvent;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.test.mock.MockStreamingChatModel;
 import dev.langchain4j.service.AiServiceStreamingEvent;
 import dev.langchain4j.service.AiServices;
 import java.util.List;
-import java.util.concurrent.Flow;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -43,11 +44,10 @@ class AiServiceWithReactorNonBlockingTest {
 
     @Test
     void should_stream_events_as_a_Flux() {
-        MockStreamingChatModel model = MockStreamingChatModel.thatStreams("H", "e", "l", "l", "o");
+        MockStreamingChatModel model = spy(MockStreamingChatModel.thatStreams("H", "e", "l", "l", "o"));
 
-        Assistant assistant = AiServices.builder(Assistant.class)
-                .streamingChatModel(publisherOnly(model))
-                .build();
+        Assistant assistant =
+                AiServices.builder(Assistant.class).streamingChatModel(model).build();
 
         List<AiServiceStreamingEvent> events =
                 assistant.events("Hi").collectList().block();
@@ -62,6 +62,7 @@ class AiServiceWithReactorNonBlockingTest {
                 .reduce("", String::concat);
         assertThat(text).isEqualTo("Hello");
         assertThat(model.requests()).hasSize(1);
+        verify(model, never()).doChat(any(ChatRequest.class), any(StreamingChatResponseHandler.class));
     }
 
     @Test
@@ -75,25 +76,6 @@ class AiServiceWithReactorNonBlockingTest {
                 .isFalse();
         assertThat(adapter.canAdapt(Returns.class.getMethod("events").getGenericReturnType()))
                 .isTrue();
-    }
-
-    /**
-     * The given model with only the reactive publisher path: the handler path fails, so the test proves that a
-     * {@code Flux<AiServiceStreamingEvent>} uses the publisher path. Which path is used is what this test checks, so
-     * the wrapper is written here.
-     */
-    private static StreamingChatModel publisherOnly(StreamingChatModel model) {
-        return new StreamingChatModel() {
-            @Override
-            public void doChat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
-                throw new UnsupportedOperationException("only the publisher path may be used");
-            }
-
-            @Override
-            public Flow.Publisher<ChatModelStreamingEvent> doChat(ChatRequest chatRequest) {
-                return model.doChat(chatRequest);
-            }
-        };
     }
 
     interface Returns {
