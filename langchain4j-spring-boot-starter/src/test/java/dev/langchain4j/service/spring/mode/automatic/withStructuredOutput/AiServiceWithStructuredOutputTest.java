@@ -1,7 +1,7 @@
 package dev.langchain4j.service.spring.mode.automatic.withStructuredOutput;
 
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AiServiceWithStructuredOutputTest {
 
-    ChatModelMock chatModel = ChatModelMock.thatAlwaysResponds("{\"name\":\"Klaus\",\"age\":42}");
+    MockChatModel chatModel = MockChatModel.thatResponds("{\"name\":\"Klaus\",\"age\":42}");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class))

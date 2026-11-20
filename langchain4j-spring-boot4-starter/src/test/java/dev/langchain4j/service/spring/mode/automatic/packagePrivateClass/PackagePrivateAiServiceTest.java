@@ -1,7 +1,7 @@
 package dev.langchain4j.service.spring.mode.automatic.packagePrivateClass;
 
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PackagePrivateAiServiceTest {
 
-    ChatModelMock chatModel = ChatModelMock.thatAlwaysResponds("Berlin");
+    MockChatModel chatModel = MockChatModel.thatResponds("Berlin");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class))

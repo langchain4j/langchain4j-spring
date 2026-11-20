@@ -1,7 +1,7 @@
 package dev.langchain4j.service.spring.mode.automatic.scanPackages.package1;
 
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import dev.langchain4j.service.spring.mode.automatic.scanPackages.aiService.ScanPackageAiService;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ScanPackageAiServiceTest {
 
-    ChatModelMock chatModel = ChatModelMock.thatAlwaysResponds("Berlin");
+    MockChatModel chatModel = MockChatModel.thatResponds("Berlin");
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class))

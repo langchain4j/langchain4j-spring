@@ -47,6 +47,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai</artifactId>
             <scope>test</scope>
@@ -54,10 +60,8 @@
 
         <dependency>
             <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-core</artifactId>
-            <version>${langchain4j.stable.version}</version>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
+            <artifactId>langchain4j-test</artifactId>
+            <version>${langchain4j.beta.version}</version>
             <scope>test</scope>
         </dependency>
 

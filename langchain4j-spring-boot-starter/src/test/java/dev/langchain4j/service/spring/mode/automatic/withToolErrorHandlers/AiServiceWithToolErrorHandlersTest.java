@@ -4,7 +4,7 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -18,7 +18,7 @@ class AiServiceWithToolErrorHandlersTest {
     void should_wire_tool_execution_error_handler_bean_into_ai_service() {
 
         // given the tool throws
-        ChatModelMock chatModel = chatModelRequesting("{\"arg0\": \"42\"}");
+        MockChatModel chatModel = chatModelRequesting("{\"arg0\": \"42\"}");
 
         contextRunner(chatModel).run(context -> {
 
@@ -41,7 +41,7 @@ class AiServiceWithToolErrorHandlersTest {
     void should_wire_tool_arguments_error_handler_bean_into_ai_service() {
 
         // given the LLM generated arguments that cannot be parsed
-        ChatModelMock chatModel = chatModelRequesting("{\"arg0\": ");
+        MockChatModel chatModel = chatModelRequesting("{\"arg0\": ");
 
         contextRunner(chatModel).run(context -> {
 
@@ -59,8 +59,8 @@ class AiServiceWithToolErrorHandlersTest {
         });
     }
 
-    private static ChatModelMock chatModelRequesting(String toolArguments) {
-        return ChatModelMock.thatAlwaysResponds(
+    private static MockChatModel chatModelRequesting(String toolArguments) {
+        return MockChatModel.thatResponds(
                 AiMessage.from(ToolExecutionRequest.builder()
                         .id("1")
                         .name("orderStatus")

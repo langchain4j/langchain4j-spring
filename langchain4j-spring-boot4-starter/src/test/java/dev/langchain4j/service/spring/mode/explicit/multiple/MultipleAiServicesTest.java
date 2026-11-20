@@ -1,7 +1,7 @@
 package dev.langchain4j.service.spring.mode.explicit.multiple;
 
 import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -21,8 +21,8 @@ class MultipleAiServicesTest {
                 .withUserConfiguration(MultipleAiServicesApplication.class)
                 .run(context -> {
 
-                    ChatModelMock chatModel = context.getBean(
-                            MultipleAiServicesApplication.CHAT_MODEL_BEAN_NAME, ChatModelMock.class);
+                    MockChatModel chatModel = context.getBean(
+                            MultipleAiServicesApplication.CHAT_MODEL_BEAN_NAME, MockChatModel.class);
 
                     // MultipleAiServicesApplication.chatMemory() is wired automatically because wiringMode = AUTOMATIC
                     testWithMemory(chatModel, context.getBean(FirstAiServiceWithAutomaticWiring.class));
@@ -34,7 +34,7 @@ class MultipleAiServicesTest {
                 });
     }
 
-    private static void testWithMemory(ChatModelMock chatModel, BaseAiService aiService) {
+    private static void testWithMemory(MockChatModel chatModel, BaseAiService aiService) {
 
         // given
         int requestsBefore = chatModel.requests().size();
@@ -48,7 +48,7 @@ class MultipleAiServicesTest {
                 .contains(UserMessage.from("My name is Klaus"));
     }
 
-    private static void testWithoutMemory(ChatModelMock chatModel, BaseAiService aiService) {
+    private static void testWithoutMemory(MockChatModel chatModel, BaseAiService aiService) {
 
         // given
         int requestsBefore = chatModel.requests().size();
