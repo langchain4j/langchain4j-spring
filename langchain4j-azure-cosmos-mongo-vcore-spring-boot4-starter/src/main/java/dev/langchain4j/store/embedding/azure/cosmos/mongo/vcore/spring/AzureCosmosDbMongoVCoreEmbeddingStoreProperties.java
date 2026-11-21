@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 
 /**
- * Configuration properties for Azure Cosmos DB for MongoDB vCore Embedding Store.
+ * Configuration properties for the Azure DocumentDB (with MongoDB compatibility) Embedding Store.
  * <p>
  * Properties are prefixed with {@code langchain4j.azure.cosmos-mongo-vcore}.
  * </p>
@@ -31,7 +31,7 @@ public class AzureCosmosDbMongoVCoreEmbeddingStoreProperties {
     static final String PREFIX = "langchain4j.azure.cosmos-mongo-vcore";
 
     /**
-     * The MongoDB connection string for Azure Cosmos DB for MongoDB vCore.
+     * The MongoDB connection string for Azure DocumentDB.
      */
     private String connectionString;
 
