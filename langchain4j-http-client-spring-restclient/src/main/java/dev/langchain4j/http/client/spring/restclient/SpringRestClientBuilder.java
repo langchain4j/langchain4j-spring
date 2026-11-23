@@ -9,6 +9,7 @@ import org.springframework.boot.http.client.reactive.ClientHttpConnectorSettings
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.web.client.RestClient;
 
+import java.net.Proxy;
 import java.time.Duration;
 
 public class SpringRestClientBuilder implements HttpClientBuilder {
@@ -23,6 +24,7 @@ public class SpringRestClientBuilder implements HttpClientBuilder {
     private Boolean createDefaultStreamingRequestExecutor = true;
     private Duration connectTimeout;
     private Duration readTimeout;
+    private Proxy proxy;
 
     public RestClient.Builder restClientBuilder() {
         return restClientBuilder;
@@ -185,6 +187,20 @@ public class SpringRestClientBuilder implements HttpClientBuilder {
     @Override
     public SpringRestClientBuilder readTimeout(Duration readTimeout) {
         this.readTimeout = readTimeout;
+        return this;
+    }
+
+    public Proxy proxy() {
+        return proxy;
+    }
+
+    /**
+     * Sets the HTTP proxy the blocking client routes requests through. When not set, no proxy is used.
+     * Only {@link Proxy.Type#HTTP} proxies are supported, and the proxy applies to the Apache HttpClient 5
+     * request factory, when Spring picks it.
+     */
+    public SpringRestClientBuilder proxy(Proxy proxy) {
+        this.proxy = proxy;
         return this;
     }
 
