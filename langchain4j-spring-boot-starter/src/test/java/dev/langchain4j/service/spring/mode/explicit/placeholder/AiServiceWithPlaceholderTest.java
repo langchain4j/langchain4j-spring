@@ -1,0 +1,232 @@
+package dev.langchain4j.service.spring.mode.explicit.placeholder;
+
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.test.mock.MockChatModel;
+import dev.langchain4j.service.IllegalConfigurationException;
+import dev.langchain4j.service.spring.AiServicesAutoConfig;
+import dev.langchain4j.service.spring.LogCapture;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.ApplicationContext;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class AiServiceWithPlaceholderTest {
+
+    ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(AiServicesAutoConfig.class));
+
+    @Test
+    void should_resolve_chat_model_bean_name_from_placeholder() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                        "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                )
+                .run(context -> {
+                    AiServiceWithPlaceholderChatModel aiService = context.getBean(AiServiceWithPlaceholderChatModel.class);
+                    String response = aiService.chat("Hello");
+                    assertThat(response).isEqualTo("ConfiguredModelResponse");
+                });
+    }
+
+    @Test
+    void should_resolve_chat_model_bean_name_from_placeholder_with_default_value() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                        "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                )
+                .run(context -> {
+                    AiServiceWithPlaceholderFallbackModel aiService = context.getBean(AiServiceWithPlaceholderFallbackModel.class);
+                    String response = aiService.chat("Hello");
+                    assertThat(response).isEqualTo("FallbackModelResponse");
+                });
+    }
+
+    @Test
+    void should_override_default_value_when_property_is_specified() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                        "my.missing.chat-model=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                        "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                )
+                .run(context -> {
+                    AiServiceWithPlaceholderFallbackModel aiService = context.getBean(AiServiceWithPlaceholderFallbackModel.class);
+                    String response = aiService.chat("Hello");
+                    assertThat(response).isEqualTo("ConfiguredModelResponse");
+                });
+    }
+
+    @Test
+    void should_resolve_tool_bean_name_from_placeholder() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                        "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                )
+                .run(context -> {
+                    AiServiceWithPlaceholderTools aiService = context.getBean(AiServiceWithPlaceholderTools.class);
+                    String response = aiService.chat("Hello");
+                    assertThat(response).isEqualTo("ConfiguredModelResponse");
+                    assertThat(toolNamesSentToModel(context)).containsExactly("helperTool");
+                });
+    }
+
+    @Test
+    void should_resolve_multiple_tool_names_from_comma_separated_placeholder() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                        "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME + ", "
+                                + AiServiceWithPlaceholderApplication.SECOND_TOOL_BEAN_NAME
+                )
+                .run(context -> {
+                    AiServiceWithPlaceholderTools aiService = context.getBean(AiServiceWithPlaceholderTools.class);
+                    String response = aiService.chat("Hello");
+                    assertThat(response).isEqualTo("ConfiguredModelResponse");
+                    assertThat(toolNamesSentToModel(context))
+                            .containsExactlyInAnyOrder("helperTool", "secondHelperTool");
+                });
+    }
+
+    @Test
+    void should_wire_no_tools_when_placeholder_resolves_to_empty_value() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                        "my.tool.name="
+                )
+                .run(context -> {
+                    AiServiceWithPlaceholderTools aiService = context.getBean(AiServiceWithPlaceholderTools.class);
+                    String response = aiService.chat("Hello");
+                    assertThat(response).isEqualTo("ConfiguredModelResponse");
+                    assertThat(toolNamesSentToModel(context)).isEmpty();
+                });
+    }
+
+    @Test
+    void should_resolve_multiple_tool_names_from_comma_separated_literal() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                        "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                )
+                .run(context -> {
+                    AiServiceWithCommaSeparatedTools aiService = context.getBean(AiServiceWithCommaSeparatedTools.class);
+                    String response = aiService.chat("Hello");
+                    assertThat(response).isEqualTo("ConfiguredModelResponse");
+                    assertThat(toolNamesSentToModel(context))
+                            .containsExactlyInAnyOrder("helperTool", "secondHelperTool");
+                });
+    }
+
+    @Test
+    void should_fail_when_placeholder_cannot_be_resolved() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                )
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure())
+                            .isInstanceOf(IllegalConfigurationException.class)
+                            .hasMessageContaining("Cannot resolve the 'chatModel' attribute of @AiService on ")
+                            .hasMessageContaining("Could not resolve placeholder 'my.chat-model.name'");
+                });
+    }
+
+    @Test
+    void should_fail_when_tools_placeholder_cannot_be_resolved() {
+        contextRunner
+                .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                .withPropertyValues(
+                        "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME
+                )
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure())
+                            .isInstanceOf(IllegalConfigurationException.class)
+                            .hasMessageContaining("Cannot resolve the 'tools' attribute of @AiService on "
+                                    + AiServiceWithPlaceholderTools.class.getName())
+                            .hasMessageContaining("Could not resolve placeholder 'my.tool.name'");
+                });
+    }
+
+    @Test
+    void should_log_configured_bean_references_resolved_from_placeholders() {
+        try (LogCapture logs = LogCapture.debug(AiServicesAutoConfig.class)) {
+            contextRunner
+                    .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                    .withPropertyValues(
+                            "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                            // not in alphabetical order: explicitly configured tools are logged in the configured order
+                            "my.tool.name=" + AiServiceWithPlaceholderApplication.SECOND_TOOL_BEAN_NAME + ", "
+                                    + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                    )
+                    .run(context -> assertThat(logs.messages()).contains(
+                            "Registered @AiService bean 'aiServiceWithPlaceholderTools' for "
+                                    + AiServiceWithPlaceholderTools.class.getName()
+                                    + " using EXPLICIT wiring mode, configured bean references: "
+                                    + "{chatModel=configuredChatModel, tools=[secondTool, configuredTool]}"));
+        }
+    }
+
+    @Test
+    void should_not_initialize_configured_beans_when_logging_them() {
+        try (LogCapture ignored = LogCapture.debug(AiServicesAutoConfig.class)) {
+            contextRunner
+                    .withUserConfiguration(AiServiceWithPlaceholderApplication.class)
+                    .withBean(SingletonsBeforeBeanPostProcessors.class)
+                    .withPropertyValues(
+                            "my.chat-model.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                            "my.tool.name=" + AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME
+                    )
+                    .run(context -> {
+                        assertThat(context).hasNotFailed();
+                        assertThat(context.getBean(SingletonsBeforeBeanPostProcessors.class).singletonNames)
+                                .doesNotContain(
+                                        AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME,
+                                        AiServiceWithPlaceholderApplication.CONFIGURED_TOOL_BEAN_NAME);
+                    });
+        }
+    }
+
+    private static List<String> toolNamesSentToModel(ApplicationContext context) {
+        MockChatModel chatModel = context.getBean(
+                AiServiceWithPlaceholderApplication.CONFIGURED_CHAT_MODEL_BEAN_NAME, MockChatModel.class);
+        return chatModel.requests().get(0).toolSpecifications().stream()
+                .map(ToolSpecification::name)
+                .toList();
+    }
+
+    /**
+     * Bean post processors are created after all bean factory post processors, including the one
+     * registering AI services, so this records the singletons that were created before that point.
+     */
+    static class SingletonsBeforeBeanPostProcessors implements BeanPostProcessor, BeanFactoryAware {
+
+        List<String> singletonNames;
+
+        @Override
+        public void setBeanFactory(BeanFactory beanFactory) {
+            singletonNames = List.of(((ConfigurableListableBeanFactory) beanFactory).getSingletonNames());
+        }
+    }
+}

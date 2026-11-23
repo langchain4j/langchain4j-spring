@@ -3,8 +3,9 @@ package dev.langchain4j.service.spring.mode.automatic.withChatMemory;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.spring.AiServicesAutoConfiguration;
+import dev.langchain4j.service.spring.LogCapture;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -13,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AiServiceWithChatMemoryTest {
 
-    ChatModelMock chatModel = ChatModelMock.thatAlwaysResponds("Your name is Klaus.");
+    MockChatModel chatModel = MockChatModel.thatResponds("Your name is Klaus.").thenRepeats();
 
     ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(AiServicesAutoConfiguration.class))
@@ -42,5 +43,19 @@ class AiServiceWithChatMemoryTest {
                                     AiMessage.from("Your name is Klaus."),
                                     UserMessage.from("What is my name?"));
                 });
+    }
+
+    @Test
+    void should_log_configured_bean_references() {
+        try (LogCapture logs = LogCapture.debug(AiServicesAutoConfiguration.class)) {
+            contextRunner
+                    .withUserConfiguration(AiServiceWithChatMemoryApplication.class)
+                    .run(context -> assertThat(logs.messages())
+                            .contains("Registered @AiService bean 'aiServiceWithChatMemory' for "
+                                    + AiServiceWithChatMemory.class.getName() + " using AUTOMATIC wiring mode")
+                            .contains("chatModel=chatModel,")
+                            .contains("chatMemory=chatMemory,")
+                            .doesNotContain("streamingChatModel"));
+        }
     }
 }

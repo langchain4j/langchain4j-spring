@@ -7,7 +7,7 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-spring</artifactId>
-        <version>1.21.0-beta31-SNAPSHOT</version>
+        <version>1.25.0-beta35-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>langchain4j-spring-boot4-starter</artifactId>
@@ -52,6 +52,12 @@
         </dependency>
 
         <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>context-propagation</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -76,6 +82,13 @@
             <version>${langchain4j.stable.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-test</artifactId>
+            <version>${langchain4j.beta.version}</version>
             <scope>test</scope>
         </dependency>
 

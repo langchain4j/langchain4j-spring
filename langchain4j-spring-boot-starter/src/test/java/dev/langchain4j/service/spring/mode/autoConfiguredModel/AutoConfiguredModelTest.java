@@ -18,7 +18,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The other AI service tests supply the model directly as a {@code ChatModelMock} bean, because what they are
+ * The other AI service tests supply the model directly as a {@code MockChatModel} bean, because what they are
  * about is how Spring assembles an AI service, not how a model talks to a provider. That leaves one seam
  * uncovered: an AI service also has to work when the model bean comes from a starter's auto-configuration
  * rather than from a {@code @Bean} method. This test covers exactly that, with the OpenAI API stubbed.

@@ -4,7 +4,7 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AiServiceWithExplicitToolsTest {
 
-    ChatModelMock chatModel = ChatModelMock.thatAlwaysResponds(
+    MockChatModel chatModel = MockChatModel.thatResponds(
             AiMessage.from(
                     ToolExecutionRequest.builder().id("1").name("getCurrentTemperature").arguments("{}").build()),
             AiMessage.from("The current temperature is " + TOOL_1_TEMPERATURE + " degrees."));

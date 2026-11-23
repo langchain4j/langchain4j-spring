@@ -1,0 +1,53 @@
+{
+  "properties": [
+    {
+      "name": "langchain4j.azure.documentdb.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable Azure DocumentDB embedding store auto-configuration.",
+      "defaultValue": true
+    },
+    {
+      "name": "langchain4j.azure.documentdb.index-name",
+      "defaultValue": "defaultIndexAzureCosmos"
+    },
+    {
+      "name": "langchain4j.azure.documentdb.application-name",
+      "defaultValue": "LangChain4j"
+    },
+    {
+      "name": "langchain4j.azure.documentdb.create-index",
+      "defaultValue": false
+    },
+    {
+      "name": "langchain4j.azure.documentdb.num-lists",
+      "defaultValue": 1
+    },
+    {
+      "name": "langchain4j.azure.documentdb.m",
+      "defaultValue": 16
+    },
+    {
+      "name": "langchain4j.azure.documentdb.ef-construction",
+      "defaultValue": 64
+    },
+    {
+      "name": "langchain4j.azure.documentdb.ef-search",
+      "defaultValue": 40
+    }
+  ],
+  "hints": [
+    {
+      "name": "langchain4j.azure.documentdb.kind",
+      "values": [
+        {
+          "value": "vector-ivf",
+          "description": "Inverted file vector index."
+        },
+        {
+          "value": "vector-hnsw",
+          "description": "Hierarchical navigable small world vector index."
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 package dev.langchain4j.reactor;
 
 import dev.langchain4j.model.chat.StreamingChatModel;
-import dev.langchain4j.model.chat.mock.StreamingChatModelMock;
+import dev.langchain4j.test.mock.MockStreamingChatModel;
 import dev.langchain4j.service.AiServices;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -22,7 +22,7 @@ public class AiServiceWithFluxTest {
         // given
         List<String> tokens = List.of("H", "e", "l", "l", "o");
 
-        StreamingChatModel model = StreamingChatModelMock.thatAlwaysStreams(tokens);
+        StreamingChatModel model = MockStreamingChatModel.thatStreams(tokens);
 
         Assistant assistant = AiServices.builder(Assistant.class)
                 .streamingChatModel(model)

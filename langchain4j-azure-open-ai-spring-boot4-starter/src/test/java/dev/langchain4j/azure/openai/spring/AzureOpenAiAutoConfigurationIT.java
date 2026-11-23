@@ -144,7 +144,7 @@ class AzureOpenAiAutoConfigurationIT {
 
     @ParameterizedTest(name = "Deployment name: {0}")
     @CsvSource({
-            "gpt-3.5-turbo"
+            "gpt-5.6-terra"
     })
     @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
     void should_provide_chat_model_no_azure(String deploymentName) {

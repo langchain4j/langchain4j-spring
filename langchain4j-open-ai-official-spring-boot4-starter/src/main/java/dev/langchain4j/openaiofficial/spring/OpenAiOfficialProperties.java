@@ -16,7 +16,10 @@ public record OpenAiOfficialProperties(
     OpenAiOfficialEmbeddingModelProperties embeddingModel,
 
     @NestedConfigurationProperty
-    OpenAiOfficialImageModelProperties imageModel
+    OpenAiOfficialImageModelProperties imageModel,
+
+    @NestedConfigurationProperty
+    OpenAiOfficialDecisionModelProperties decisionModel
 ) {
     static final String PREFIX = "langchain4j.open-ai-official";
 

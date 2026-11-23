@@ -5,7 +5,7 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.service.spring.AiServicesAutoConfig;
 import dev.langchain4j.service.spring.event.AiServiceRegisteredEvent;
 import dev.langchain4j.service.spring.mode.automatic.withTools.aop.ToolObserverAspect;
@@ -50,7 +50,7 @@ class AiServicesAutoConfigTest {
 
     @Test
     void should_create_AI_service_with_tool_which_is_public_method_in_public_class() {
-        ChatModelMock chatModel = ChatModelMock.thatAlwaysResponds(
+        MockChatModel chatModel = MockChatModel.thatResponds(
                 callTools("getCurrentDate"), AiMessage.from("Today is " + CURRENT_DATE + "."));
 
         contextRunnerWith(chatModel)
@@ -74,7 +74,7 @@ class AiServicesAutoConfigTest {
 
     @Test
     void should_create_AI_service_with_tool_that_is_package_private_method_in_package_private_class() {
-        ChatModelMock chatModel = ChatModelMock.thatAlwaysResponds(
+        MockChatModel chatModel = MockChatModel.thatResponds(
                 callTools("getCurrentTime"), AiMessage.from("It is " + CURRENT_TIME + " now."));
 
         contextRunnerWith(chatModel)
@@ -98,7 +98,7 @@ class AiServicesAutoConfigTest {
 
     @Test
     void should_receive_ai_service_registered_event() {
-        contextRunnerWith(ChatModelMock.thatAlwaysResponds("Answer"))
+        contextRunnerWith(MockChatModel.thatResponds("Answer"))
                 .withUserConfiguration(AiServiceWithToolsApplication.class)
                 .run(context -> {
 
@@ -124,7 +124,7 @@ class AiServicesAutoConfigTest {
 
     @Test
     void should_create_AI_service_with_tool_which_is_enhanced_by_spring_aop() {
-        ChatModelMock chatModel = ChatModelMock.thatAlwaysResponds(
+        MockChatModel chatModel = MockChatModel.thatResponds(
                 callTools("getToolObserverPackageName", "getToolObserverKey", "getCurrentTime"),
                 AiMessage.from("The annotation lives in " + TOOL_OBSERVER_PACKAGE_NAME + ", its key is "
                         + TOOL_OBSERVER_KEY + " and it is " + CURRENT_TIME + " now."));

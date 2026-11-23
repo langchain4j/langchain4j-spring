@@ -9,7 +9,7 @@ name: Nightly integration tests
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '17 23 * * *' # daily at 23:17 UTC, off the hour to reduce GitHub's scheduling delay
   workflow_dispatch:
 
 permissions:
@@ -25,12 +25,12 @@ jobs:
     if: github.repository == 'langchain4j/langchain4j-spring'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Set up JDK 21
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
           cache: 'maven'
 
@@ -41,14 +41,11 @@ jobs:
           mvn -U -B --fail-at-end clean install 2>&1 | tee maven-output.log
         env:
           LC4J_GLOBAL_TEST_RETRY_ENABLED: true
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
           AZURE_OPENAI_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
           AZURE_SEARCH_ENDPOINT: ${{ secrets.AZURE_SEARCH_ENDPOINT }}
           AZURE_SEARCH_KEY: ${{ secrets.AZURE_SEARCH_KEY }}
-          GOOGLE_AI_GEMINI_API_KEY: ${{ secrets.GOOGLE_AI_GEMINI_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
           # No secrets exist for the environment variables below, so the integration tests guarded by them do
           # not run anywhere - not here and not in the PR build. Add the secrets to switch these tests on:
           #   AZURE_COSMOS_MONGO_VCORE_CONNECTION_STRING  langchain4j-azure-cosmos-mongo-vcore-spring-boot*-starter
@@ -127,10 +124,3 @@ jobs:
                   if len(failed_tests) > 50:
                       f.write(f'\n*... and {len(failed_tests) - 50} more*\n')
           PYEOF
-
-      - name: Upload Test Reports
-        if: always() # always run even if the previous step failed or was cancelled
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: Test-Reports
-          path: '**/target/*-reports/*'

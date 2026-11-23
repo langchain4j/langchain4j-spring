@@ -1,8 +1,10 @@
 package dev.langchain4j.openaiofficial.spring;
 
 import dev.langchain4j.model.chat.listener.ChatModelListener;
+import dev.langchain4j.model.decision.listener.DecisionModelListener;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialChatModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialChatRequestParameters;
+import dev.langchain4j.model.openaiofficial.OpenAiOfficialDecisionModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialEmbeddingModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialImageModel;
 import dev.langchain4j.model.openaiofficial.OpenAiOfficialStreamingChatModel;
@@ -115,6 +117,24 @@ public class OpenAiOfficialAutoConfiguration {
                 .timeout(embeddingModelProperties.timeout())
                 .maxRetries(embeddingModelProperties.maxRetries())
                 .customHeaders(embeddingModelProperties.customHeaders())
+                .build();
+    }
+
+    @Bean
+    @ConditionalOnProperty(PREFIX + ".decision-model.api-key")
+    @ConditionalOnMissingBean
+    OpenAiOfficialDecisionModel openAiOfficialDecisionModel(
+            OpenAiOfficialProperties properties, ObjectProvider<DecisionModelListener> listeners) {
+        OpenAiOfficialDecisionModelProperties decisionModelProperties = properties.decisionModel();
+        return OpenAiOfficialDecisionModel.builder()
+                .baseUrl(decisionModelProperties.baseUrl())
+                .apiKey(decisionModelProperties.apiKey())
+                .organizationId(decisionModelProperties.organizationId())
+                .modelName(decisionModelProperties.modelName())
+                .timeout(decisionModelProperties.timeout())
+                .maxRetries(decisionModelProperties.maxRetries())
+                .customHeaders(decisionModelProperties.customHeaders())
+                .listeners(listeners.orderedStream().toList())
                 .build();
     }
 

@@ -1,7 +1,7 @@
 package dev.langchain4j.service.spring.mode.explicit.chatModel;
 
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.mock.ChatModelMock;
+import dev.langchain4j.test.mock.MockChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +15,7 @@ class AiServiceWithExplicitChatModelApplication {
 
     @Bean(CHAT_MODEL_BEAN_NAME)
     ChatModel chatModel() {
-        return ChatModelMock.thatAlwaysResponds("Berlin");
+        return MockChatModel.thatResponds("Berlin");
     }
 
     @Bean(CHAT_MODEL_BEAN_NAME + 2)

@@ -1,9 +1,10 @@
 package dev.langchain4j.ollama.spring;
 
 import dev.langchain4j.http.client.HttpClientBuilder;
-import dev.langchain4j.http.client.spring.restclient.SpringRestClient;
+import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilders;
 import dev.langchain4j.model.chat.listener.ChatModelListener;
 import dev.langchain4j.model.ollama.*;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -17,7 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.ContextPropagatingTaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.client.RestClient;
 
 import static dev.langchain4j.ollama.spring.Properties.PREFIX;
 
@@ -79,9 +79,8 @@ public class AutoConfig {
     @Bean(CHAT_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".chat-model.base-url")
     @ConditionalOnMissingBean(name = CHAT_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder ollamaChatModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
-        return SpringRestClient.builder()
-                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+    HttpClientBuilder ollamaChatModelHttpClientBuilder(ListableBeanFactory beanFactory) {
+        return SpringRestClientBuilders.fromSpringBoot(beanFactory)
                 // executor is not needed for no-streaming OllamaChatModel
                 .createDefaultStreamingRequestExecutor(false);
     }
@@ -126,10 +125,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-chat-model.base-url")
     @ConditionalOnMissingBean(name = STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder ollamaStreamingChatModelHttpClientBuilder(
-            ObjectProvider<RestClient.Builder> restClientBuilder,
+            ListableBeanFactory beanFactory,
             @Qualifier(STREAMING_CHAT_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
-        return SpringRestClient.builder()
-                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+        return SpringRestClientBuilders.fromSpringBoot(beanFactory)
                 .streamingRequestExecutor(executor);
     }
 
@@ -185,9 +183,8 @@ public class AutoConfig {
     @Bean(LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".language-model.base-url")
     @ConditionalOnMissingBean(name = LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder ollamaLanguageModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
-        return SpringRestClient.builder()
-                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+    HttpClientBuilder ollamaLanguageModelHttpClientBuilder(ListableBeanFactory beanFactory) {
+        return SpringRestClientBuilders.fromSpringBoot(beanFactory)
                 // executor is not needed for no-streaming OllamaLanguageModel
                 .createDefaultStreamingRequestExecutor(false);
     }
@@ -221,11 +218,9 @@ public class AutoConfig {
     @ConditionalOnProperty(PREFIX + ".streaming-language-model.base-url")
     @ConditionalOnMissingBean(name = STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder ollamaStreamingLanguageModelHttpClientBuilder(
-            @Qualifier(STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor,
-            ObjectProvider<RestClient.Builder> restClientBuilder
-    ) {
-        return SpringRestClient.builder()
-                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+            ListableBeanFactory beanFactory,
+            @Qualifier(STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
+        return SpringRestClientBuilders.fromSpringBoot(beanFactory)
                 .streamingRequestExecutor(executor);
     }
 
@@ -274,9 +269,8 @@ public class AutoConfig {
     @Bean(EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".embedding-model.base-url")
     @ConditionalOnMissingBean(name = EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder ollamaEmbeddingModelHttpClientBuilder(ObjectProvider<RestClient.Builder> restClientBuilder) {
-        return SpringRestClient.builder()
-                .restClientBuilder(restClientBuilder.getIfAvailable(RestClient::builder))
+    HttpClientBuilder ollamaEmbeddingModelHttpClientBuilder(ListableBeanFactory beanFactory) {
+        return SpringRestClientBuilders.fromSpringBoot(beanFactory)
                 // executor is not needed for no-streaming OllamaEmbeddingModel
                 .createDefaultStreamingRequestExecutor(false);
     }

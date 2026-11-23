@@ -6,7 +6,7 @@
     <parent>
         <groupId>dev.langchain4j</groupId>
         <artifactId>langchain4j-spring</artifactId>
-        <version>1.21.0-beta31-SNAPSHOT</version>
+        <version>1.25.0-beta35-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>langchain4j-spring-boot4-tests</artifactId>
@@ -52,7 +52,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
+                <version>3.5.1</version>
                 <executions>
                     <execution>
                         <goals>
