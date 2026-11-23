@@ -10,6 +10,7 @@ import dev.langchain4j.http.client.sse.HttpStreamingEvent;
 import dev.langchain4j.http.client.sse.ServerSentEventListener;
 import dev.langchain4j.http.client.sse.ServerSentEventParser;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.JdkClientHttpRequestFactoryBuilder;
@@ -28,6 +29,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.http.HttpTimeoutException;
 import java.time.Duration;
@@ -71,7 +74,8 @@ public class SpringRestClient implements HttpClient {
             settings = settings.withReadTimeout(builder.readTimeout());
         }
         ClientHttpRequestFactory clientHttpRequestFactory = createRequestFactory(
-                builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect, settings);
+                builder.clientHttpRequestFactoryBuilder(), ClientHttpRequestFactoryBuilder::detect, settings,
+                builder.proxy());
 
         this.delegate = restClientBuilder.clone()
                 .requestFactory(clientHttpRequestFactory)
@@ -91,9 +95,19 @@ public class SpringRestClient implements HttpClient {
     static ClientHttpRequestFactory createRequestFactory(ClientHttpRequestFactoryBuilder<?> customBuilder,
                                                          Supplier<ClientHttpRequestFactoryBuilder<?>> detect,
                                                          ClientHttpRequestFactorySettings settings) {
+        return createRequestFactory(customBuilder, detect, settings, null);
+    }
+
+    static ClientHttpRequestFactory createRequestFactory(ClientHttpRequestFactoryBuilder<?> customBuilder,
+                                                         Supplier<ClientHttpRequestFactoryBuilder<?>> detect,
+                                                         ClientHttpRequestFactorySettings settings,
+                                                         Proxy proxy) {
         ClientHttpRequestFactoryBuilder<?> requestFactoryBuilder = getOrDefault(customBuilder, detect);
         if (requestFactoryBuilder instanceof HttpComponentsClientHttpRequestFactoryBuilder httpComponentsBuilder) {
-            requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(HttpClientBuilder::disableAutomaticRetries);
+            requestFactoryBuilder = httpComponentsBuilder.withHttpClientCustomizer(httpClientBuilder -> {
+                httpClientBuilder.disableAutomaticRetries();
+                applyProxy(httpClientBuilder, proxy);
+            });
         }
         ClientHttpRequestFactorySettings factorySettings = withoutZeroReadTimeout(requestFactoryBuilder, settings);
         ClientHttpRequestFactory requestFactory = requestFactoryBuilder.build(factorySettings);
@@ -134,6 +148,22 @@ public class SpringRestClient implements HttpClient {
 
     public static SpringRestClientBuilder builder() {
         return new SpringRestClientBuilder();
+    }
+
+    private static void applyProxy(HttpClientBuilder httpClientBuilder, Proxy proxy) {
+        if (proxy == null || proxy.type() == Proxy.Type.DIRECT) {
+            return;
+        }
+
+        if (proxy.type() != Proxy.Type.HTTP) {
+            throw new IllegalArgumentException("Only HTTP proxies are supported");
+        }
+
+        if (!(proxy.address() instanceof InetSocketAddress proxyAddress)) {
+            throw new IllegalArgumentException("Proxy address must be an InetSocketAddress");
+        }
+
+        httpClientBuilder.setProxy(new HttpHost(proxyAddress.getHostString(), proxyAddress.getPort()));
     }
 
     @Override

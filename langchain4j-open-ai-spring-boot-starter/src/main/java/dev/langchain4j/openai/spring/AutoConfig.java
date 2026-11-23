@@ -103,8 +103,9 @@ public class AutoConfig {
     @Bean(CHAT_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".chat-model.api-key")
     @ConditionalOnMissingBean(name = CHAT_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder openAiChatModelHttpClientBuilder(ListableBeanFactory beanFactory) {
+    HttpClientBuilder openAiChatModelHttpClientBuilder(ListableBeanFactory beanFactory, Properties properties) {
         return SpringRestClientBuilders.fromSpringBoot(beanFactory)
+                .proxy(ProxyProperties.toProxy(properties.chatModel().proxy()))
                 // executor is not needed for no-streaming OpenAiChatModel
                 .createDefaultStreamingRequestExecutor(false);
     }
@@ -164,8 +165,10 @@ public class AutoConfig {
     @ConditionalOnMissingBean(name = STREAMING_CHAT_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiStreamingChatModelHttpClientBuilder(
             ListableBeanFactory beanFactory,
+            Properties properties,
             @Qualifier(STREAMING_CHAT_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
         return SpringRestClientBuilders.fromSpringBoot(beanFactory)
+                .proxy(ProxyProperties.toProxy(properties.streamingChatModel().proxy()))
                 .streamingRequestExecutor(executor);
     }
 
@@ -219,8 +222,9 @@ public class AutoConfig {
     @Bean(LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".language-model.api-key")
     @ConditionalOnMissingBean(name = LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder openAiLanguageModelHttpClientBuilder(ListableBeanFactory beanFactory) {
+    HttpClientBuilder openAiLanguageModelHttpClientBuilder(ListableBeanFactory beanFactory, Properties properties) {
         return SpringRestClientBuilders.fromSpringBoot(beanFactory)
+                .proxy(ProxyProperties.toProxy(properties.languageModel().proxy()))
                 // executor is not needed for no-streaming OpenAiLanguageModel
                 .createDefaultStreamingRequestExecutor(false);
     }
@@ -255,8 +259,10 @@ public class AutoConfig {
     @ConditionalOnMissingBean(name = STREAMING_LANGUAGE_MODEL_HTTP_CLIENT_BUILDER)
     HttpClientBuilder openAiStreamingLanguageModelHttpClientBuilder(
             ListableBeanFactory beanFactory,
+            Properties properties,
             @Qualifier(STREAMING_LANGUAGE_MODEL_TASK_EXECUTOR) AsyncTaskExecutor executor) {
         return SpringRestClientBuilders.fromSpringBoot(beanFactory)
+                .proxy(ProxyProperties.toProxy(properties.streamingLanguageModel().proxy()))
                 .streamingRequestExecutor(executor);
     }
 
@@ -312,8 +318,9 @@ public class AutoConfig {
     @Bean(EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".embedding-model.api-key")
     @ConditionalOnMissingBean(name = EMBEDDING_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder openAiEmbeddingModelHttpClientBuilder(ListableBeanFactory beanFactory) {
+    HttpClientBuilder openAiEmbeddingModelHttpClientBuilder(ListableBeanFactory beanFactory, Properties properties) {
         return SpringRestClientBuilders.fromSpringBoot(beanFactory)
+                .proxy(ProxyProperties.toProxy(properties.embeddingModel().proxy()))
                 // executor is not needed for no-streaming OpenAiEmbeddingModel
                 .createDefaultStreamingRequestExecutor(false);
     }
@@ -344,8 +351,9 @@ public class AutoConfig {
     @Bean(MODERATION_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".moderation-model.api-key")
     @ConditionalOnMissingBean(name = MODERATION_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder openAiModerationModelHttpClientBuilder(ListableBeanFactory beanFactory) {
+    HttpClientBuilder openAiModerationModelHttpClientBuilder(ListableBeanFactory beanFactory, Properties properties) {
         return SpringRestClientBuilders.fromSpringBoot(beanFactory)
+                .proxy(ProxyProperties.toProxy(properties.moderationModel().proxy()))
                 // executor is not needed for no-streaming OpenAiModerationModel
                 .createDefaultStreamingRequestExecutor(false);
     }
@@ -378,8 +386,9 @@ public class AutoConfig {
     @Bean(DECISION_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".decision-model.api-key")
     @ConditionalOnMissingBean(name = DECISION_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder openAiDecisionModelHttpClientBuilder(ListableBeanFactory beanFactory) {
+    HttpClientBuilder openAiDecisionModelHttpClientBuilder(ListableBeanFactory beanFactory, Properties properties) {
         return SpringRestClientBuilders.fromSpringBoot(beanFactory)
+                .proxy(ProxyProperties.toProxy(properties.decisionModel().proxy()))
                 // executor is not needed for non-streaming OpenAiDecisionModel
                 .createDefaultStreamingRequestExecutor(false);
     }
@@ -417,8 +426,9 @@ public class AutoConfig {
     @Bean(IMAGE_MODEL_HTTP_CLIENT_BUILDER)
     @ConditionalOnProperty(PREFIX + ".image-model.api-key")
     @ConditionalOnMissingBean(name = IMAGE_MODEL_HTTP_CLIENT_BUILDER)
-    HttpClientBuilder openAiImageModelHttpClientBuilder(ListableBeanFactory beanFactory) {
+    HttpClientBuilder openAiImageModelHttpClientBuilder(ListableBeanFactory beanFactory, Properties properties) {
         return SpringRestClientBuilders.fromSpringBoot(beanFactory)
+                .proxy(ProxyProperties.toProxy(properties.imageModel().proxy()))
                 // executor is not needed for no-streaming OpenAiImageModel
                 .createDefaultStreamingRequestExecutor(false);
     }
