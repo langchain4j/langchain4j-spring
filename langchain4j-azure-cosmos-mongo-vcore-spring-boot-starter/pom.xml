@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>langchain4j-azure-cosmos-mongo-vcore-spring-boot-starter</artifactId>
-    <name>LangChain4j Spring Boot starter for Azure Cosmos DB Mongo vCore</name>
+    <name>LangChain4j Spring Boot starter for Azure DocumentDB (with MongoDB compatibility)</name>
     <packaging>jar</packaging>
 
     <dependencies>
