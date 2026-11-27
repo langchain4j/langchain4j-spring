@@ -90,6 +90,8 @@ public class AutoConfig {
                         .customParameters(chatModelProperties.customParameters())
                         .build())
                 .returnThinking(chatModelProperties.returnThinking())
+                .sendThinking(chatModelProperties.sendThinking(),
+                        chatModelProperties.sendThinkingFieldName())
                 .timeout(chatModelProperties.timeout())
                 .maxRetries(chatModelProperties.maxRetries())
                 .logRequests(chatModelProperties.logRequests())
@@ -150,6 +152,8 @@ public class AutoConfig {
                         .customParameters(chatModelProperties.customParameters())
                         .build())
                 .returnThinking(chatModelProperties.returnThinking())
+                .sendThinking(chatModelProperties.sendThinking(),
+                        chatModelProperties.sendThinkingFieldName())
                 .timeout(chatModelProperties.timeout())
                 .logRequests(chatModelProperties.logRequests())
                 .logResponses(chatModelProperties.logResponses())
@@ -433,4 +437,5 @@ public class AutoConfig {
             log.warn("{}.{}.{} is set, but it is ignored: {}", PREFIX, model, property, reason);
         }
     }
+
 }
